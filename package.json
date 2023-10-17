@@ -4,6 +4,8 @@
   "description": "API for cryptocurrency arbitrage.",
   "main": "index.js",
   "scripts": {
+    "start": "NODE_PATH=./dist node dist/app.js",
+    "build": "tsc -p .",
     "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
