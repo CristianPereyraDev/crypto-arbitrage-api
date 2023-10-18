@@ -5,7 +5,7 @@ export interface ICryptoArbitrageResult {
   askPrice: number
   bidExchange: string
   bidPrice: number
-  profit: number
+  profitPercentage: number
   time: number
 }
 
@@ -33,7 +33,7 @@ export function calculateGreatestProfit (
     askPrice: minAsk.price,
     bidExchange: maxBid.exchange,
     bidPrice: maxBid.price,
-    profit: (maxBid.price - minAsk.price) / minAsk.price,
+    profitPercentage: ((maxBid.price - minAsk.price) / minAsk.price) * 100,
     time: Math.max(maxBid.time, minAsk.time)
   }
 }
