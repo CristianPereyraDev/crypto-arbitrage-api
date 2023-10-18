@@ -13,7 +13,10 @@ export async function pricingCollector (): Promise<void> {
       const prices = await pricesByCurrencyPair(pair.crypto, pair.fiat, 0.1)
       const arbitrageResult = calculateGreatestProfit(prices)
 
-      console.log('prices->', prices)
+      console.log(
+        'arbitrageResult.profitPercentage=',
+        arbitrageResult.profitPercentage
+      )
 
       if (arbitrageResult.profitPercentage > 0) {
         const doc = new CryptoArbitrageModel({
