@@ -13,25 +13,18 @@ export async function pricingCollector (): Promise<void> {
       const prices = await pricesByCurrencyPair(pair.crypto, pair.fiat, 0.1)
       const arbitrageResult = calculateGreatestProfit(prices)
 
-      console.log(
-        'arbitrageResult.profitPercentage=',
-        arbitrageResult.profitPercentage
-      )
+      const doc = new CryptoArbitrageModel({
+        cryptocurrency: pair.crypto,
+        fiat: pair.fiat,
+        askExchange: arbitrageResult.askExchange,
+        askPrice: arbitrageResult.askPrice,
+        bidExchange: arbitrageResult.bidExchange,
+        bidPrice: arbitrageResult.bidPrice,
+        profit: arbitrageResult.profitPercentage,
+        time: arbitrageResult.time
+      })
 
-      if (arbitrageResult.profitPercentage > 0) {
-        const doc = new CryptoArbitrageModel({
-          cryptocurrency: pair.crypto,
-          fiat: pair.fiat,
-          askExchange: arbitrageResult.askExchange,
-          askPrice: arbitrageResult.askPrice,
-          bidExchange: arbitrageResult.bidExchange,
-          bidPrice: arbitrageResult.bidPrice,
-          profit: arbitrageResult.profitPercentage,
-          time: arbitrageResult.time
-        })
-
-        await doc.save()
-      }
+      await doc.save()
     } catch (error) {
       console.log(error)
       continue
