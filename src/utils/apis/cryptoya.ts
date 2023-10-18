@@ -11,9 +11,16 @@ export async function pricesByCurrencyPair (
     const response = await fetch(
       `https://criptoya.com/api/${crypto}/${fiat}/${volume}`
     )
-    const jsonResponse = (await response.json()) as IExchangePairPricing
 
-    return jsonResponse
+    if (response.ok) {
+      const jsonResponse = (await response.json()) as IExchangePairPricing
+
+      return jsonResponse
+    } else {
+      throw new Error(
+        `An error has ocurred during the request to the API: ${response.statusText}`
+      )
+    }
   } catch (error) {
     throw new Error('Error al hacer una petición a la api')
   }

@@ -29,7 +29,7 @@ export async function pricingCollector (): Promise<void> {
       }
     } catch (error) {
       console.log(error)
-      break
+      continue
     }
   }
 }
