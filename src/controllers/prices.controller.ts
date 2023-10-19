@@ -14,6 +14,7 @@ controller.get(
         cryptocurrency: crypto.toUpperCase(),
         fiat: fiat.toUpperCase()
       })
+        .sort({ time: -1 })
         .where('time')
         .gte(currentTimeInSeconds - 60)
         .where('profit')
