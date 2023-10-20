@@ -4,6 +4,7 @@ import { calculateGreatestProfit } from '../utils/arbitrage-calculator'
 
 const currencyPairs = [
   { crypto: 'BTC', fiat: 'ARS' },
+  { crypto: 'ETH', fiat: 'ARS' },
   { crypto: 'USDT', fiat: 'ARS' }
 ]
 
