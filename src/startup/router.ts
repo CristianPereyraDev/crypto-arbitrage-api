@@ -1,11 +1,34 @@
 import { type Express, type Request, type Response } from 'express'
-import pricesRouter from '../controllers/prices.controller'
+import AdminJS from 'adminjs'
+import AdminJSExpress from '@adminjs/express'
+import * as AdminJSMongoose from '@adminjs/mongoose'
 
-const routerSetup = (app: Express): Express =>
-  app
+import arbitragesRouter from '../controllers/arbitrages.controller.js'
+import infoRouter from '../controllers/info.controller.js'
+
+import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
+
+AdminJS.registerAdapter({
+  Resource: AdminJSMongoose.Resource,
+  Database: AdminJSMongoose.Database
+})
+
+const routerSetup = (app: Express): Express => {
+  const admin = new AdminJS({ resources: [Exchange] })
+
+  const adminRouter = AdminJSExpress.buildRouter(admin)
+
+  console.log(
+    `AdminJS started on http://localhost:${process.env.PORT}${admin.options.rootPath}`
+  )
+
+  return app
     .get('/', (req: Request, res: Response) => {
-      res.send('Hello Express APIvantage!')
+      res.send('Welcome to Crypto Arbitrage Api')
     })
-    .use('/api/pricing', pricesRouter)
+    .use('/api', infoRouter)
+    .use('/api/arbitrages', arbitragesRouter)
+    .use(admin.options.rootPath, adminRouter)
+}
 
 export default routerSetup

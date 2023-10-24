@@ -1,6 +1,6 @@
 import { type Document } from 'mongoose'
 
-export interface IAskBid {
+export interface IAskBid extends Document {
   time: number
   ask: number
   totalAsk: number
@@ -16,7 +16,5 @@ export interface ICurrencyPair extends Document {
 
 export interface IExchange extends Document {
   name: string
-  available_cryptocurrencies: string[]
-  available_fiats: string[]
   pairs: ICurrencyPair[]
 }

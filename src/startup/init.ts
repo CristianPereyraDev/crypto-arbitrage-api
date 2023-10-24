@@ -1,5 +1,5 @@
 import { type Express } from 'express'
-import mongooseConnect from '../databases/mongodb/mongodb'
+import mongooseConnect from '../databases/mongodb/mongodb.js'
 
 const appSetup = async (app: Express): Promise<void> => {
   try {

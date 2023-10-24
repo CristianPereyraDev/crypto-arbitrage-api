@@ -1,9 +1,10 @@
 import dotenv from 'dotenv'
 import express from 'express'
-import appSetup from './startup/init'
-import routerSetup from './startup/router'
-import securitySetup from './startup/security'
-import { pricingCollector } from './startup/pricing_collector'
+
+import appSetup from './startup/init.js'
+import routerSetup from './startup/router.js'
+import securitySetup from './startup/security.js'
+import { pricingCollector } from './startup/pricing_collector.js'
 
 dotenv.config()
 
@@ -15,10 +16,10 @@ appSetup(app)
     routerSetup(app)
     // Pricing collection interval
     setInterval(() => {
-      pricingCollector().catch(reason => {
-        console.log(reason)
-      })
-    }, 6000)
+      // pricingCollector().catch(reason => {
+      //   console.log(reason)
+      // })
+    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
   })
   .catch(reason => {
     console.log(reason)

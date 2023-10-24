@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose'
-import { type ICryptoArbitrage } from '../model/arbitrage.model'
+import { type ICryptoArbitrage } from '../model/arbitrage.model.js'
 
 const schema = new Schema<ICryptoArbitrage>(
   {

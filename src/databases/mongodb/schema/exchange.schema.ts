@@ -1,10 +1,25 @@
 import { Schema, model } from 'mongoose'
-import { type IExchange, type ICurrencyPair } from '../model/exchange.model'
+import {
+  type IExchange,
+  type ICurrencyPair,
+  type IAskBid
+} from '../model/exchange.model.js'
+
+const askBidSchema = new Schema<IAskBid>(
+  {
+    time: String,
+    ask: Number,
+    totalAsk: Number,
+    bid: Number,
+    totalBid: Number
+  },
+  { timestamps: true }
+)
 
 const currencyPairSchema = new Schema<ICurrencyPair>({
   crypto: { type: String },
   fiat: { type: String },
-  prices: [{ time: Number, price: Number }]
+  prices: [askBidSchema]
 })
 
 const schema = new Schema<IExchange>({
@@ -13,9 +28,10 @@ const schema = new Schema<IExchange>({
     required: true,
     unique: true
   },
-  available_cryptocurrencies: [{ type: String }],
-  available_fiats: [{ type: String }],
   pairs: [currencyPairSchema]
 })
 
-export default model<IExchange>('Exchange', schema)
+askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 })
+currencyPairSchema.index({ crypto: 1, fiat: 1 }, { unique: true })
+
+export const Exchange = model<IExchange>('Exchange', schema)

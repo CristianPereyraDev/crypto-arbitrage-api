@@ -1,4 +1,4 @@
-import { type IAskBid } from '../../databases/mongodb/model/exchange.model'
+import { type IAskBid } from '../../databases/mongodb/model/exchange.model.js'
 
 export type IExchangePairPricing = Record<string, IAskBid>
 

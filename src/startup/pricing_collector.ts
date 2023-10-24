@@ -1,11 +1,14 @@
-import CryptoArbitrageModel from '../databases/mongodb/schema/arbitrage.schema'
-import { pricesByCurrencyPair } from '../utils/apis/cryptoya'
-import { calculateGreatestProfit } from '../utils/arbitrage-calculator'
+import CryptoArbitrageModel from '../databases/mongodb/schema/arbitrage.schema.js'
+import { pricesByCurrencyPair } from '../utils/apis/cryptoya.js'
+import { calculateGreatestProfit } from '../utils/arbitrage-calculator.js'
 
-const currencyPairs = [
+export const currencyPairs = [
   { crypto: 'BTC', fiat: 'ARS' },
   { crypto: 'ETH', fiat: 'ARS' },
-  { crypto: 'USDT', fiat: 'ARS' }
+  { crypto: 'USDT', fiat: 'ARS' },
+  { crypto: 'BTC', fiat: 'USD' },
+  { crypto: 'ETH', fiat: 'USD' },
+  { crypto: 'USDT', fiat: 'USD' }
 ]
 
 export async function pricingCollector (): Promise<void> {

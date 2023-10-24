@@ -1,4 +1,4 @@
-import { type IExchangePairPricing } from './apis/cryptoya'
+import { type IExchangePairPricing } from './apis/cryptoya.js'
 
 export interface ICryptoArbitrageResult {
   askExchange: string
