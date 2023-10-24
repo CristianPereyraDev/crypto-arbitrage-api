@@ -7,31 +7,40 @@ import {
 
 const askBidSchema = new Schema<IAskBid>(
   {
-    time: String,
-    ask: Number,
-    totalAsk: Number,
-    bid: Number,
-    totalBid: Number
+    time: { type: Number, required: true },
+    ask: { type: Number, required: true },
+    totalAsk: { type: Number, required: true },
+    bid: { type: Number, required: true },
+    totalBid: { type: Number, required: true }
   },
   { timestamps: true }
 )
 
 const currencyPairSchema = new Schema<ICurrencyPair>({
-  crypto: { type: String },
-  fiat: { type: String },
+  crypto: { type: String, required: true },
+  fiat: { type: String, required: true },
   prices: [askBidSchema]
 })
 
-const schema = new Schema<IExchange>({
+const exchangeSchema = new Schema<IExchange>({
   name: {
     type: String,
     required: true,
     unique: true
   },
-  pairs: [currencyPairSchema]
+  pairs: {
+    type: [currencyPairSchema],
+    validate: {
+      validator: function (v: any) {
+        const set = new Set(v.map((pair: any) => `${pair.crypto}-${pair.fiat}`))
+
+        return set.size === v.length
+      },
+      message: 'Repeated pairs is not allowed.'
+    }
+  }
 })
 
 askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 })
-currencyPairSchema.index({ crypto: 1, fiat: 1 }, { unique: true })
 
-export const Exchange = model<IExchange>('Exchange', schema)
+export const Exchange = model<IExchange>('Exchange', exchangeSchema)

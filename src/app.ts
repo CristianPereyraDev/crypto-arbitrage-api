@@ -16,9 +16,9 @@ appSetup(app)
     routerSetup(app)
     // Pricing collection interval
     setInterval(() => {
-      // pricingCollector().catch(reason => {
-      //   console.log(reason)
-      // })
+      pricingCollector().catch(reason => {
+        console.log(reason)
+      })
     }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
   })
   .catch(reason => {
