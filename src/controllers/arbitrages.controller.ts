@@ -22,8 +22,10 @@ controller.get(
         .exec()
 
       return arbitrage !== null
-        ? res.status(200).json(arbitrage)
-        : res.status(404).json({ message: 'Arbitrage not found.' })
+        ? res.status(200).json({ arbitrageFound: true, arbitrage })
+        : res
+            .status(200)
+            .json({ arbitrageFound: false, message: 'Arbitrage not found.' })
     } catch (error) {
       next(error)
     }
