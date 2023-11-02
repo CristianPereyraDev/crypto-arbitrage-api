@@ -1,6 +1,10 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
+import {
+  ICryptoFee,
+  INetworkFee
+} from 'databases/mongodb/model/exchange.model.js'
 
 const controller = Router()
 
@@ -25,6 +29,32 @@ controller
     }
   )
   .get(
+    '/exchanges',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const exchanges = await Exchange.find({}).exec()
+
+        return res.status(200).json(exchanges)
+      } catch (error) {
+        return res.status(404).json({ message: 'Error' })
+      }
+    }
+  )
+  .get(
+    '/exchanges/:name',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const { name } = req.params
+
+      try {
+        const exchange = await Exchange.findOne({ name: name }).exec()
+
+        return res.status(200).json(exchange)
+      } catch (error) {
+        return res.status(404).json({ message: 'Error' })
+      }
+    }
+  )
+  .get(
     '/exchanges_available/:crypto-:fiat',
     async (req: Request, res: Response, next: NextFunction) => {
       const { crypto, fiat } = req.params
@@ -43,6 +73,41 @@ controller
           )
       } catch (error) {
         return res.status(404).json({ message: 'Error' })
+      }
+    }
+  )
+  .put(
+    '/generate_exchanges',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await fetch('https://criptoya.com/api/fees')
+        const jsonResponse = await response.json()
+
+        await Exchange.deleteMany({})
+
+        for (let exchange in jsonResponse) {
+          const dbExchange = new Exchange({ name: exchange })
+
+          for (let crypto in jsonResponse[exchange]) {
+            let networks: INetworkFee[] = []
+            for (let network in jsonResponse[exchange][crypto]) {
+              networks.push({
+                network,
+                fee: jsonResponse[exchange][crypto][network]
+              })
+            }
+            dbExchange.fees.push({
+              crypto,
+              networks: networks
+            })
+          }
+
+          await dbExchange.save()
+        }
+
+        return res.status(200).json(jsonResponse)
+      } catch (error) {
+        return res.status(404).json({ message: error })
       }
     }
   )

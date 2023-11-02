@@ -14,7 +14,20 @@ export interface ICurrencyPair extends Document {
   prices: IAskBid[]
 }
 
+export interface INetworkFee {
+  network: string
+  fee: number
+}
+
+export interface ICryptoFee {
+  crypto: string
+  networks: INetworkFee[]
+}
+
 export interface IExchange extends Document {
   name: string
   pairs: ICurrencyPair[]
+  fees: ICryptoFee[]
+  makerFee: number
+  takerFee: number
 }

@@ -2,7 +2,8 @@ import { Schema, model } from 'mongoose'
 import {
   type IExchange,
   type ICurrencyPair,
-  type IAskBid
+  type IAskBid,
+  ICryptoFee
 } from '../model/exchange.model.js'
 
 const askBidSchema = new Schema<IAskBid>(
@@ -22,6 +23,11 @@ const currencyPairSchema = new Schema<ICurrencyPair>({
   prices: [askBidSchema]
 })
 
+const cryptoFeeSchema = new Schema<ICryptoFee>({
+  crypto: { type: String, required: true },
+  networks: [{ network: String, fee: Number }]
+})
+
 const exchangeSchema = new Schema<IExchange>({
   name: {
     type: String,
@@ -38,7 +44,10 @@ const exchangeSchema = new Schema<IExchange>({
       },
       message: 'Repeated pairs is not allowed.'
     }
-  }
+  },
+  makerFee: { type: Number, default: 0 },
+  takerFee: { type: Number, default: 0 },
+  fees: { type: [cryptoFeeSchema] }
 })
 
 askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 })
