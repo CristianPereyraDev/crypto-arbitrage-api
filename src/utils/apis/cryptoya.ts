@@ -9,7 +9,8 @@ export async function pricesByCurrencyPair (
 ): Promise<IExchangePairPricing> {
   try {
     const response = await fetch(
-      `https://criptoya.com/api/${crypto}/${fiat}/${volume}`
+      //`https://criptoya.com/api/${crypto}/${fiat}/${volume}`
+      `https://criptoya.com/api/${crypto}/${fiat}`
     )
 
     if (response.ok) {

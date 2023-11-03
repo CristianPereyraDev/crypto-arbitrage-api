@@ -1,3 +1,4 @@
+import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import { type IExchangePairPricing } from './apis/cryptoya.js'
 
 export interface ICryptoArbitrageResult {
@@ -9,20 +10,27 @@ export interface ICryptoArbitrageResult {
   time: number
 }
 
-export function calculateGreatestProfit (
+export async function calculateGreatestProfit (
   data: IExchangePairPricing | undefined
-): ICryptoArbitrageResult {
+): Promise<ICryptoArbitrageResult> {
   const minAsk = { price: Number.POSITIVE_INFINITY, exchange: '', time: 0 }
   const maxBid = { price: 0, exchange: '', time: 0 }
 
-  for (const exchange in data) {
-    if (data[exchange].totalAsk < minAsk.price) {
-      minAsk.price = data[exchange].totalAsk
+  // Get exchange fees.
+  const fees = await getExchangesFees()
+
+  for (let exchange in data) {
+    const takerFee = fees?.get(exchange)?.takerFee ?? 0
+    const totalAsk = data[exchange].ask + (takerFee * data[exchange].ask) / 100
+    const totalBid = data[exchange].bid - (takerFee * data[exchange].bid) / 100
+
+    if (totalAsk < minAsk.price) {
+      minAsk.price = totalAsk
       minAsk.exchange = exchange
       minAsk.time = data[exchange].time
     }
-    if (data[exchange].totalBid > maxBid.price) {
-      maxBid.price = data[exchange].totalBid
+    if (totalBid > maxBid.price) {
+      maxBid.price = totalBid
       maxBid.exchange = exchange
       maxBid.time = data[exchange].time
     }
