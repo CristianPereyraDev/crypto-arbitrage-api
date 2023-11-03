@@ -5,10 +5,7 @@ import { calculateGreatestProfit } from '../utils/arbitrage-calculator.js'
 export const currencyPairs = [
   { crypto: 'BTC', fiat: 'ARS' },
   { crypto: 'ETH', fiat: 'ARS' },
-  { crypto: 'USDT', fiat: 'ARS' },
-  { crypto: 'BTC', fiat: 'USD' },
-  { crypto: 'ETH', fiat: 'USD' },
-  { crypto: 'USDT', fiat: 'USD' }
+  { crypto: 'USDT', fiat: 'ARS' }
 ]
 
 export async function pricingCollector (): Promise<void> {
@@ -17,18 +14,20 @@ export async function pricingCollector (): Promise<void> {
       const prices = await pricesByCurrencyPair(pair.crypto, pair.fiat, 0.1)
       const arbitrageResult = await calculateGreatestProfit(prices)
 
-      const doc = new CryptoArbitrageModel({
-        cryptocurrency: pair.crypto,
-        fiat: pair.fiat,
-        askExchange: arbitrageResult.askExchange,
-        askPrice: arbitrageResult.askPrice,
-        bidExchange: arbitrageResult.bidExchange,
-        bidPrice: arbitrageResult.bidPrice,
-        profit: arbitrageResult.profitPercentage,
-        time: arbitrageResult.time
-      })
+      for (let arbitrage of arbitrageResult) {
+        const doc = new CryptoArbitrageModel({
+          cryptocurrency: pair.crypto,
+          fiat: pair.fiat,
+          askExchange: arbitrage.askExchange,
+          askPrice: arbitrage.askPrice,
+          bidExchange: arbitrage.bidExchange,
+          bidPrice: arbitrage.bidPrice,
+          profit: arbitrage.profitPercentage,
+          time: arbitrage.time
+        })
 
-      await doc.save()
+        await doc.save()
+      }
     } catch (error) {
       console.log(error)
       continue

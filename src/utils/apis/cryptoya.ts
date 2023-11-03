@@ -10,7 +10,7 @@ export async function pricesByCurrencyPair (
   try {
     const response = await fetch(
       //`https://criptoya.com/api/${crypto}/${fiat}/${volume}`
-      `https://criptoya.com/api/${crypto}/${fiat}`
+      `https://criptoya.com/api/${crypto}/${fiat}/`
     )
 
     if (response.ok) {
