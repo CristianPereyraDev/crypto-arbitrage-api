@@ -1,10 +1,8 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
-import {
-  ICryptoFee,
-  INetworkFee
-} from 'databases/mongodb/model/exchange.model.js'
+import { INetworkFee } from 'databases/mongodb/model/exchange.model.js'
+import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 
 const controller = Router()
 
@@ -76,6 +74,15 @@ controller
       }
     }
   )
+  .get('/fees', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const fees = await getExchangesFees()
+
+      return res.status(200).json(fees)
+    } catch (error) {
+      return res.status(500).json({ message: 'Error' })
+    }
+  })
   .put(
     '/generate_exchanges',
     async (req: Request, res: Response, next: NextFunction) => {

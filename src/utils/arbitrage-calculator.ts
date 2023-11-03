@@ -20,7 +20,7 @@ export async function calculateGreatestProfit (
   const fees = await getExchangesFees()
 
   for (let exchange in data) {
-    const takerFee = fees?.get(exchange)?.takerFee ?? 0
+    const takerFee = fees[exchange].makerFee ?? 0
     const totalAsk = data[exchange].ask + (takerFee * data[exchange].ask) / 100
     const totalBid = data[exchange].bid - (takerFee * data[exchange].bid) / 100
 
