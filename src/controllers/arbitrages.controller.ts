@@ -10,7 +10,7 @@ controller.get(
 
     try {
       const currentTimeInSeconds = Date.now() / 1000
-      const arbitrage = await CryptoArbitrageModel.findOne({
+      const arbitrages = await CryptoArbitrageModel.find({
         cryptocurrency: crypto.toUpperCase(),
         fiat: fiat.toUpperCase()
       })
@@ -21,8 +21,8 @@ controller.get(
         .gte(Number(minProfit))
         .exec()
 
-      return arbitrage !== null
-        ? res.status(200).json({ arbitrageFound: true, arbitrage })
+      return arbitrages.length > 0
+        ? res.status(200).json({ arbitrageFound: true, arbitrage: arbitrages })
         : res
             .status(200)
             .json({ arbitrageFound: false, message: 'Arbitrage not found.' })
