@@ -1,6 +1,6 @@
 import { type IAskBid } from '../../databases/mongodb/model/exchange.model.js'
 
-export type IExchangePairPricing = Record<string, IAskBid>
+export type IExchangePairPricing = Map<string, IAskBid>
 
 export async function pricesByCurrencyPair (
   crypto: string,
