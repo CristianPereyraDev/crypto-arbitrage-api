@@ -28,7 +28,7 @@ export async function calculateGreatestProfit (
 
   for (let i = 0; i < exchangesArr.length; i++) {
     const takerFee1 = Object.hasOwn(fees, exchangesArr[i].exchange)
-      ? fees[exchangesArr[i].exchange].makerFee
+      ? fees[exchangesArr[i].exchange].takerFee
       : 0
     const totalAsk1 =
       exchangesArr[i].value.ask + (takerFee1 * exchangesArr[i].value.ask) / 100
@@ -37,7 +37,7 @@ export async function calculateGreatestProfit (
 
     for (let j = i; j < exchangesArr.length; j++) {
       const takerFee2 = Object.hasOwn(fees, exchangesArr[j].exchange)
-        ? fees[exchangesArr[j].exchange].makerFee
+        ? fees[exchangesArr[j].exchange].takerFee
         : 0
       const totalAsk2 =
         exchangesArr[j].value.ask +
@@ -46,10 +46,9 @@ export async function calculateGreatestProfit (
         exchangesArr[j].value.bid -
         (takerFee2 * exchangesArr[j].value.bid) / 100
 
-      let maxBidExchange = ''
-      let maxBid = 0
-      let minAskExchange = ''
-      let minAsk = 0
+      let [maxBidExchange, minAskExchange] = ['', '']
+      let [maxBid, minAsk] = [0, 0]
+
       if (totalBid1 >= totalBid2) {
         maxBidExchange = exchangesArr[i].exchange
         maxBid = totalBid1

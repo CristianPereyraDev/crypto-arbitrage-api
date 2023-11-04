@@ -14,9 +14,9 @@ export async function pricesByCurrencyPair (
     )
 
     if (response.ok) {
-      const jsonResponse = (await response.json()) as IExchangePairPricing
+      const jsonResponse = await response.json()
 
-      return jsonResponse
+      return new Map<string, IAskBid>(jsonResponse)
     } else {
       throw new Error(
         `An error has ocurred during the request to the API: ${response.statusText}`
