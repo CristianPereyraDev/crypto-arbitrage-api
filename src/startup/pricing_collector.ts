@@ -29,7 +29,7 @@ export async function pricingCollector (): Promise<void> {
         await doc.save()
       }
     } catch (error) {
-      console.log(error)
+      //console.log(error)
       continue
     }
   }
