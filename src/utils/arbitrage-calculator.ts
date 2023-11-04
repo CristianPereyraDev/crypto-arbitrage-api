@@ -11,7 +11,7 @@ export interface ICryptoArbitrageResult {
   time: number
 }
 
-export async function calculateGreatestProfit (
+export async function calculateArbitragesFromPairData (
   data: IExchangePairPricing | undefined
 ): Promise<ICryptoArbitrageResult[]> {
   if (data === undefined) return []

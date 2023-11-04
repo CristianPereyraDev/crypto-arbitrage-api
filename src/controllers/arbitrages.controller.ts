@@ -9,14 +9,17 @@ controller.get(
     const { crypto, fiat, minProfit } = req.params
 
     try {
-      const currentTimeInSeconds = Date.now() / 1000
+      const minTimeInSeconds =
+        (Date.now() - Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000)) /
+        1000
+
       const arbitrages = await CryptoArbitrageModel.find({
         cryptocurrency: crypto.toUpperCase(),
         fiat: fiat.toUpperCase()
       })
         .sort({ time: -1 })
         .where('time')
-        .gte(currentTimeInSeconds - 60)
+        .gte(minTimeInSeconds)
         .where('profit')
         .gte(Number(minProfit))
         .exec()

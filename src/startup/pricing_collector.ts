@@ -1,6 +1,6 @@
 import CryptoArbitrageModel from '../databases/mongodb/schema/arbitrage.schema.js'
 import { pricesByCurrencyPair } from '../utils/apis/cryptoya.js'
-import { calculateGreatestProfit } from '../utils/arbitrage-calculator.js'
+import { calculateArbitragesFromPairData } from '../utils/arbitrage-calculator.js'
 
 export const currencyPairs = [
   { crypto: 'BTC', fiat: 'ARS' },
@@ -12,7 +12,7 @@ export async function pricingCollector (): Promise<void> {
   for (const pair of currencyPairs) {
     try {
       const prices = await pricesByCurrencyPair(pair.crypto, pair.fiat, 0.1)
-      const arbitrageResult = await calculateGreatestProfit(prices)
+      const arbitrageResult = await calculateArbitragesFromPairData(prices)
 
       for (let arbitrage of arbitrageResult) {
         const doc = new CryptoArbitrageModel({
