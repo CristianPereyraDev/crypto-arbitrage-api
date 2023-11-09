@@ -15,11 +15,11 @@ appSetup(app)
     securitySetup(app, express)
     routerSetup(app)
     // Pricing collection interval
-    setInterval(() => {
-      pricingCollector().catch(reason => {
-        console.log(reason)
-      })
-    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
+    // setInterval(() => {
+    //   pricingCollector().catch(reason => {
+    //     console.log(reason)
+    //   })
+    // }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
   })
   .catch(reason => {
     console.log(reason)

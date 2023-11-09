@@ -90,6 +90,7 @@ controller
         const response = await fetch('https://criptoya.com/api/fees')
         const jsonResponse = await response.json()
 
+        // First delete collection
         await Exchange.deleteMany({})
 
         for (let exchange in jsonResponse) {
@@ -103,7 +104,7 @@ controller
                 fee: jsonResponse[exchange][crypto][network]
               })
             }
-            dbExchange.fees.push({
+            dbExchange.networkFees.push({
               crypto,
               networks: networks
             })

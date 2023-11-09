@@ -27,7 +27,11 @@ export interface ICryptoFee {
 export interface IExchange extends Document {
   name: string
   pairs: ICurrencyPair[]
-  fees: ICryptoFee[]
+  networkFees: ICryptoFee[] // Represents crypto withdrawal fees. Deposits is supposed to be free.
+  depositFiatFee: number
+  withdrawalFiatFee: number
   makerFee: number
   takerFee: number
+  buyFee: number
+  sellFee: number
 }

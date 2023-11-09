@@ -7,13 +7,17 @@ export enum Crypocurrency {
 }
 
 export interface IExchangeFees {
+  depositFiatFee: number
+  withdrawalFiatFee: number
   makerFee: number
   takerFee: number
   networkFees: { [key: string]: { [key: string]: number } }
+  buyFee: number
+  sellFee: number
 }
 
 export async function getExchangesFees (): Promise<{
-  [k: string]: IExchangeFees
+  [exchange: string]: IExchangeFees
 }> {
   try {
     const exchanges = await Exchange.find({}).exec()
@@ -22,12 +26,14 @@ export async function getExchangesFees (): Promise<{
       exchanges?.map(exchange => [
         exchange.name.toLowerCase(),
         Object.fromEntries([
+          ['depositFiatFee', exchange.depositFiatFee],
+          ['withdrawalFiatFee', exchange.withdrawalFiatFee],
           ['makerFee', exchange.makerFee],
           ['takerFee', exchange.takerFee],
           [
             'networkFees',
             Object.fromEntries(
-              exchange.fees.map(cryptoFee => [
+              exchange.networkFees.map(cryptoFee => [
                 cryptoFee.crypto,
                 Object.fromEntries(
                   cryptoFee.networks.map(network => [
@@ -37,7 +43,9 @@ export async function getExchangesFees (): Promise<{
                 )
               ])
             )
-          ]
+          ],
+          ['buyFee', exchange.buyFee],
+          ['sellFee', exchange.sellFee]
         ]) as IExchangeFees
       ])
     )

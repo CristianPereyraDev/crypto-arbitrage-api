@@ -45,11 +45,15 @@ const exchangeSchema = new Schema<IExchange>({
       message: 'Repeated pairs is not allowed.'
     }
   },
+  networkFees: { type: [cryptoFeeSchema] },
+  depositFiatFee: { type: Number, default: 0 },
+  withdrawalFiatFee: { type: Number, default: 0 },
   makerFee: { type: Number, default: 0 },
   takerFee: { type: Number, default: 0 },
-  fees: { type: [cryptoFeeSchema] }
+  buyFee: { type: Number, default: 0 },
+  sellFee: { type: Number, default: 0 }
 })
 
-askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 })
+askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
 
 export const Exchange = model<IExchange>('Exchange', exchangeSchema)
