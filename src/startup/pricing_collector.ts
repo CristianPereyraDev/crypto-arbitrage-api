@@ -5,7 +5,9 @@ import { calculateArbitragesFromPairData } from '../utils/arbitrage-calculator.j
 export const currencyPairs = [
   { crypto: 'BTC', fiat: 'ARS' },
   { crypto: 'ETH', fiat: 'ARS' },
-  { crypto: 'USDT', fiat: 'ARS' }
+  { crypto: 'USDT', fiat: 'ARS' },
+  { crypto: 'MATIC', fiat: 'ARS' },
+  { crypto: 'MANA', fiat: 'ARS' }
 ]
 
 export async function pricingCollector (): Promise<void> {
