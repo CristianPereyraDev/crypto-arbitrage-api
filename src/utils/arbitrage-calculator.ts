@@ -27,42 +27,68 @@ export async function calculateArbitragesFromPairData (
   })
 
   for (let i = 0; i < exchangesArr.length; i++) {
-    const takerFee1 = Object.hasOwn(fees, exchangesArr[i].exchange)
-      ? fees[exchangesArr[i].exchange].takerFee
-      : 0
-    const totalAsk1 =
-      exchangesArr[i].value.ask + (takerFee1 * exchangesArr[i].value.ask) / 100
-    const totalBid1 =
-      exchangesArr[i].value.bid - (takerFee1 * exchangesArr[i].value.bid) / 100
+    let totalAskExchange1 = exchangesArr[i].value.ask
+    let totalBidExchange1 = exchangesArr[i].value.bid
+
+    const exchangeFees1 = Object.hasOwn(fees, exchangesArr[i].exchange)
+      ? fees[exchangesArr[i].exchange]
+      : undefined
+
+    if (exchangeFees1 !== undefined) {
+      const buyFeeExchange1 = Math.max(
+        exchangeFees1.buyFee,
+        exchangeFees1.takerFee
+      )
+
+      const sellFeeExchange1 = Math.max(
+        exchangeFees1.sellFee,
+        exchangeFees1.takerFee
+      )
+
+      totalAskExchange1 *= 1 + buyFeeExchange1 / 100
+      totalBidExchange1 *= 1 - sellFeeExchange1 / 100
+    }
 
     for (let j = i; j < exchangesArr.length; j++) {
-      const takerFee2 = Object.hasOwn(fees, exchangesArr[j].exchange)
-        ? fees[exchangesArr[j].exchange].takerFee
-        : 0
-      const totalAsk2 =
-        exchangesArr[j].value.ask +
-        (takerFee2 * exchangesArr[j].value.ask) / 100
-      const totalBid2 =
-        exchangesArr[j].value.bid -
-        (takerFee2 * exchangesArr[j].value.bid) / 100
+      let totalAskExchange2 = exchangesArr[j].value.ask
+      let totalBidExchange2 = exchangesArr[j].value.bid
+
+      const exchangeFees2 = Object.hasOwn(fees, exchangesArr[j].exchange)
+        ? fees[exchangesArr[j].exchange]
+        : undefined
+
+      if (exchangeFees2 !== undefined) {
+        const buyFeeExchange2 = Math.max(
+          exchangeFees2.buyFee,
+          exchangeFees2.takerFee
+        )
+
+        const sellFeeExchange2 = Math.max(
+          exchangeFees2.sellFee,
+          exchangeFees2.takerFee
+        )
+
+        totalAskExchange2 *= 1 + buyFeeExchange2 / 100
+        totalBidExchange2 *= 1 - sellFeeExchange2 / 100
+      }
 
       let [maxBidExchange, minAskExchange] = ['', '']
       let [maxBid, minAsk] = [0, 0]
 
-      if (totalBid1 >= totalBid2) {
+      if (totalBidExchange1 >= totalBidExchange2) {
         maxBidExchange = exchangesArr[i].exchange
-        maxBid = totalBid1
+        maxBid = totalBidExchange1
       } else {
         maxBidExchange = exchangesArr[j].exchange
-        maxBid = totalBid2
+        maxBid = totalBidExchange2
       }
 
-      if (totalAsk1 <= totalAsk2) {
+      if (totalAskExchange1 <= totalAskExchange2) {
         minAskExchange = exchangesArr[i].exchange
-        minAsk = totalAsk1
+        minAsk = totalAskExchange1
       } else {
         minAskExchange = exchangesArr[j].exchange
-        minAsk = totalAsk2
+        minAsk = totalAskExchange2
       }
 
       // Check > 0 because some exchanges can have ask price = 0 or bid price = 0
