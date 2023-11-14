@@ -15,7 +15,17 @@ const schema = new Schema<ICryptoArbitrage>(
   { timestamps: true }
 )
 
-schema.index({ cryptocurrency: 1, fiat: 1, time: 1 }, { unique: true })
+schema.index(
+  {
+    cryptocurrency: 1,
+    fiat: 1,
+    askExchange: 1,
+    bidExchange: 1,
+    profit: 1,
+    time: 1
+  },
+  { unique: true }
+)
 schema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
 
 export default model<ICryptoArbitrage>('CryptoArbitrage', schema)

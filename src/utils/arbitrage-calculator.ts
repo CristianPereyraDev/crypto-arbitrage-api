@@ -18,7 +18,7 @@ export async function calculateArbitragesFromPairData (
 
   const arbitrages: ICryptoArbitrageResult[] = []
 
-  // Get exchange fees.
+  // Get exchange fees. Se supone que los fees son porcentajes (hay que dividir por 100).
   const fees = await getExchangesFees()
 
   const exchangesArr: { exchange: string; value: IAskBid }[] = []
