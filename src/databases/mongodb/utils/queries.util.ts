@@ -24,7 +24,7 @@ export async function getExchangesFees (): Promise<{
 
     const fees = Object.fromEntries(
       exchanges?.map(exchange => [
-        exchange.name.toLowerCase(),
+        exchange.name.toLowerCase().replaceAll(' ', ''),
         Object.fromEntries([
           ['depositFiatFee', exchange.depositFiatFee],
           ['withdrawalFiatFee', exchange.withdrawalFiatFee],
