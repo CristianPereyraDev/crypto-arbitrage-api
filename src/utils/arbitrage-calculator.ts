@@ -103,8 +103,6 @@ export async function calculateArbitragesFromPairData (
       const profit =
         minAsk > 0 ? ((maxTotalBid - minTotalAsk) / minTotalAsk) * 100 : 0
 
-      console.log(`${minAskExchange}-${maxBidExchange}:`, profit)
-
       if (profit > 0) {
         arbitrages.push({
           askExchange: minAskExchange,
