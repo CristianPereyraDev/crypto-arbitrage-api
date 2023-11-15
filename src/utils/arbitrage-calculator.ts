@@ -77,26 +77,31 @@ export async function calculateArbitragesFromPairData (
       }
 
       let [maxBidExchange, minAskExchange] = ['', '']
-      let [maxBid, minAsk] = [0, 0]
+      let [maxBid, maxTotalBid, minAsk, minTotalAsk] = [0, 0, 0, 0]
 
       if (totalBidExchange1 >= totalBidExchange2) {
         maxBidExchange = exchangesArr[i].exchange
         maxBid = bidExchange1
+        maxTotalBid = totalBidExchange1
       } else {
         maxBidExchange = exchangesArr[j].exchange
         maxBid = bidExchange2
+        maxTotalBid = totalBidExchange2
       }
 
       if (totalAskExchange1 <= totalAskExchange2) {
         minAskExchange = exchangesArr[i].exchange
         minAsk = askExchange1
+        minTotalAsk = totalAskExchange1
       } else {
         minAskExchange = exchangesArr[j].exchange
         minAsk = askExchange2
+        minTotalAsk = totalAskExchange2
       }
 
       // Check > 0 because some exchanges can have ask price = 0 or bid price = 0
-      const profit = minAsk > 0 ? ((maxBid - minAsk) / minAsk) * 100 : 0
+      const profit =
+        minAsk > 0 ? ((maxTotalBid - minTotalAsk) / minTotalAsk) * 100 : 0
 
       console.log(`${minAskExchange}-${maxBidExchange}:`, profit)
 
