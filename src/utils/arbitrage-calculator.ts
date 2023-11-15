@@ -27,6 +27,8 @@ export async function calculateArbitragesFromPairData (
   })
 
   for (let i = 0; i < exchangesArr.length; i++) {
+    const askExchange1 = exchangesArr[i].value.ask
+    const bidExchange1 = exchangesArr[i].value.bid
     let totalAskExchange1 = exchangesArr[i].value.ask
     let totalBidExchange1 = exchangesArr[i].value.bid
 
@@ -50,6 +52,8 @@ export async function calculateArbitragesFromPairData (
     }
 
     for (let j = i; j < exchangesArr.length; j++) {
+      const askExchange2 = exchangesArr[j].value.ask
+      const bidExchange2 = exchangesArr[j].value.bid
       let totalAskExchange2 = exchangesArr[j].value.ask
       let totalBidExchange2 = exchangesArr[j].value.bid
 
@@ -77,22 +81,24 @@ export async function calculateArbitragesFromPairData (
 
       if (totalBidExchange1 >= totalBidExchange2) {
         maxBidExchange = exchangesArr[i].exchange
-        maxBid = totalBidExchange1
+        maxBid = bidExchange1
       } else {
         maxBidExchange = exchangesArr[j].exchange
-        maxBid = totalBidExchange2
+        maxBid = bidExchange2
       }
 
       if (totalAskExchange1 <= totalAskExchange2) {
         minAskExchange = exchangesArr[i].exchange
-        minAsk = totalAskExchange1
+        minAsk = askExchange1
       } else {
         minAskExchange = exchangesArr[j].exchange
-        minAsk = totalAskExchange2
+        minAsk = askExchange2
       }
 
       // Check > 0 because some exchanges can have ask price = 0 or bid price = 0
       const profit = minAsk > 0 ? ((maxBid - minAsk) / minAsk) * 100 : 0
+
+      console.log(`${minAskExchange}-${maxBidExchange}:`, profit)
 
       if (profit > 0) {
         arbitrages.push({
