@@ -7,20 +7,15 @@ import {
 } from '../model/exchange.model.js'
 
 const askBidSchema = new Schema<IAskBid>(
-  {
-    time: { type: Number, required: true },
-    ask: { type: Number, required: true },
-    totalAsk: { type: Number, required: true },
-    bid: { type: Number, required: true },
-    totalBid: { type: Number, required: true }
-  },
+  { price: { type: Number }, qty: { type: Number } },
   { timestamps: true }
 )
 
 const currencyPairSchema = new Schema<ICurrencyPair>({
   crypto: { type: String, required: true },
   fiat: { type: String, required: true },
-  prices: [askBidSchema]
+  bids: [[Number]],
+  asks: [[Number]]
 })
 
 const cryptoFeeSchema = new Schema<ICryptoFee>({
@@ -54,6 +49,6 @@ const exchangeSchema = new Schema<IExchange>({
   sellFee: { type: Number, default: 0 }
 })
 
-askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
+//askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
 
 export const Exchange = model<IExchange>('Exchange', exchangeSchema)

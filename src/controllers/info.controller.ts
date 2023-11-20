@@ -1,8 +1,15 @@
-import { Router, type Request, type Response, type NextFunction } from 'express'
+import {
+  Router,
+  type Request,
+  type Response,
+  type NextFunction,
+  response
+} from 'express'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 import { INetworkFee } from 'databases/mongodb/model/exchange.model.js'
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
+import { performScraping } from './../utils/scraping/cryptoya.js'
 
 const controller = Router()
 
@@ -117,6 +124,16 @@ controller
       } catch (error) {
         return res.status(404).json({ message: error })
       }
+    }
+  )
+  .get(
+    '/exchangeIdsByPair',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const response = await performScraping()
+
+      console.log(response)
+
+      res.status(200).json(response)
     }
   )
 

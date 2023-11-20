@@ -1,17 +1,15 @@
 import { type Document } from 'mongoose'
 
 export interface IAskBid extends Document {
-  time: number
-  ask: number
-  totalAsk: number
-  bid: number
-  totalBid: number
+  price: number
+  qty: number
 }
 
-export interface ICurrencyPair extends Document {
+export interface ICurrencyPair {
   crypto: string
   fiat: string
-  prices: IAskBid[]
+  bids: [number, number][]
+  asks: [number, number][]
 }
 
 export interface INetworkFee {

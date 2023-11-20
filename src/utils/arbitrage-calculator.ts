@@ -1,13 +1,16 @@
 import { IAskBid } from 'databases/mongodb/model/exchange.model.js'
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
-import { type IExchangePairPricing } from './apis/cryptoya.js'
+import {
+  IExchangePricing,
+  type IExchangePairPricing
+} from '../types/exchange.js'
 
 export interface ICryptoArbitrageResult {
   askExchange: string
   askPrice: number
   bidExchange: string
   bidPrice: number
-  profitPercentage: number
+  profit: number
   time: number
 }
 
@@ -21,7 +24,7 @@ export async function calculateArbitragesFromPairData (
   // Get exchange fees. Se supone que los fees son porcentajes (hay que dividir por 100).
   const fees = await getExchangesFees()
 
-  const exchangesArr: { exchange: string; value: IAskBid }[] = []
+  const exchangesArr: { exchange: string; value: IExchangePricing }[] = []
   data.forEach((value, exchange) => {
     exchangesArr.push({ exchange, value })
   })
@@ -109,7 +112,7 @@ export async function calculateArbitragesFromPairData (
           askPrice: minAsk,
           bidExchange: maxBidExchange,
           bidPrice: maxBid,
-          profitPercentage: profit,
+          profit: profit,
           time: Math.max(exchangesArr[i].value.time, exchangesArr[j].value.time)
         })
       }
