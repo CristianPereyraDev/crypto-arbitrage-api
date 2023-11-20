@@ -1,6 +1,8 @@
 import * as cheerio from 'cheerio'
 
-export async function performScraping (): Promise<{ [pair: string]: any }> {
+export async function performScraping (): Promise<{
+  [pair: string]: any
+} | null> {
   try {
     const response = await fetch('https://criptoya.com/', {
       method: 'GET',
@@ -20,7 +22,7 @@ export async function performScraping (): Promise<{ [pair: string]: any }> {
         const coin = element.attribs['data-coin']
         const fiat = element.attribs['data-fiat']
 
-        const idMapping: { [exchange: string]: number } = {}
+        const idToExchangeMapping: { [id: string]: string } = {}
 
         $(element)
           .find('tbody tr')
@@ -31,16 +33,16 @@ export async function performScraping (): Promise<{ [pair: string]: any }> {
             ]
 
             if (exchangeName !== undefined)
-              idMapping[exchangeName] = Number(exchangeId)
+              idToExchangeMapping[exchangeId] = exchangeName
           })
 
-        exchangesMapping[coin + fiat] = idMapping
+        exchangesMapping[coin + fiat] = idToExchangeMapping
       }
     })
 
     return exchangesMapping
   } catch (error) {
     console.log(error)
-    return new Map<string, any>()
+    return null
   }
 }

@@ -131,9 +131,12 @@ controller
     async (req: Request, res: Response, next: NextFunction) => {
       const response = await performScraping()
 
-      console.log(response)
-
-      res.status(200).json(response)
+      if (response !== null)
+        res.status(200).json({ success: true, message: 'ok', data: response })
+      else
+        res
+          .status(400)
+          .json({ success: false, message: 'error', data: response })
     }
   )
 
