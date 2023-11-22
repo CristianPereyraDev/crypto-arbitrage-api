@@ -17,20 +17,17 @@ controller
   .get(
     '/pairs_available',
     async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const exchanges = await Exchange.find({}).exec()
-        const pairs = new Set<string>()
+      const scraping = await performScraping()
+      const response: string[] = []
 
-        exchanges.forEach(exchange => {
-          exchange.pairs.forEach(pair =>
-            pairs.add(`${pair.crypto}-${pair.fiat}`)
-          )
-        })
-
-        return res.status(200).json([...pairs])
-      } catch (error) {
-        return res.status(404).json({ message: 'Error' })
+      for (let symbol in scraping) {
+        response.push(scraping[symbol]['coin'] + '-' + scraping[symbol]['fiat'])
       }
+
+      if (scraping !== null)
+        res.status(200).json({ success: true, message: 'ok', data: response })
+      else
+        res.status(400).json({ success: false, message: 'error', data: null })
     }
   )
   .get(
@@ -129,14 +126,17 @@ controller
   .get(
     '/exchangeIdsByPair',
     async (req: Request, res: Response, next: NextFunction) => {
-      const response = await performScraping()
+      const scraping = await performScraping()
+      const response: { [symbol: string]: { [id: string]: string } } = {}
 
-      if (response !== null)
+      for (let symbol in scraping) {
+        response[symbol] = scraping[symbol]['ids']
+      }
+
+      if (scraping !== null)
         res.status(200).json({ success: true, message: 'ok', data: response })
       else
-        res
-          .status(400)
-          .json({ success: false, message: 'error', data: response })
+        res.status(400).json({ success: false, message: 'error', data: null })
     }
   )
 

@@ -25,13 +25,12 @@ appSetup(app)
     securitySetup(app, express)
     routerSetup(app)
     // Pricing collection interval
-    setInterval(() => {
-      // collectArbitragesToDB().catch(reason => {
-      //   console.log(reason)
-      // })
-      //collectExchangesPricesToBD().catch(reason => console.log(reason))
-      //getBitgetPairPrices('USDT', 'ARS').catch(reason => console.log(reason))
-    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
+    // setInterval(() => {
+    //   collectArbitragesToDB().catch(reason => {
+    //     console.log(reason)
+    //   })
+    //   collectExchangesPricesToBD().catch(reason => console.log(reason))
+    // }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
   })
   .catch(reason => {
     console.log(reason)

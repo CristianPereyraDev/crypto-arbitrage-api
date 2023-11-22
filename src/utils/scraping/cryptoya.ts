@@ -1,7 +1,11 @@
 import * as cheerio from 'cheerio'
 
 export async function performScraping (): Promise<{
-  [pair: string]: any
+  [symbol: string]: {
+    ids: { [id: string]: string }
+    coin: string
+    fiat: string
+  }
 } | null> {
   try {
     const response = await fetch('https://criptoya.com/', {
@@ -15,7 +19,13 @@ export async function performScraping (): Promise<{
 
     const $ = cheerio.load(responseText, null, false)
 
-    const exchangesMapping: { [pair: string]: any } = {}
+    const exchangesMapping: {
+      [symbol: string]: {
+        ids: { [id: string]: string }
+        coin: string
+        fiat: string
+      }
+    } = {}
 
     $('table').each((i, element) => {
       if (element.attribs.id !== undefined) {
@@ -36,13 +46,12 @@ export async function performScraping (): Promise<{
               idToExchangeMapping[exchangeId] = exchangeName
           })
 
-        exchangesMapping[coin + fiat] = idToExchangeMapping
+        exchangesMapping[coin + fiat] = { ids: idToExchangeMapping, coin, fiat }
       }
     })
 
     return exchangesMapping
   } catch (error) {
-    console.log(error)
     return null
   }
 }
