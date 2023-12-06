@@ -5,7 +5,6 @@ const appSetup = async (app: Express): Promise<void> => {
   try {
     // Set database connection
     const databaseURI = await mongooseConnect()
-    console.log(`Database Connected successfully - ${databaseURI}`)
 
     const APP_PORT =
       process.env.PORT !== undefined ? Number(process.env.PORT) : 3000

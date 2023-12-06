@@ -18,13 +18,17 @@ const routerSetup = (app: Express): Express => {
 
   const adminRouter = AdminJSExpress.buildRouter(admin)
 
-  console.log(
-    `AdminJS started on http://localhost:${process.env.PORT}${admin.options.rootPath}`
-  )
+  // console.log(
+  //   `AdminJS started on http://localhost:${process.env.PORT}${admin.options.rootPath}`
+  // )
 
   return app
     .get('/', (req: Request, res: Response) => {
-      res.send('Welcome to Crypto Arbitrage Api')
+      res
+        .status(200)
+        .send(
+          `<h1>Welcome to Crypto Arbitrage Api<h1><p><a href="${admin.options.rootPath}">Admin</a></p>`
+        )
     })
     .use('/api', infoRouter)
     .use('/api/arbitrages', arbitragesRouter)
