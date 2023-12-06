@@ -27,7 +27,7 @@ const routerSetup = (app: Express): Express => {
       res
         .status(200)
         .send(
-          `<h1>Welcome to Crypto Arbitrage Api<h1><p><a href="${admin.options.rootPath}">Admin</a></p>`
+          `<h1 style="text-align: center">Welcome to Crypto Arbitrage Api<h1>`
         )
     })
     .use('/api', infoRouter)
