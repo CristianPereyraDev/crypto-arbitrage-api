@@ -3,6 +3,9 @@ import AdminJS from 'adminjs'
 import AdminJSExpress from '@adminjs/express'
 import * as AdminJSMongoose from '@adminjs/mongoose'
 
+import MongoStore from 'connect-mongo'
+import mongoose from 'mongoose'
+
 import arbitragesRouter from '../controllers/arbitrages.controller.js'
 import infoRouter from '../controllers/info.controller.js'
 
@@ -13,14 +16,43 @@ AdminJS.registerAdapter({
   Database: AdminJSMongoose.Database
 })
 
+const authenticate = async (email: string, password: string) => {
+  if (
+    email === process.env.DEFAULT_ADMIN_EMAIL &&
+    password === process.env.DEFAULT_ADMIN_PASSWORD
+  ) {
+    return Promise.resolve({ email, password })
+  }
+  return null
+}
+
 const routerSetup = (app: Express): Express => {
   const admin = new AdminJS({ resources: [Exchange] })
 
-  const adminRouter = AdminJSExpress.buildRouter(admin)
+  const sessionStore = MongoStore.create({
+    client: mongoose.connection.getClient() as any
+  })
 
-  // console.log(
-  //   `AdminJS started on http://localhost:${process.env.PORT}${admin.options.rootPath}`
-  // )
+  const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
+    admin,
+    {
+      authenticate,
+      cookieName: 'adminjs',
+      cookiePassword: process.env.SESSION_SECRET || 'sessionsecret'
+    },
+    null,
+    {
+      store: sessionStore,
+      resave: true,
+      saveUninitialized: true,
+      secret: process.env.SESSION_SECRET || 'sessionsecret',
+      cookie: {
+        httpOnly: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production'
+      },
+      name: 'adminjs'
+    }
+  )
 
   return app
     .get('/', (req: Request, res: Response) => {

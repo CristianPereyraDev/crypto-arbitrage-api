@@ -1,9 +1,10 @@
-import { connect } from 'mongoose'
+import { MongoClient } from 'mongodb'
+import mongoose from 'mongoose'
 
-export default async function mongooseConnect (): Promise<string> {
+export default async function mongooseConnect (): Promise<mongoose.mongo.MongoClient> {
   const mongoDBURI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017'
 
-  await connect(mongoDBURI)
+  const conn = await mongoose.connect(mongoDBURI)
 
-  return mongoDBURI
+  return conn.connection.getClient()
 }
