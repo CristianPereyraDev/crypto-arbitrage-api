@@ -1,6 +1,5 @@
 import { RestClientV2 } from 'bitget-api'
-import { createHmac } from 'crypto'
-import { IPairPricing } from 'types/exchange.js'
+import { IPairPricing } from '../../../types/exchange.js'
 
 const API_KEY = process.env.BITGET_API_KEY
 const API_SECRET = process.env.BITGET_API_SECRET

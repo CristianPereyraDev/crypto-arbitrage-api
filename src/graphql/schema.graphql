@@ -1,0 +1,14 @@
+type Query {
+  exchange(name: String!): Exchange
+  exchanges: [Exchange]
+}
+
+type Exchange {
+  name: String
+  depositFiatFee: Float
+  withdrawalFiatFee: Float
+  makerFee: Float
+  takerFee: Float
+  buyFee: Float
+  sellFee: Float
+}

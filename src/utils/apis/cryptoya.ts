@@ -1,4 +1,4 @@
-import { IExchangePairPricing, IExchangePricing } from 'types/exchange.js'
+import { IExchangePairPricing, IExchangePricing } from '../../types/exchange.js'
 
 export async function pricesByCurrencyPair (
   crypto: string,
@@ -11,7 +11,7 @@ export async function pricesByCurrencyPair (
     )
 
     if (response.ok) {
-      const jsonResponse = await response.json()
+      const jsonResponse: any = await response.json()
 
       return new Map<string, IExchangePricing>(Object.entries(jsonResponse))
     } else {

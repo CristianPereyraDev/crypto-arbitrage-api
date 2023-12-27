@@ -29,6 +29,13 @@ const exchangeSchema = new Schema<IExchange>({
     required: true,
     unique: true
   },
+  depositFiatFee: { type: Number, default: 0 },
+  withdrawalFiatFee: { type: Number, default: 0 },
+  makerFee: { type: Number, default: 0 },
+  takerFee: { type: Number, default: 0 },
+  buyFee: { type: Number, default: 0 },
+  sellFee: { type: Number, default: 0 },
+  networkFees: { type: [cryptoFeeSchema] },
   pairs: {
     type: [currencyPairSchema],
     validate: {
@@ -39,14 +46,7 @@ const exchangeSchema = new Schema<IExchange>({
       },
       message: 'Repeated pairs is not allowed.'
     }
-  },
-  networkFees: { type: [cryptoFeeSchema] },
-  depositFiatFee: { type: Number, default: 0 },
-  withdrawalFiatFee: { type: Number, default: 0 },
-  makerFee: { type: Number, default: 0 },
-  takerFee: { type: Number, default: 0 },
-  buyFee: { type: Number, default: 0 },
-  sellFee: { type: Number, default: 0 }
+  }
 })
 
 //askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })

@@ -4,7 +4,7 @@ import {
   RestTradeTypes,
   Spot
 } from '@binance/connector-typescript'
-import { IExchangePricing, IPairPricing } from 'types/exchange.js'
+import { IExchangePricing, IPairPricing } from '../../../types/exchange.js'
 
 dotenv.config()
 
@@ -73,7 +73,7 @@ export async function getP2POrders (
     )
 
     if (response.ok) {
-      const jsonResponse = await response.json()
+      const jsonResponse: any = await response.json()
       const formatedResponse: IP2POrder[] = jsonResponse.data.map(
         (order: IP2POrder) => {
           return {
