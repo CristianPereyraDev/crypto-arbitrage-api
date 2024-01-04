@@ -1,54 +1,60 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, Types, model } from 'mongoose'
 import {
-  type IExchange,
-  type ICurrencyPair,
-  type IAskBid,
-  ICryptoFee
+  type ICurrencyPairPrices,
+  IP2PExchange,
+  IP2POrder,
+  IExchange,
+  IAskBid
 } from '../model/exchange.model.js'
+import { ExchangeBase } from './exchange_base.schema.js'
 
+// Exchange
 const askBidSchema = new Schema<IAskBid>(
-  { price: { type: Number }, qty: { type: Number } },
+  {
+    asks: { type: [[Number]], required: true },
+    bids: { type: [[Number]], required: true }
+  },
   { timestamps: true }
 )
 
-const currencyPairSchema = new Schema<ICurrencyPair>({
+// Override CurrencyPair document props
+type CurrencyPairDocumentProps = {
+  asksAndBids: Types.DocumentArray<IAskBid>
+}
+
+type CurrencyPairModelType = Model<
+  ICurrencyPairPrices,
+  {},
+  CurrencyPairDocumentProps
+>
+
+const currencyPairSchema = new Schema<
+  ICurrencyPairPrices,
+  CurrencyPairModelType
+>({
   crypto: { type: String, required: true },
   fiat: { type: String, required: true },
-  bids: [[Number]],
-  asks: [[Number]]
+  asksAndBids: [askBidSchema]
 })
 
-const cryptoFeeSchema = new Schema<ICryptoFee>({
-  crypto: { type: String, required: true },
-  networks: [{ network: String, fee: Number }]
-})
+type ExchangeDocumentProps = {
+  pricesByPair: Types.DocumentArray<ICurrencyPairPrices>
+}
 
-const exchangeSchema = new Schema<IExchange>({
-  name: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  depositFiatFee: { type: Number, default: 0 },
-  withdrawalFiatFee: { type: Number, default: 0 },
-  makerFee: { type: Number, default: 0 },
-  takerFee: { type: Number, default: 0 },
-  buyFee: { type: Number, default: 0 },
-  sellFee: { type: Number, default: 0 },
-  networkFees: { type: [cryptoFeeSchema] },
-  pairs: {
-    type: [currencyPairSchema],
-    validate: {
-      validator: function (v: any) {
-        const set = new Set(v.map((pair: any) => `${pair.crypto}-${pair.fiat}`))
+type ExchangeModelType = Model<IExchange, {}, ExchangeDocumentProps>
 
-        return set.size === v.length
-      },
-      message: 'Repeated pairs is not allowed.'
+const exchangeSchema = new Schema<IExchange, ExchangeModelType>(
+  {
+    pricesByPair: {
+      type: [currencyPairSchema]
     }
+  },
+  {
+    discriminatorKey: 'exchangeType'
   }
-})
+)
 
-//askBidSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
-
-export const Exchange = model<IExchange>('Exchange', exchangeSchema)
+export const Exchange = ExchangeBase.discriminator<
+  IExchange,
+  ExchangeModelType
+>('Exchange', exchangeSchema)

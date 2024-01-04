@@ -1,4 +1,7 @@
-import { IExchangePairPricing, IExchangePricing } from '../../types/exchange.js'
+import {
+  IExchangePairPricing,
+  IExchangePricing
+} from '../../../types/exchange.js'
 
 export async function pricesByCurrencyPair (
   crypto: string,

@@ -1,0 +1,3 @@
+div(id='symbols-container' hx-swap-oob='innerHTML')
+    each pair in availablePairs
+        div(id=`${pair.crypto}-${pair.fiat}-container` class='symbol-container')

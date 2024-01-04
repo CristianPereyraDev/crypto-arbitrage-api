@@ -1,4 +1,3 @@
-import { IAskBid } from '../databases/mongodb/model/exchange.model.js'
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import {
   IExchangePricing,

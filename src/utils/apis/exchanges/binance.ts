@@ -20,7 +20,7 @@ const client = new Spot(API_KEY, API_SECRET, {
 export async function getSpotAskBidPrices (
   asset: string,
   fiat: string
-): Promise<IPairPricing> {
+): Promise<IPairPricing | undefined> {
   const options: RestMarketTypes.orderBookOptions = {
     limit: 5
   }
@@ -31,7 +31,7 @@ export async function getSpotAskBidPrices (
     return { bids: orderBook.bids, asks: orderBook.asks }
   } catch (error) {
     //console.log(asset + fiat, error)
-    return { bids: [], asks: [] }
+    return undefined
   }
 }
 
@@ -111,6 +111,7 @@ export async function getP2PAskBidPrices (
     const bidOrders = await getP2POrders(asset, fiat, 'SELL')
 
     return {
+      exchange: 'BinanceP2P',
       ask: askOrders[0].adv.price,
       totalAsk: askOrders[0].adv.price,
       bid: bidOrders[0].adv.price,
@@ -118,6 +119,13 @@ export async function getP2PAskBidPrices (
       time: 0
     }
   } catch (error) {
-    return { ask: 0, totalAsk: 0, bid: 0, totalBid: 0, time: 0 }
+    return {
+      exchange: 'BinanceP2P',
+      ask: 0,
+      totalAsk: 0,
+      bid: 0,
+      totalBid: 0,
+      time: 0
+    }
   }
 }

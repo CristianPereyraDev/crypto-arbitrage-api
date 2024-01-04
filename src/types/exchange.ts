@@ -1,4 +1,5 @@
 export interface IExchangePricing {
+  exchange: string
   ask: number
   totalAsk: number
   bid: number

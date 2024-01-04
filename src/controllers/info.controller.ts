@@ -4,6 +4,7 @@ import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 import { INetworkFee } from '../databases/mongodb/model/exchange.model.js'
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import { performScraping } from '../utils/scraping/cryptoya.js'
+import { getAvailablePairs } from 'src/services/exchanges.service.js'
 
 const controller = Router()
 
@@ -11,14 +12,12 @@ controller
   .get(
     '/pairs_available',
     async (req: Request, res: Response, next: NextFunction) => {
-      const scraping = await performScraping()
-      const response: string[] = []
+      const availablePairs = await getAvailablePairs()
+      const response: string[] = availablePairs.map(
+        pair => pair.crypto + '-' + pair.fiat
+      )
 
-      for (let symbol in scraping) {
-        response.push(scraping[symbol]['coin'] + '-' + scraping[symbol]['fiat'])
-      }
-
-      if (scraping !== null)
+      if (response !== null)
         res.status(200).json({ success: true, message: 'ok', data: response })
       else
         res.status(400).json({ success: false, message: 'error', data: null })
@@ -62,7 +61,7 @@ controller
           .json(
             exchanges.filter(
               exchange =>
-                exchange.pairs.find(
+                exchange.availablePairs.find(
                   pair => pair.crypto === crypto && pair.fiat === fiat
                 ) !== undefined
             )

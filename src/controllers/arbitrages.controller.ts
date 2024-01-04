@@ -1,6 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
 import CryptoArbitrageModel from '../databases/mongodb/schema/arbitrage.schema.js'
-import { collectArbitrages } from '../startup/pricing_collector.js'
+import { collectArbitrages } from '../utils/pricing_collector/pricing_collector.js'
 
 const controller = Router()
 

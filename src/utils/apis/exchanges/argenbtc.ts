@@ -16,16 +16,16 @@ export async function getPairPrices (
 
       switch (asset) {
         case 'BTC':
-          asks = [[jsonResponse.precio_compra_f, '1']]
-          bids = [[jsonResponse.precio_venta_f, '1']]
+          asks = [[jsonResponse.precio_compra, '1']]
+          bids = [[jsonResponse.precio_venta, '1']]
           break
         case 'USDT':
-          asks = [[jsonResponse.usdt_compra_f, '1']]
-          bids = [[jsonResponse.usdt_venta_f, '1']]
+          asks = [[jsonResponse.usdt_compra, '1']]
+          bids = [[jsonResponse.usdt_venta, '1']]
           break
         case 'DAI':
-          asks = [[jsonResponse.dai_compra_f, '1']]
-          bids = [[jsonResponse.dai_venta_f, '1']]
+          asks = [[jsonResponse.dai_compra, '1']]
+          bids = [[jsonResponse.dai_venta, '1']]
           break
       }
     }

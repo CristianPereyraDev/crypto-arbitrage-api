@@ -9,7 +9,7 @@ import mongoose from 'mongoose'
 import arbitragesRouter from '../controllers/arbitrages.controller.js'
 import infoRouter from '../controllers/info.controller.js'
 
-import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
+import { ExchangeBase } from '../databases/mongodb/schema/exchange_base.schema.js'
 
 import { gql } from 'graphql-tag'
 import { ApolloServer } from '@apollo/server'
@@ -18,7 +18,6 @@ import { expressMiddleware } from '@apollo/server/express4'
 import resolvers from '../graphql/resolvers.js'
 import { readFileSync } from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
 AdminJS.registerAdapter({
   Resource: AdminJSMongoose.Resource,
@@ -36,7 +35,7 @@ const authenticate = async (email: string, password: string) => {
 }
 
 const routerSetup = async (app: Express): Promise<Express> => {
-  const admin = new AdminJS({ resources: [Exchange] })
+  const admin = new AdminJS({ resources: [ExchangeBase] })
 
   const sessionStore = MongoStore.create({
     client: mongoose.connection.getClient() as any

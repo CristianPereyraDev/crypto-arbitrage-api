@@ -1,0 +1,8 @@
+div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
+        each val in prices
+            div(class='symbol-table-row')
+                span=val.exchange 
+                span=val.ask
+                span=val.totalAsk
+                span=val.bid
+                span=val.totalBid
