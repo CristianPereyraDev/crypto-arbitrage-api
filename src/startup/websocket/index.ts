@@ -1,9 +1,6 @@
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
-import {
-  getAvailablePairs,
-  getPricesBySymbol
-} from 'src/services/exchanges.service.js'
+import { getPricesBySymbol } from 'src/services/exchanges.service.js'
 import path from 'path'
 import pug from 'pug'
 import { IExchangePricing } from 'src/types/exchange.js'
@@ -16,9 +13,6 @@ import { IExchangePricing } from 'src/types/exchange.js'
 export default function (expressServer: Server | undefined) {
   if (expressServer === undefined) return undefined
 
-  const symbolsTemplate = pug.compileFile(
-    path.join(process.cwd(), 'src', 'views', 'symbols.pug')
-  )
   const symbolPricesTemplate = pug.compileFile(
     path.join(process.cwd(), 'src', 'views', 'symbol_prices.pug')
   )
@@ -33,8 +27,6 @@ export default function (expressServer: Server | undefined) {
 
   wss.on('connection', async (websocket, connectionRequest) => {
     let exchangePricesTimeout: ReturnType<typeof setInterval>
-    // const availablePairs = await getAvailablePairs()
-    // websocket.send(symbolsTemplate({ availablePairs }))
 
     websocket.on('error', error => {
       clearInterval(exchangePricesTimeout)
@@ -55,8 +47,15 @@ export default function (expressServer: Server | undefined) {
             parsedMessage.prices.fiat
           )
 
+          // websocket.send(
+          //   symbolPricesTemplate({
+          //     asset: parsedMessage.prices.asset,
+          //     fiat: parsedMessage.prices.fiat,
+          //     prices
+          //   })
+          // )
           websocket.send(
-            symbolPricesTemplate({
+            JSON.stringify({
               asset: parsedMessage.prices.asset,
               fiat: parsedMessage.prices.fiat,
               prices

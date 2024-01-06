@@ -5,19 +5,16 @@ import { IPair } from 'src/databases/mongodb/model/exchange.model.js'
 
 export async function removeOlderPrices () {
   try {
-    const exchanges = await Exchange.find({})
-
-    for (let exchange of exchanges) {
-      const pricesByPair = exchange.pricesByPair
-      for (let pairPrices of pricesByPair) {
-        pairPrices.asksAndBids = pairPrices.asksAndBids.filter(
-          askBid =>
-            askBid.createdAt !== undefined &&
-            askBid.createdAt?.getMilliseconds() > Date.now() - 1000 * 60 //
-        )
+    await Exchange.updateMany(
+      {},
+      {
+        $pull: {
+          'pricesByPair.$[].asksAndBids': {
+            createdAt: { $lte: new Date(Date.now() - 1000 * 60) }
+          }
+        }
       }
-      exchange.save()
-    }
+    )
   } catch (error) {
     console.error(error)
   }

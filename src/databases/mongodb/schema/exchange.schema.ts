@@ -1,8 +1,6 @@
 import { Model, Schema, Types, model } from 'mongoose'
 import {
   type ICurrencyPairPrices,
-  IP2PExchange,
-  IP2POrder,
   IExchange,
   IAskBid
 } from '../model/exchange.model.js'

@@ -18,6 +18,7 @@ import { expressMiddleware } from '@apollo/server/express4'
 import resolvers from '../graphql/resolvers.js'
 import { readFileSync } from 'fs'
 import path from 'path'
+import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 
 AdminJS.registerAdapter({
   Resource: AdminJSMongoose.Resource,
@@ -35,7 +36,7 @@ const authenticate = async (email: string, password: string) => {
 }
 
 const routerSetup = async (app: Express): Promise<Express> => {
-  const admin = new AdminJS({ resources: [ExchangeBase] })
+  const admin = new AdminJS({ resources: [ExchangeBase, Exchange] })
 
   const sessionStore = MongoStore.create({
     client: mongoose.connection.getClient() as any

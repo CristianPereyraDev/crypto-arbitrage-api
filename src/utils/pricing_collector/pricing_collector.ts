@@ -126,9 +126,10 @@ export async function collectExchangesPricesToBD () {
                 ]
               })
             }
+
+            await exchange.save()
           }
         }
-        await exchange.save()
       }
     }
   } catch (error) {

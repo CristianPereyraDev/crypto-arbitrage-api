@@ -1,7 +1,10 @@
+import { Types } from 'mongoose'
+
 /**
  * Ask and bids are arrays of arrays like [[price, qty], [price, qty]]
  */
 export interface IAskBid {
+  _id?: Types.ObjectId
   asks: number[][]
   bids: number[][]
   createdAt?: Date
