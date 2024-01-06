@@ -6,8 +6,7 @@ import {
   calculateArbitragesFromPairData
 } from '../arbitrage-calculator.js'
 import { priceCollectorFunctions } from '../apis/exchanges/index.js'
-import { ICurrencyPairPrices } from 'src/databases/mongodb/model/exchange.model.js'
-import { ExchangeP2P } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+import { updateExchangePrices } from 'src/services/exchanges.service.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -38,7 +37,7 @@ export async function collectArbitragesToDB (): Promise<void> {
         await doc.save()
       }
     } catch (error) {
-      //console.log(error)
+      console.log(error)
       continue
     }
   }
@@ -60,79 +59,27 @@ export async function collectArbitrages (
   }
 }
 
-async function collectExchangePrices (
-  exchangeName: string,
-  crypto: string,
-  fiat: string
-) {
-  try {
-    const priceCollector = priceCollectorFunctions.get(exchangeName)
-
-    if (priceCollector !== undefined) {
-      const askBids = await priceCollector(crypto, fiat)
-
-      if (askBids !== undefined) {
-        const asks: Array<[number, number]> = askBids.asks.map(ask => [
-          parseFloat(ask[0]),
-          parseFloat(ask[1])
-        ])
-        const bids: Array<[number, number]> = askBids.bids.map(ask => [
-          parseFloat(ask[0]),
-          parseFloat(ask[1])
-        ])
-
-        return { asks, bids }
-      }
-    }
-    return undefined
-  } catch (error) {
-    console.log('Error in collectExchangesPricesToBD', error)
-    return undefined
-  }
-}
-
 export async function collectExchangesPricesToBD () {
-  try {
-    const exchanges = await Exchange.find({})
-    const exchangesP2P = await ExchangeP2P.find({})
+  priceCollectorFunctions.forEach(async (collector, exchangeName) => {
+    try {
+      const exchangeDoc = await Exchange.findOne({ name: exchangeName })
 
-    for (let exchange of exchanges) {
-      if (exchange.availablePairs.length > 0) {
-        for (let availablePair of exchange.availablePairs) {
-          const collectedPrices = await collectExchangePrices(
-            exchange.name,
-            availablePair.crypto,
-            availablePair.fiat
-          )
-
-          if (collectedPrices !== undefined) {
-            const pair: ICurrencyPairPrices | undefined =
-              exchange.pricesByPair.find(
-                price =>
-                  price.crypto === availablePair.crypto &&
-                  price.fiat === availablePair.fiat
+      if (exchangeDoc !== null) {
+        exchangeDoc.availablePairs.forEach(availablePair => {
+          collector(availablePair.crypto, availablePair.fiat).then(prices => {
+            if (prices !== undefined) {
+              updateExchangePrices(
+                exchangeName,
+                availablePair.crypto,
+                availablePair.fiat,
+                prices
               )
-            if (pair !== undefined) {
-              pair.asksAndBids.push({
-                asks: collectedPrices.asks,
-                bids: collectedPrices.bids
-              })
-            } else {
-              exchange.pricesByPair.push({
-                crypto: availablePair.crypto,
-                fiat: availablePair.fiat,
-                asksAndBids: [
-                  { asks: collectedPrices.asks, bids: collectedPrices.bids }
-                ]
-              })
             }
-
-            await exchange.save()
-          }
-        }
+          })
+        })
       }
+    } catch (error) {
+      console.log('Error en collectExchangesPricesToBD', error)
     }
-  } catch (error) {
-    console.log('Error en collectExchangesPricesToBD', error)
-  }
+  })
 }

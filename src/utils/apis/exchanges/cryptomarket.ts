@@ -1,12 +1,12 @@
-import { IPairPricing } from '../../../types/exchange.js'
+import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<IPairPricing | undefined> {
+): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    let asks: string[][] = []
-    let bids: string[][] = []
+    let asks: number[][] = []
+    let bids: number[][] = []
 
     const responseBTCFiat = await fetch(
       `https://api.exchange.cryptomkt.com/api/3/public/orderbook/BTCARS`
@@ -28,11 +28,11 @@ export async function getPairPrices (
         default:
           asks = jsonResponseBTCFiat.ask.map((ask: string[]) => [
             Number(ask[0]) / priceBTCAsset,
-            ask[1]
+            parseFloat(ask[1])
           ])
           bids = jsonResponseBTCFiat.bid.map((bid: string[]) => [
             Number(bid[0]) / priceBTCAsset,
-            bid[1]
+            parseFloat(bid[1])
           ])
       }
 

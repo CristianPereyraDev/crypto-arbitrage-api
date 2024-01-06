@@ -1,7 +1,44 @@
 import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { IExchangePricing } from 'src/types/exchange.js'
-import { IPair } from 'src/databases/mongodb/model/exchange.model.js'
+import {
+  ICurrencyPairPrices,
+  IPair
+} from 'src/databases/mongodb/model/exchange.model.js'
+import { CollectorFunctionReturnType } from 'src/utils/apis/exchanges/index.js'
+
+export async function updateExchangePrices (
+  exchangeName: string,
+  baseAsset: string,
+  quoteAsset: string,
+  prices: CollectorFunctionReturnType
+) {
+  try {
+    const exchange = await Exchange.findOne({ name: exchangeName })
+
+    if (exchange !== null) {
+      const pair: ICurrencyPairPrices | undefined = exchange.pricesByPair.find(
+        price => price.crypto === baseAsset && price.fiat === quoteAsset
+      )
+      if (pair !== undefined) {
+        pair.asksAndBids.push({
+          asks: prices.asks,
+          bids: prices.bids
+        })
+      } else {
+        exchange.pricesByPair.push({
+          crypto: baseAsset,
+          fiat: baseAsset,
+          asksAndBids: [{ asks: prices.asks, bids: prices.bids }]
+        })
+      }
+
+      await exchange.save()
+    }
+  } catch (error) {
+    console.error('An error in updateExchangePrices has ocurred: %s', error)
+  }
+}
 
 export async function removeOlderPrices () {
   try {
