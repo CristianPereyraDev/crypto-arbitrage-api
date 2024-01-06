@@ -28,7 +28,7 @@ export async function updateExchangePrices (
       } else {
         exchange.pricesByPair.push({
           crypto: baseAsset,
-          fiat: baseAsset,
+          fiat: quoteAsset,
           asksAndBids: [{ asks: prices.asks, bids: prices.bids }]
         })
       }

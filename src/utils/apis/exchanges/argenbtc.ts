@@ -1,12 +1,13 @@
 import { IPairPricing } from '../../../types/exchange.js'
+import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<IPairPricing> {
+): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    let asks: string[][] = []
-    let bids: string[][] = []
+    let asks: number[][] = []
+    let bids: number[][] = []
     const response = await fetch('https://argenbtc.com/cotizacion', {
       method: 'POST'
     })
@@ -16,26 +17,28 @@ export async function getPairPrices (
 
       switch (asset) {
         case 'BTC':
-          asks = [[jsonResponse.precio_compra, '1']]
-          bids = [[jsonResponse.precio_venta, '1']]
+          asks = [[parseFloat(jsonResponse.precio_compra), 1]]
+          bids = [[parseFloat(jsonResponse.precio_venta), 1]]
           break
         case 'USDT':
-          asks = [[jsonResponse.usdt_compra, '1']]
-          bids = [[jsonResponse.usdt_venta, '1']]
+          asks = [[parseFloat(jsonResponse.usdt_compra), 1]]
+          bids = [[parseFloat(jsonResponse.usdt_venta), 1]]
           break
         case 'DAI':
-          asks = [[jsonResponse.dai_compra, '1']]
-          bids = [[jsonResponse.dai_venta, '1']]
+          asks = [[parseFloat(jsonResponse.dai_compra), 1]]
+          bids = [[parseFloat(jsonResponse.dai_venta), 1]]
           break
       }
-    }
 
-    return {
-      asks,
-      bids
+      return {
+        asks,
+        bids
+      }
+    } else {
+      return undefined
     }
   } catch (error) {
     console.log(error)
-    return { asks: [], bids: [] }
+    return undefined
   }
 }

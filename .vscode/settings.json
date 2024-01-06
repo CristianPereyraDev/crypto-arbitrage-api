@@ -16,6 +16,7 @@
     "resave",
     "sessionsecret",
     "Subdocument",
+    "trxusdt",
     "venta"
   ]
 }

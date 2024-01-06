@@ -30,15 +30,15 @@ appSetup(app)
       collectExchangesPricesToBD().catch(reason => console.log(reason))
     }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
     // Scheduled Jobs
-    // const removeOlderPricesJob = new CronJob(
-    //   '0 * * * * *',
-    //   function () {
-    //     console.log('Deleting older prices...')
-    //     removeOlderPrices()
-    //   },
-    //   null,
-    //   true
-    // )
+    const removeOlderPricesJob = new CronJob(
+      '0 * * * * *',
+      function () {
+        console.log('Deleting older prices...')
+        removeOlderPrices()
+      },
+      null,
+      true
+    )
   })
   .catch(reason => {
     console.log(reason)
