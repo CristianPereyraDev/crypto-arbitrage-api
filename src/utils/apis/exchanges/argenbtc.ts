@@ -1,4 +1,3 @@
-import { IPairPricing } from '../../../types/exchange.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
