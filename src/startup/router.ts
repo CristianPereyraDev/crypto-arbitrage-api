@@ -36,7 +36,21 @@ const authenticate = async (email: string, password: string) => {
 }
 
 const routerSetup = async (app: Express): Promise<Express> => {
-  const admin = new AdminJS({ resources: [ExchangeBase, Exchange] })
+  const admin = new AdminJS({
+    resources: [
+      ExchangeBase,
+      {
+        resource: Exchange,
+        options: {
+          properties: {
+            'pricesByPair.asksAndBids': {
+              isVisible: { edit: false, list: false }
+            }
+          }
+        }
+      }
+    ]
+  })
 
   const sessionStore = MongoStore.create({
     client: mongoose.connection.getClient() as any

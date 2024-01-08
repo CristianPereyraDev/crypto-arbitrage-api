@@ -5,8 +5,13 @@ import {
   ICryptoArbitrageResult,
   calculateArbitragesFromPairData
 } from '../arbitrage-calculator.js'
-import { priceCollectorFunctions } from '../apis/exchanges/index.js'
+import {
+  CollectorFunctionReturnType,
+  CollectorFunctionType,
+  priceCollectorFunctions
+} from '../apis/exchanges/index.js'
 import { updateExchangePrices } from 'src/services/exchanges.service.js'
+import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -59,27 +64,51 @@ export async function collectArbitrages (
   }
 }
 
-export async function collectExchangesPricesToBD () {
-  priceCollectorFunctions.forEach(async (collector, exchangeName) => {
-    try {
-      const exchangeDoc = await Exchange.findOne({ name: exchangeName })
+type PromiseAllElemResultType = {
+  exchangeName: string
+  baseAsset: string
+  quoteAsset: string
+  prices: CollectorFunctionReturnType | undefined
+}
 
-      if (exchangeDoc !== null) {
-        exchangeDoc.availablePairs.forEach(availablePair => {
-          collector(availablePair.crypto, availablePair.fiat).then(prices => {
-            if (prices !== undefined) {
-              updateExchangePrices(
-                exchangeName,
-                availablePair.crypto,
-                availablePair.fiat,
+export async function collectExchangesPricesToBD () {
+  try {
+    const exchanges = await Exchange.find({})
+    const collectors: Promise<PromiseAllElemResultType>[] = []
+
+    for (let exchange of exchanges) {
+      const priceCollector = priceCollectorFunctions.get(exchange.name)
+      if (priceCollector === undefined) continue
+
+      for (let pair of exchange.pricesByPair) {
+        collectors.push(
+          new Promise<PromiseAllElemResultType>((resolve, _reject) => {
+            priceCollector(pair.crypto, pair.fiat).then(prices => {
+              resolve({
+                exchangeName: exchange.name,
+                baseAsset: pair.crypto,
+                quoteAsset: pair.fiat,
                 prices
-              )
-            }
+              })
+            })
           })
-        })
+        )
       }
-    } catch (error) {
-      console.log('Error en collectExchangesPricesToBD', error)
     }
-  })
+
+    // Call collectors in parallel
+    const priceCollectorResults = await Promise.all(collectors)
+    for (let priceCollectorResult of priceCollectorResults) {
+      if (priceCollectorResult.prices !== undefined) {
+        updateExchangePrices(
+          priceCollectorResult.exchangeName,
+          priceCollectorResult.baseAsset,
+          priceCollectorResult.quoteAsset,
+          priceCollectorResult.prices
+        )
+      }
+    }
+  } catch (error) {
+    console.log('Error en collectExchangesPricesToBD', error)
+  }
 }

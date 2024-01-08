@@ -5,11 +5,16 @@ import * as bitmonedero from './bitmonedero.js'
 import * as cryptomarket from './cryptomarket.js'
 import * as ripiotrade from './ripiotrade.js'
 import * as saldo from './saldo.js'
+import * as trubit from './trubit.js'
+import * as bitso from './bitso.js'
 
 /**
  * bids & asks are arrays like -> [[price, qty], [price, qty], ...]
  */
-export type CollectorFunctionReturnType = { bids: number[][]; asks: number[][] }
+export type CollectorFunctionReturnType = {
+  bids: number[][]
+  asks: number[][]
+}
 
 export type CollectorFunctionType = (
   baseAsset: string,
@@ -25,5 +30,7 @@ const priceCollectorFunctions = new Map<string, CollectorFunctionType>()
 //priceCollectorFunctions.set('CryptoMarket', cryptomarket.getPairPrices) // Implemented
 //priceCollectorFunctions.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
 //priceCollectorFunctions.set('Saldo', saldo.getPairPrices) // Implemented
+//priceCollectorFunctions.set('TruBit', trubit.getPairPrices) // Implemented
+priceCollectorFunctions.set('Bitso', bitso.getPairPrices) // Implemented
 
 export { priceCollectorFunctions }

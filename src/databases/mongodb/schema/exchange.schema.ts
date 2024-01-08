@@ -1,4 +1,4 @@
-import { Model, Schema, Types, model } from 'mongoose'
+import mongoose, { Model, Schema, Types } from 'mongoose'
 import {
   type ICurrencyPairPrices,
   IExchange,
@@ -6,13 +6,15 @@ import {
 } from '../model/exchange.model.js'
 import { ExchangeBase } from './exchange_base.schema.js'
 
+//mongoose.set('debug', true)
+
 // Exchange
 const askBidSchema = new Schema<IAskBid>(
   {
     asks: { type: [[Number]], required: true },
     bids: { type: [[Number]], required: true }
   },
-  { timestamps: true }
+  { timestamps: { createdAt: true, updatedAt: false } }
 )
 
 // Override CurrencyPair document props
