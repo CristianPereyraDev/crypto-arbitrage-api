@@ -41,6 +41,7 @@
     "@types/ws": "^8.5.10",
     "adminjs": "^7.3.0",
     "bitget-api": "^2.0.1",
+    "bybit-api": "^3.8.0",
     "cheerio": "^1.0.0-rc.12",
     "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",

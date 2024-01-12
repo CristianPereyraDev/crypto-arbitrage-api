@@ -7,6 +7,10 @@ import * as ripiotrade from './ripiotrade.js'
 import * as saldo from './saldo.js'
 import * as trubit from './trubit.js'
 import * as bitso from './bitso.js'
+import * as pluscrypto from './pluscrypto.js'
+import * as bybit from './bybit.js'
+import * as fiwind from './fiwind.js'
+import * as tiendacrypto from './tiendacrypto.js'
 
 /**
  * bids & asks are arrays like -> [[price, qty], [price, qty], ...]
@@ -31,6 +35,10 @@ const priceCollectorFunctions = new Map<string, CollectorFunctionType>()
 //priceCollectorFunctions.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
 //priceCollectorFunctions.set('Saldo', saldo.getPairPrices) // Implemented
 //priceCollectorFunctions.set('TruBit', trubit.getPairPrices) // Implemented
-priceCollectorFunctions.set('Bitso', bitso.getPairPrices) // Implemented
+//priceCollectorFunctions.set('Bitso', bitso.getPairPrices) // Implemented
+//priceCollectorFunctions.set('Plus Crypto', pluscrypto.getPairPrices) // Implemented
+//priceCollectorFunctions.set('Fiwind', fiwind.getPairPrices) // Implemented
+//priceCollectorFunctions.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
+//bybit.getPairPrices()
 
 export { priceCollectorFunctions }
