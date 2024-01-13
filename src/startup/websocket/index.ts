@@ -11,17 +11,22 @@ import { IExchangePricing } from 'src/types/exchange.js'
  * @returns
  */
 export default function (expressServer: Server | undefined) {
-  if (expressServer === undefined) return undefined
+  if (expressServer === undefined) return
 
   const symbolPricesTemplate = pug.compileFile(
     path.join(process.cwd(), 'src', 'views', 'symbol_prices.pug')
   )
 
   const wss = new WebSocketServer({ noServer: true, path: '/websocket' })
+  const wssWebApp = new WebSocketServer({ noServer: true, path: '/ws/web' })
 
   expressServer.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, websocket => {
       wss.emit('connection', websocket, request)
+    })
+
+    wssWebApp.handleUpgrade(request, socket, head, websocket => {
+      wssWebApp.emit('connection', websocket, request)
     })
   })
 
@@ -72,5 +77,43 @@ export default function (expressServer: Server | undefined) {
     })
   })
 
-  return wss
+  wssWebApp.on('connection', async (websocket, connectionRequest) => {
+    let exchangePricesTimeout: ReturnType<typeof setInterval>
+
+    websocket.on('error', error => {
+      clearInterval(exchangePricesTimeout)
+    })
+
+    websocket.on('close', () => {
+      console.log('The client has been closed the connection')
+      clearInterval(exchangePricesTimeout)
+    })
+
+    websocket.on('message', message => {
+      const parsedMessage = JSON.parse(message.toString())
+
+      if (Object.hasOwn(parsedMessage, 'prices')) {
+        async function sendMessage () {
+          const prices: IExchangePricing[] = await getPricesBySymbol(
+            parsedMessage.prices.asset,
+            parsedMessage.prices.fiat
+          )
+
+          websocket.send(
+            symbolPricesTemplate({
+              asset: parsedMessage.prices.asset,
+              fiat: parsedMessage.prices.fiat,
+              prices
+            })
+          )
+        }
+
+        sendMessage()
+
+        exchangePricesTimeout = setInterval(() => {
+          sendMessage()
+        }, 1000 * 6)
+      }
+    })
+  })
 }

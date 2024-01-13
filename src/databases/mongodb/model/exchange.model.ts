@@ -48,21 +48,33 @@ export interface IExchange extends IExchangeBase {
 }
 
 // Exchange P2P
-export interface IP2PExchange extends IExchangeBase {
-  orders: IP2POrder[]
+export type P2POrderType = 'BUY' | 'SELL'
+
+export type P2PUserType = 'user' | 'merchant'
+
+export interface IPaymentMethod {
+  slug: string
+  name: string
 }
 
 export interface IP2POrder {
+  orderType: P2POrderType
   orderId: string
-  merchantId: string
-  merchantName: string
   volume: number
   price: number
   min: number
   max: number
-  trades: number
-  completed: number
-  payments: string[][]
-  verified: boolean
+  payments: IPaymentMethod[]
+  // USER PROPERTIES //
+  userType: P2PUserType
+  merchantId: string
+  merchantName: string
+  monthOrderCount: number
+  monthFinishRate: number
+  positiveRate: number
   link: string
+}
+
+export interface IP2PExchange extends IExchangeBase {
+  ordersByPair: { crypto: string; fiat: string; orders: IP2POrder[] }[]
 }

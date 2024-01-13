@@ -1,10 +1,6 @@
 import dotenv from 'dotenv'
-import {
-  RestMarketTypes,
-  RestTradeTypes,
-  Spot
-} from '@binance/connector-typescript'
-import { IExchangePricing, IPairPricing } from '../../../types/exchange.js'
+import { RestMarketTypes, Spot } from '@binance/connector-typescript'
+import { CollectorFunctionReturnType } from './index.js'
 
 dotenv.config()
 
@@ -20,7 +16,7 @@ const client = new Spot(API_KEY, API_SECRET, {
 export async function getSpotAskBidPrices (
   asset: string,
   fiat: string
-): Promise<IPairPricing | undefined> {
+): Promise<CollectorFunctionReturnType | undefined> {
   const options: RestMarketTypes.orderBookOptions = {
     limit: 5
   }
@@ -28,104 +24,12 @@ export async function getSpotAskBidPrices (
   try {
     const orderBook = await client.orderBook(asset + fiat, options)
 
-    return { bids: orderBook.bids, asks: orderBook.asks }
+    return {
+      bids: orderBook.bids.map(bid => [parseFloat(bid[0]), parseFloat(bid[1])]),
+      asks: orderBook.asks.map(ask => [parseFloat(ask[0]), parseFloat(ask[1])])
+    }
   } catch (error) {
-    //console.log(asset + fiat, error)
+    console.log('Binance API error: %s', error)
     return undefined
-  }
-}
-
-export interface IP2POrder {
-  adv: {
-    price: number
-    maxSingleTransAmount: number
-    minSingleTransAmount: number
-  }
-  advertiser: { nickName: string; userType: 'merchant' | 'user' | null }
-}
-
-export async function getP2POrders (
-  asset: string,
-  fiat: string,
-  tradeType: string
-): Promise<IP2POrder[]> {
-  const data = {
-    fiat: fiat,
-    page: 1,
-    rows: 10,
-    tradeType: tradeType,
-    asset: asset,
-    countries: [],
-    proMerchantAds: false,
-    shieldMerchantAds: false,
-    publisherType: null,
-    payTypes: [],
-    classifies: ['mass', 'profession']
-  }
-  try {
-    const response = await fetch(
-      `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }
-    )
-
-    if (response.ok) {
-      const jsonResponse: any = await response.json()
-      const formatedResponse: IP2POrder[] = jsonResponse.data.map(
-        (order: IP2POrder) => {
-          return {
-            adv: {
-              price: order.adv.price,
-              maxSingleTransAmount: order.adv.maxSingleTransAmount,
-              minSingleTransAmount: order.adv.minSingleTransAmount
-            },
-            advertiser: {
-              nickName: order.advertiser.nickName,
-              userType: order.advertiser.userType
-            }
-          }
-        }
-      )
-
-      return formatedResponse
-    } else {
-      console.log('Status code=', response.status)
-      return []
-    }
-  } catch (error) {
-    console.log('Error on fetch to p2p')
-    return []
-  }
-}
-
-export async function getP2PAskBidPrices (
-  asset: string,
-  fiat: string,
-  volume: number
-): Promise<IExchangePricing> {
-  try {
-    const askOrders = await getP2POrders(asset, fiat, 'BUY')
-    const bidOrders = await getP2POrders(asset, fiat, 'SELL')
-
-    return {
-      exchange: 'BinanceP2P',
-      ask: askOrders[0].adv.price,
-      totalAsk: askOrders[0].adv.price,
-      bid: bidOrders[0].adv.price,
-      totalBid: bidOrders[0].adv.price,
-      time: 0
-    }
-  } catch (error) {
-    return {
-      exchange: 'BinanceP2P',
-      ask: 0,
-      totalAsk: 0,
-      bid: 0,
-      totalBid: 0,
-      time: 0
-    }
   }
 }

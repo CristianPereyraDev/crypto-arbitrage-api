@@ -7,11 +7,10 @@ import {
 } from '../arbitrage-calculator.js'
 import {
   CollectorFunctionReturnType,
-  CollectorFunctionType,
   priceCollectorFunctions
 } from '../apis/exchanges/index.js'
 import { updateExchangePrices } from 'src/services/exchanges.service.js'
-import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
+import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -69,6 +68,12 @@ type PromiseAllElemResultType = {
   baseAsset: string
   quoteAsset: string
   prices: CollectorFunctionReturnType | undefined
+}
+
+export async function collectP2POrdersToBD () {
+  try {
+    const p2pExchanges = await P2PExchange.find({})
+  } catch (error) {}
 }
 
 export async function collectExchangesPricesToBD () {
