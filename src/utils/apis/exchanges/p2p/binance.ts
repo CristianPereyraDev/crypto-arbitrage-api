@@ -12,7 +12,7 @@ export type BinanceP2PTradeMethodType = {
   paySubBank: string | null
   identifier: string
   iconUrlColor: string | null
-  tradeMethodName: 'Lemon Cash'
+  tradeMethodName: string | null
   tradeMethodShortName: string | null
   tradeMethodBgColor: string
 }
@@ -99,7 +99,7 @@ export async function getP2POrders (
       return undefined
     }
   } catch (error) {
-    console.log('Error on fetch to p2p')
+    console.log('Error on fetch to p2p: %s', error)
     return undefined
   }
 }

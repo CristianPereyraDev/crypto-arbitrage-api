@@ -31,14 +31,7 @@ export type CollectorFunctionType = (
   quoteAsset: string
 ) => Promise<CollectorFunctionReturnType | undefined>
 
-export type P2PCollectorFunctionType = (
-  asset: string,
-  fiat: string,
-  tradeType: P2POrderType
-) => Promise<IP2POrder[] | undefined>
-
 const priceCollectors = new Map<string, CollectorFunctionType>()
-const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>()
 
 // priceCollectors.set('Binance', binance.getSpotAskBidPrices) // Implemented
 // priceCollectors.set('ArgenBTC', argenbtc.getPairPrices) // Implemented
@@ -56,6 +49,14 @@ const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>()
 //bybit.getPairPrices()
 
 // P2P Exchange collectors
+export type P2PCollectorFunctionType = (
+  asset: string,
+  fiat: string,
+  tradeType: P2POrderType
+) => Promise<IP2POrder[] | undefined>
+
+const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>()
+
 p2pOrderCollectors.set('Binance P2P', binancep2p.getP2POrders)
 
-export { priceCollectors as priceCollectorFunctions }
+export { priceCollectors, p2pOrderCollectors }

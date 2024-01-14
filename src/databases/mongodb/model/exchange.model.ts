@@ -76,5 +76,10 @@ export interface IP2POrder {
 }
 
 export interface IP2PExchange extends IExchangeBase {
-  ordersByPair: { crypto: string; fiat: string; orders: IP2POrder[] }[]
+  ordersByPair: {
+    crypto: string
+    fiat: string
+    buyOrders: IP2POrder[]
+    sellOrders: IP2POrder[]
+  }[]
 }

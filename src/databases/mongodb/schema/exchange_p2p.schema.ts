@@ -28,7 +28,7 @@ const p2pOrderSchema = new Schema<IP2POrder>(
     positiveRate: { type: Number },
     link: { type: String }
   },
-  { timestamps: true }
+  { timestamps: { createdAt: true, updatedAt: false } }
 )
 
 const p2pExchangeSchema = new Schema<IP2PExchange>(
@@ -38,7 +38,8 @@ const p2pExchangeSchema = new Schema<IP2PExchange>(
         new Schema({
           crypto: { type: String, required: true },
           fiat: { type: String, required: true },
-          orders: [p2pOrderSchema]
+          buyOrders: [p2pOrderSchema],
+          sellOrders: [p2pOrderSchema]
         })
       ]
     }

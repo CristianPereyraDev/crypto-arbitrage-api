@@ -19,6 +19,7 @@ import resolvers from '../graphql/resolvers.js'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
+import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 
 AdminJS.registerAdapter({
   Resource: AdminJSMongoose.Resource,
@@ -44,6 +45,16 @@ const routerSetup = async (app: Express): Promise<Express> => {
         options: {
           properties: {
             'pricesByPair.asksAndBids': {
+              isVisible: { edit: false, list: false }
+            }
+          }
+        }
+      },
+      {
+        resource: P2PExchange,
+        options: {
+          properties: {
+            'ordersByPair.orders': {
               isVisible: { edit: false, list: false }
             }
           }

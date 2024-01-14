@@ -1,8 +1,43 @@
 import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { IExchangePricing } from 'src/types/exchange.js'
-import { IPair } from 'src/databases/mongodb/model/exchange.model.js'
+import {
+  IP2POrder,
+  IPair,
+  P2POrderType
+} from 'src/databases/mongodb/model/exchange.model.js'
 import { CollectorFunctionReturnType } from 'src/utils/apis/exchanges/index.js'
+import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+
+export async function updateP2POrders (
+  exchangeName: string,
+  baseAsset: string,
+  fiat: string,
+  orderType: P2POrderType,
+  orders: IP2POrder[]
+) {
+  try {
+    let target =
+      orderType === 'BUY'
+        ? 'ordersByPair.$[i].buyOrders'
+        : 'ordersByPair.$[i].sellOrders'
+
+    await P2PExchange.findOneAndUpdate(
+      { name: exchangeName },
+      { $set: { [target]: orders } },
+      {
+        arrayFilters: [
+          {
+            'i.crypto': baseAsset,
+            'i.fiat': fiat
+          }
+        ]
+      }
+    )
+  } catch (error) {
+    console.error('An error in updateP2POrders has ocurred: %s', error)
+  }
+}
 
 export async function updateExchangePrices (
   exchangeName: string,

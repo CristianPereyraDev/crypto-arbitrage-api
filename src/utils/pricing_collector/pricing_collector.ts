@@ -7,9 +7,13 @@ import {
 } from '../arbitrage-calculator.js'
 import {
   CollectorFunctionReturnType,
-  priceCollectorFunctions
+  p2pOrderCollectors,
+  priceCollectors
 } from '../apis/exchanges/index.js'
-import { updateExchangePrices } from 'src/services/exchanges.service.js'
+import {
+  updateExchangePrices,
+  updateP2POrders
+} from 'src/services/exchanges.service.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 
 export const currencyPairs = [
@@ -63,17 +67,50 @@ export async function collectArbitrages (
   }
 }
 
+export async function collectP2POrdersToBD () {
+  try {
+    const p2pExchanges = await P2PExchange.find({})
+
+    for (let p2pExchange of p2pExchanges) {
+      const orderCollector = p2pOrderCollectors.get(p2pExchange.name)
+
+      if (orderCollector !== undefined) {
+        for (let p2pPair of p2pExchange.ordersByPair) {
+          orderCollector(p2pPair.crypto, p2pPair.fiat, 'BUY').then(orders => {
+            if (orders !== undefined) {
+              updateP2POrders(
+                p2pExchange.name,
+                p2pPair.crypto,
+                p2pPair.fiat,
+                'BUY',
+                orders
+              )
+            }
+          })
+          orderCollector(p2pPair.crypto, p2pPair.fiat, 'SELL').then(orders => {
+            if (orders !== undefined) {
+              updateP2POrders(
+                p2pExchange.name,
+                p2pPair.crypto,
+                p2pPair.fiat,
+                'SELL',
+                orders
+              )
+            }
+          })
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Error en collectP2POrdersToBD', error)
+  }
+}
+
 type PromiseAllElemResultType = {
   exchangeName: string
   baseAsset: string
   quoteAsset: string
   prices: CollectorFunctionReturnType | undefined
-}
-
-export async function collectP2POrdersToBD () {
-  try {
-    const p2pExchanges = await P2PExchange.find({})
-  } catch (error) {}
 }
 
 export async function collectExchangesPricesToBD () {
@@ -82,7 +119,7 @@ export async function collectExchangesPricesToBD () {
     const collectors: Promise<PromiseAllElemResultType>[] = []
 
     for (let exchange of exchanges) {
-      const priceCollector = priceCollectorFunctions.get(exchange.name)
+      const priceCollector = priceCollectors.get(exchange.name)
       if (priceCollector === undefined) continue
 
       for (let pair of exchange.pricesByPair) {
