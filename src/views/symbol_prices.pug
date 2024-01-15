@@ -1,8 +1,25 @@
 div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
+    div(class='symbol-table-ask')
         each val in prices
             div(class='symbol-table-row')
-                span=val.exchange 
-                span=val.ask
-                span=val.totalAsk
-                span=val.bid
-                span=val.totalBid
+                span=val.exchange                
+                if val.ask
+                    span=val.ask.toFixed(2)
+                else
+                    span="Not available"
+                if val.totalAsk
+                    span=val.totalAsk.toFixed(2)
+                else
+                    span="Not available"
+    div(class='symbol-table-bid')
+        each val in prices
+            div(class='symbol-table-row')
+                span=val.exchange
+                if val.bid
+                    span=val.bid.toFixed(2)
+                else
+                    span="Not available"
+                if val.totalBid
+                    span=val.totalBid.toFixed(2)
+                else
+                    span="Not available"

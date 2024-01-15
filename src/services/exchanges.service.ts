@@ -2,6 +2,7 @@ import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { IExchangePricing } from 'src/types/exchange.js'
 import {
+  IAskBid,
   IP2POrder,
   IPair,
   P2POrderType
@@ -116,9 +117,27 @@ export async function getAvailablePairs (): Promise<IPair[]> {
   }
 }
 
-export async function getPricesBySymbol (
+function calculateOrderBookAvgPrice (orders: number[][], volume: number) {
+  let avg = [0, volume]
+
+  for (let i = 0; i < orders.length; i++) {
+    if (avg[1] > orders[i][1]) {
+      avg[0] += orders[i][0] * orders[i][1]
+      avg[1] -= orders[i][1]
+    } else {
+      avg[0] += orders[i][0] * avg[1]
+      avg[1] = 0
+      break
+    }
+  }
+
+  return avg[0] / volume
+}
+
+export async function getAllExchangesPricesBySymbol (
   asset: string,
-  fiat: string
+  fiat: string,
+  volume: number = 1.0
 ): Promise<IExchangePricing[]> {
   try {
     const exchanges = await Exchange.find({
@@ -140,22 +159,24 @@ export async function getPricesBySymbol (
         )
 
       if (pairPrices !== undefined && pairPrices.length > 0) {
-        const lastPrice = pairPrices[0]
+        const avgAsk = calculateOrderBookAvgPrice(pairPrices[0].asks, volume)
+        const avgBid = calculateOrderBookAvgPrice(pairPrices[0].bids, volume)
+
         return {
           exchange: exchange.name,
-          ask: lastPrice.asks.length > 0 ? lastPrice.asks[0][0] : 0,
-          totalAsk: lastPrice.asks.length > 0 ? lastPrice.asks[0][0] : 0,
-          bid: lastPrice.bids.length > 0 ? lastPrice.bids[0][0] : 0,
-          totalBid: lastPrice.bids.length > 0 ? lastPrice.bids[0][0] : 0,
+          ask: avgAsk,
+          totalAsk: avgAsk,
+          bid: avgBid,
+          totalBid: avgBid,
           time: 1
         }
       } else {
         return {
           exchange: exchange.name,
-          ask: 0,
-          totalAsk: 0,
-          bid: 0,
-          totalBid: 0,
+          ask: null,
+          totalAsk: null,
+          bid: null,
+          totalBid: null,
           time: 1
         }
       }

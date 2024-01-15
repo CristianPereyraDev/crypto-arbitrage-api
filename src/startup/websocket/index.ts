@@ -1,7 +1,7 @@
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
-import { getPricesBySymbol } from 'src/services/exchanges.service.js'
-import path from 'path'
+import { getAllExchangesPricesBySymbol } from 'src/services/exchanges.service.js'
+import path, { parse } from 'path'
 import pug from 'pug'
 import { IExchangePricing } from 'src/types/exchange.js'
 
@@ -18,18 +18,30 @@ export default function (expressServer: Server | undefined) {
   )
 
   const wss = new WebSocketServer({ noServer: true, path: '/websocket' })
-  const wssWebApp = new WebSocketServer({ noServer: true, path: '/ws/web' })
-
-  expressServer.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, websocket => {
-      wss.emit('connection', websocket, request)
-    })
-
-    wssWebApp.handleUpgrade(request, socket, head, websocket => {
-      wssWebApp.emit('connection', websocket, request)
-    })
+  const wssWebApp = new WebSocketServer({
+    noServer: true,
+    path: '/websocket/web'
   })
 
+  expressServer.on('upgrade', (request, socket, head) => {
+    if (request.url !== undefined) {
+      const pathname = request.url
+
+      if (pathname === '/websocket') {
+        wss.handleUpgrade(request, socket, head, websocket => {
+          wss.emit('connection', websocket, request)
+        })
+      } else if (pathname === '/websocket/web') {
+        wssWebApp.handleUpgrade(request, socket, head, websocket => {
+          wssWebApp.emit('connection', websocket, request)
+        })
+      } else {
+        socket.destroy()
+      }
+    }
+  })
+
+  // WebSocket server for native app
   wss.on('connection', async (websocket, connectionRequest) => {
     let exchangePricesTimeout: ReturnType<typeof setInterval>
 
@@ -47,10 +59,11 @@ export default function (expressServer: Server | undefined) {
 
       if (Object.hasOwn(parsedMessage, 'prices')) {
         async function sendMessage () {
-          const prices: IExchangePricing[] = await getPricesBySymbol(
-            parsedMessage.prices.asset,
-            parsedMessage.prices.fiat
-          )
+          const prices: IExchangePricing[] =
+            await getAllExchangesPricesBySymbol(
+              parsedMessage.prices.asset,
+              parsedMessage.prices.fiat
+            )
 
           // websocket.send(
           //   symbolPricesTemplate({
@@ -77,6 +90,7 @@ export default function (expressServer: Server | undefined) {
     })
   })
 
+  // WebSocket server for the web app
   wssWebApp.on('connection', async (websocket, connectionRequest) => {
     let exchangePricesTimeout: ReturnType<typeof setInterval>
 
@@ -94,10 +108,11 @@ export default function (expressServer: Server | undefined) {
 
       if (Object.hasOwn(parsedMessage, 'prices')) {
         async function sendMessage () {
-          const prices: IExchangePricing[] = await getPricesBySymbol(
-            parsedMessage.prices.asset,
-            parsedMessage.prices.fiat
-          )
+          const prices: IExchangePricing[] =
+            await getAllExchangesPricesBySymbol(
+              parsedMessage.prices.asset,
+              parsedMessage.prices.fiat
+            )
 
           websocket.send(
             symbolPricesTemplate({

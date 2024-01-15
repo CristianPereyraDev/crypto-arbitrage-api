@@ -33,19 +33,19 @@ export type CollectorFunctionType = (
 
 const priceCollectors = new Map<string, CollectorFunctionType>()
 
-// priceCollectors.set('Binance', binance.getSpotAskBidPrices) // Implemented
-// priceCollectors.set('ArgenBTC', argenbtc.getPairPrices) // Implemented
-// priceCollectors.set('Bitmonedero', bitmonedero.getPairPrices) // Implemented
+priceCollectors.set('Binance', binance.getSpotAskBidPrices) // Implemented
+priceCollectors.set('ArgenBTC', argenbtc.getPairPrices) // Implemented
+priceCollectors.set('Bitmonedero', bitmonedero.getPairPrices) // Implemented
 // priceCollectors.set('Bitget', getBitgetPairPrices) // Not implemented
-// priceCollectors.set('CryptoMarket', cryptomarket.getPairPrices) // Implemented
-// priceCollectors.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
-// priceCollectors.set('Saldo', saldo.getPairPrices) // Implemented
-// priceCollectors.set('TruBit', trubit.getPairPrices) // Implemented
-// priceCollectors.set('Bitso', bitso.getPairPrices) // Implemented
-// priceCollectors.set('Plus Crypto', pluscrypto.getPairPrices) // Implemented
-// priceCollectors.set('Fiwind', fiwind.getPairPrices) // Implemented
-// priceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
-// priceCollectors.set('satoshitango', satoshitango.getPairPrices) // Implemented
+priceCollectors.set('CryptoMarket', cryptomarket.getPairPrices) // Implemented
+priceCollectors.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
+priceCollectors.set('Saldo', saldo.getPairPrices) // Implemented
+priceCollectors.set('TruBit', trubit.getPairPrices) // Implemented
+priceCollectors.set('Bitso', bitso.getPairPrices) // Implemented
+priceCollectors.set('Plus Crypto', pluscrypto.getPairPrices) // Implemented
+priceCollectors.set('Fiwind', fiwind.getPairPrices) // Implemented
+priceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
+priceCollectors.set('satoshitango', satoshitango.getPairPrices) // Implemented
 //bybit.getPairPrices()
 
 // P2P Exchange collectors

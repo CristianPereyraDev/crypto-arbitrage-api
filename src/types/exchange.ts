@@ -1,9 +1,9 @@
 export interface IExchangePricing {
   exchange: string
-  ask: number
-  totalAsk: number
-  bid: number
-  totalBid: number
+  ask: number | null
+  totalAsk: number | null
+  bid: number | null
+  totalBid: number | null
   time: number
 }
 
