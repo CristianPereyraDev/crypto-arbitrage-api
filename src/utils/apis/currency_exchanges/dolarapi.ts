@@ -1,12 +1,4 @@
-export type CurrencyExchangeRateType = {
-  from: string
-  to: string
-  name: string
-  slug: string
-  buy: number
-  sell: number
-  updateAt: Date
-}
+import { CurrencyCollectorFunctionReturnType } from './index.js'
 
 type DolarApiResponseType = {
   moneda: string
@@ -18,7 +10,7 @@ type DolarApiResponseType = {
 }[]
 
 export async function getDollarRates (): Promise<
-  CurrencyExchangeRateType[] | undefined
+  CurrencyCollectorFunctionReturnType | undefined
 > {
   try {
     const apiResponse = await fetch('https://dolarapi.com/v1/dolares')
@@ -28,13 +20,11 @@ export async function getDollarRates (): Promise<
 
       return apiResponseJson.map(dolar => {
         return {
-          from: dolar.moneda,
-          to: 'ARS',
-          name: dolar.nombre,
-          slug: dolar.casa,
+          exchangeSlug: dolar.casa,
+          exchangeName: dolar.nombre,
           buy: dolar.compra,
           sell: dolar.venta,
-          updateAt: new Date(dolar.fechaActualizacion)
+          updatedAt: new Date(dolar.fechaActualizacion)
         }
       })
     } else {

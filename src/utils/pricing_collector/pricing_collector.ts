@@ -1,6 +1,6 @@
 import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js'
 import CryptoArbitrageModel from '../../databases/mongodb/schema/arbitrage.schema.js'
-import { pricesByCurrencyPair } from '../apis/exchanges/cryptoya.js'
+import { pricesByCurrencyPair } from '../apis/crypto_exchanges/cryptoya.js'
 import {
   ICryptoArbitrageResult,
   calculateArbitragesFromPairData
@@ -9,12 +9,14 @@ import {
   CollectorFunctionReturnType,
   p2pOrderCollectors,
   priceCollectors
-} from '../apis/exchanges/index.js'
+} from '../apis/crypto_exchanges/index.js'
 import {
   updateExchangePrices,
   updateP2POrders
 } from 'src/services/exchanges.service.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js'
+import { updateCurrencyPairRate } from 'src/services/currency.service.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -23,6 +25,8 @@ export const currencyPairs = [
   { crypto: 'USDT', fiat: 'ARS' },
   { crypto: 'MANA', fiat: 'ARS' }
 ]
+
+// Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
 
 export async function collectArbitragesToDB (): Promise<void> {
   for (const pair of currencyPairs) {
@@ -67,7 +71,7 @@ export async function collectArbitrages (
   }
 }
 
-export async function collectP2POrdersToBD () {
+export async function collectP2POrdersToDB () {
   try {
     const p2pExchanges = await P2PExchange.find({})
 
@@ -113,7 +117,7 @@ type PromiseAllElemResultType = {
   prices: CollectorFunctionReturnType | undefined
 }
 
-export async function collectExchangesPricesToBD () {
+export async function collectCryptoExchangesPricesToDB () {
   try {
     const exchanges = await Exchange.find({})
     const collectors: Promise<PromiseAllElemResultType>[] = []
@@ -153,4 +157,17 @@ export async function collectExchangesPricesToBD () {
   } catch (error) {
     console.log('Error en collectExchangesPricesToBD', error)
   }
+}
+
+// Currency exchanges prices (USD-ARS, USD-EUR, ...)
+
+export async function collectCurrencyExchangesPricesToDB () {
+  currencyPriceCollectors.forEach((collector, symbol) => {
+    const [currencyBase, currencyQuote] = symbol.split('-')
+    collector().then(rates => {
+      if (rates !== undefined) {
+        updateCurrencyPairRate(currencyBase, currencyQuote, rates)
+      }
+    })
+  })
 }

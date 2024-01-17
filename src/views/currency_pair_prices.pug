@@ -1,0 +1,7 @@
+div(id=`${currencyBase}-${currencyQuote}-container` hx-swap-oob='innerHTML')
+    ul(class='currency-pair-rates')
+        each rate in rates
+            li
+                span=rate.exchangeName
+                span=rate.buy
+                span=rate.sell

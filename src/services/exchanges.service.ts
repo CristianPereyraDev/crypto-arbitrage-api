@@ -2,7 +2,6 @@ import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { IExchangePricing } from 'src/types/exchange.js'
 import {
-  IAskBid,
   IP2POrder,
   IPair,
   P2POrderType
@@ -164,6 +163,7 @@ export async function getAllExchangesPricesBySymbol (
 
         return {
           exchange: exchange.name,
+          exchangeLogoURL: exchange.logoURL,
           ask: avgAsk,
           totalAsk: avgAsk,
           bid: avgBid,
@@ -173,6 +173,7 @@ export async function getAllExchangesPricesBySymbol (
       } else {
         return {
           exchange: exchange.name,
+          exchangeLogoURL: exchange.logoURL,
           ask: null,
           totalAsk: null,
           bid: null,

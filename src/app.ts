@@ -7,8 +7,9 @@ import routerSetup from './startup/router.js'
 import securitySetup from './startup/security.js'
 import {
   collectArbitragesToDB,
-  collectExchangesPricesToBD,
-  collectP2POrdersToBD
+  collectCryptoExchangesPricesToDB,
+  collectCurrencyExchangesPricesToDB,
+  collectP2POrdersToDB
 } from './utils/pricing_collector/pricing_collector.js'
 import { removeOlderPrices } from './services/exchanges.service.js'
 import websocket from './startup/websocket/index.js'
@@ -23,14 +24,20 @@ appSetup(app)
     routerSetup(app)
     websocket(server)
 
-    // Pricing collection interval
+    // Crypto rates collector interval
     setInterval(() => {
       // collectArbitragesToDB().catch(reason => {
       //   console.log(reason)
       // })
       //collectExchangesPricesToBD().catch(reason => console.log(reason))
       //collectP2POrdersToBD().catch(reason => console.log(reason))
-    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 6000))
+    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6))
+
+    // Currency rates collector
+    setInterval(() => {
+      collectCurrencyExchangesPricesToDB().catch(reason => console.log(reason))
+    }, Number(process.env.CURRENCY_COLLECTOR_INTERVAL ?? 1000 * 60))
+
     // Scheduled Jobs
     // const removeOlderPricesJob = new CronJob(
     //   '0 * * * * *',
