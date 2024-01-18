@@ -6,7 +6,6 @@ import appSetup from './startup/init.js'
 import routerSetup from './startup/router.js'
 import securitySetup from './startup/security.js'
 import {
-  collectArbitragesToDB,
   collectCryptoExchangesPricesToDB,
   collectCurrencyExchangesPricesToDB,
   collectP2POrdersToDB
@@ -26,11 +25,8 @@ appSetup(app)
 
     // Crypto rates collector interval
     setInterval(() => {
-      // collectArbitragesToDB().catch(reason => {
-      //   console.log(reason)
-      // })
-      //collectExchangesPricesToBD().catch(reason => console.log(reason))
-      //collectP2POrdersToBD().catch(reason => console.log(reason))
+      collectCryptoExchangesPricesToDB().catch(reason => console.log(reason))
+      collectP2POrdersToDB().catch(reason => console.log(reason))
     }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6))
 
     // Currency rates collector
@@ -39,15 +35,15 @@ appSetup(app)
     }, Number(process.env.CURRENCY_COLLECTOR_INTERVAL ?? 1000 * 60))
 
     // Scheduled Jobs
-    // const removeOlderPricesJob = new CronJob(
-    //   '0 * * * * *',
-    //   function () {
-    //     console.log('Deleting older prices...')
-    //     removeOlderPrices()
-    //   },
-    //   null,
-    //   true
-    // )
+    const removeOlderPricesJob = new CronJob(
+      '0 * * * * *',
+      function () {
+        console.log('Deleting older prices...')
+        removeOlderPrices()
+      },
+      null,
+      true
+    )
   })
   .catch(reason => {
     console.log(reason)

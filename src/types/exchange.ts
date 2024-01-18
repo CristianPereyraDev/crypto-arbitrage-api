@@ -1,10 +1,10 @@
 export interface IExchangePricing {
   exchange: string
   exchangeLogoURL: string
-  ask: number | null
-  totalAsk: number | null
-  bid: number | null
-  totalBid: number | null
+  ask: number
+  totalAsk: number
+  bid: number
+  totalBid: number
   time: number
 }
 

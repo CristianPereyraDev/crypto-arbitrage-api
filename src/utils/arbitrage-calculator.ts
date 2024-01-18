@@ -31,7 +31,8 @@ export async function calculateArbitragesFromPairData (
   for (let i = 0; i < exchangesArr.length; i++) {
     const askExchange1 = exchangesArr[i].value.ask
     const bidExchange1 = exchangesArr[i].value.bid
-    let totalAskExchange1 = exchangesArr[i].value.ask
+    let totalAskExchange1 =
+      exchangesArr[i].value.ask !== null ? exchangesArr[i].value.ask : 0
     let totalBidExchange1 = exchangesArr[i].value.bid
 
     const exchangeFees1 = Object.hasOwn(fees, exchangesArr[i].exchange)

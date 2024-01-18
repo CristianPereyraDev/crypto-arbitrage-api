@@ -6,7 +6,7 @@ import {
   IPair,
   P2POrderType
 } from 'src/databases/mongodb/model/exchange.model.js'
-import { CollectorFunctionReturnType } from 'src/utils/apis/exchanges/index.js'
+import { CollectorFunctionReturnType } from '../utils/apis/crypto_exchanges/index.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 
 export async function updateP2POrders (
@@ -174,10 +174,10 @@ export async function getAllExchangesPricesBySymbol (
         return {
           exchange: exchange.name,
           exchangeLogoURL: exchange.logoURL,
-          ask: null,
-          totalAsk: null,
-          bid: null,
-          totalBid: null,
+          ask: 0,
+          totalAsk: 0,
+          bid: 0,
+          totalBid: 0,
           time: 1
         }
       }
