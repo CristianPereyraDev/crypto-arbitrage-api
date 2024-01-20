@@ -37,7 +37,7 @@ export async function getBitgetPairPrices (
 
     return undefined
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

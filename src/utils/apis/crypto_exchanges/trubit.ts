@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
@@ -5,7 +6,7 @@ export async function getPairPrices (
   quoteAsset: string
 ): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    const apiResponse = await fetch(
+    const apiResponse = await fetchWithTimeout(
       `https://api.mexo.io/openapi/quote/v1/option/depth?symbol=${baseAsset}${quoteAsset}`
     )
 
@@ -26,9 +27,6 @@ export async function getPairPrices (
       return undefined
     }
   } catch (error) {
-    console.error(
-      'An error on getPairPrices from trubit has ocurred: %s',
-      error
-    )
+    console.error(error)
   }
 }

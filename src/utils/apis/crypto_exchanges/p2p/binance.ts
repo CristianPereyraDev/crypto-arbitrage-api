@@ -2,6 +2,7 @@ import {
   IP2POrder,
   P2POrderType
 } from 'src/databases/mongodb/model/exchange.model.js'
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 
 export type BinanceP2PTradeMethodType = {
   payId: string | null
@@ -56,7 +57,7 @@ export async function getP2POrders (
     classifies: ['mass', 'profession']
   }
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`,
       {
         method: 'POST',
@@ -99,7 +100,7 @@ export async function getP2POrders (
       return undefined
     }
   } catch (error) {
-    console.log('Error on fetch to p2p: %s', error)
+    console.error(error)
     return undefined
   }
 }

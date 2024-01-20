@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import {
   IExchangePairPricing,
   IExchangePricing
@@ -9,7 +10,7 @@ export async function pricesByCurrencyPair (
   volume: number | undefined
 ): Promise<IExchangePairPricing> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://criptoya.com/api/${crypto}/${fiat}/${volume ?? ''}`
     )
 

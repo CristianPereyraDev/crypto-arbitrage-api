@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
@@ -7,7 +8,9 @@ export async function getPairPrices (
   try {
     let asks: number[][] = []
     let bids: number[][] = []
-    const response = await fetch('https://www.bitmonedero.com/api/btc-ars')
+    const response = await fetchWithTimeout(
+      'https://www.bitmonedero.com/api/btc-ars'
+    )
 
     if (response.ok) {
       const jsonResponse: any = await response.json()
@@ -31,7 +34,7 @@ export async function getPairPrices (
       return undefined
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

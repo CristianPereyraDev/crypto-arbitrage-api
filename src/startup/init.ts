@@ -14,6 +14,10 @@ const appSetup = async (app: Express): Promise<Server | undefined> => {
       console.log(`Server started on port ${APP_PORT}`)
     })
 
+    server.setTimeout(5000, () => {
+      console.log('timeout')
+    })
+
     return server
   } catch (error) {
     console.log('Unable to start the app!')

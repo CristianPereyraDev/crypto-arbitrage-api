@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
@@ -8,10 +9,10 @@ export async function getPairPrices (
     let asks: number[][] = []
     let bids: number[][] = []
 
-    const responseBTCFiat = await fetch(
+    const responseBTCFiat = await fetchWithTimeout(
       `https://api.exchange.cryptomkt.com/api/3/public/orderbook/BTCARS`
     )
-    const responseAssetFiat = await fetch(
+    const responseAssetFiat = await fetchWithTimeout(
       `https://api.exchange.cryptomkt.com/api/3/public/price/rate?from=BTC&to=${asset}`
     )
 
@@ -44,7 +45,7 @@ export async function getPairPrices (
       return undefined
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
@@ -8,7 +9,7 @@ export async function getPairPrices (
     let asks: number[][] = []
     let bids: number[][] = []
 
-    const responseBTCFiat = await fetch(
+    const responseBTCFiat = await fetchWithTimeout(
       `https://sandbox.bitso.com/api/v3/order_book/?book=btc_ars`
     )
 
@@ -56,7 +57,7 @@ export async function getPairPrices (
       return undefined
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

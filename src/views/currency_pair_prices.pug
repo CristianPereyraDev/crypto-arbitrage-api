@@ -3,5 +3,9 @@ div(id=`${currencyBase}-${currencyQuote}-container` hx-swap-oob='innerHTML')
         each rate in rates
             li
                 span=rate.exchangeName
-                span=rate.buy
-                span=rate.sell
+                span
+                    span="Compra"
+                    span=rate.buy                
+                span
+                    span="Venta"
+                    span=rate.sell

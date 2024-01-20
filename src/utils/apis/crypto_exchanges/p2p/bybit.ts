@@ -53,6 +53,6 @@ const client = new RestClientV5()
     // });
     // console.log('openInterest: ', openInterest.result.list);
   } catch (e) {
-    console.error('request failed: ', e)
+    console.error(e)
   }
 })()

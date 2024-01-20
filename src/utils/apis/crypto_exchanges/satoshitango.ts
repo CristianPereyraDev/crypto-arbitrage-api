@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export type SatoshiTangoDataType = {
@@ -18,7 +19,7 @@ export async function getPairPrices (
   quoteAsset: string
 ): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://api.satoshitango.com/v3/ticker/${quoteAsset}`
     )
 
@@ -37,7 +38,7 @@ export async function getPairPrices (
 
     return undefined
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

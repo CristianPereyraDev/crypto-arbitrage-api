@@ -26,9 +26,6 @@ export async function getPairPrices (
       return undefined
     }
   } catch (error) {
-    console.error(
-      'An error on getPairPrices from trubit has ocurred: %s',
-      error
-    )
+    console.error(error)
   }
 }

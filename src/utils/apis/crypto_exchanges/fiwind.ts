@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export type FiwindAPIResponseType = {
@@ -13,7 +14,9 @@ export async function getPairPrices (
   fiat: string
 ): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    const response = await fetch('https://api.fiwind.io/v1.0/prices/list')
+    const response = await fetchWithTimeout(
+      'https://api.fiwind.io/v1.0/prices/list'
+    )
 
     if (response.ok) {
       const jsonResponse = (await response.json()) as FiwindAPIResponseType
@@ -31,7 +34,7 @@ export async function getPairPrices (
 
     return undefined
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

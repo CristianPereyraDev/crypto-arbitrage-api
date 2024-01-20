@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from 'src/utils/network.utils.js'
 import { CollectorFunctionReturnType } from './index.js'
 
 export async function getPairPrices (
@@ -5,7 +6,7 @@ export async function getPairPrices (
   fiat: string
 ): Promise<CollectorFunctionReturnType | undefined> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://api.pluscambio.com.ar/crypto/coins?front-web=true`,
       {
         method: 'GET',
@@ -34,7 +35,7 @@ export async function getPairPrices (
 
     return undefined
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return undefined
   }
 }

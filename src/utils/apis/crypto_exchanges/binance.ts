@@ -29,7 +29,7 @@ export async function getSpotAskBidPrices (
       asks: orderBook.asks.map(ask => [parseFloat(ask[0]), parseFloat(ask[1])])
     }
   } catch (error) {
-    console.log('Binance API error: %s', error)
+    console.error(error)
     return undefined
   }
 }
