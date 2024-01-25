@@ -2,6 +2,7 @@ import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { IExchangePricing } from 'src/types/exchange.js'
 import {
+  IExchange,
   IP2POrder,
   IPair,
   P2POrderType
@@ -166,15 +167,60 @@ function calculateOrderBookAvgPrice (orders: number[][], volume: number) {
   return avg[0] / volume
 }
 
-export async function getAllExchangesPricesBySymbol (
+async function brokeragesPrices (asset: string, fiat: string) {
+  try {
+    const exchanges = await Brokerage.find({
+      'availablePairs.crypto': asset,
+      'availablePairs.fiat': fiat,
+      available: true
+    })
+
+    const prices = exchanges.map(brokerage => {
+      // Find pair's prices for current exchange and sort
+      const pairPrices = brokerage.pricesByPair.find(
+        priceByPair => priceByPair.crypto === asset && priceByPair.fiat === fiat
+      )
+
+      if (pairPrices !== undefined) {
+        return {
+          exchange: brokerage.name,
+          exchangeLogoURL: brokerage.logoURL,
+          ask: pairPrices.ask,
+          totalAsk: pairPrices.ask,
+          bid: pairPrices.bid,
+          totalBid: pairPrices.bid,
+          time: 1
+        }
+      } else {
+        return {
+          exchange: brokerage.name,
+          exchangeLogoURL: brokerage.logoURL,
+          ask: 0,
+          totalAsk: 0,
+          bid: 0,
+          totalBid: 0,
+          time: 1
+        }
+      }
+    })
+
+    return prices
+  } catch (error) {
+    console.log(error)
+    return []
+  }
+}
+
+async function exchangesPrices (
   asset: string,
   fiat: string,
   volume: number = 1.0
-): Promise<IExchangePricing[]> {
+) {
   try {
     const exchanges = await Exchange.find({
       'availablePairs.crypto': asset,
-      'availablePairs.fiat': fiat
+      'availablePairs.fiat': fiat,
+      available: true
     })
 
     const prices = exchanges.map(exchange => {
@@ -221,4 +267,17 @@ export async function getAllExchangesPricesBySymbol (
     console.log(error)
     return []
   }
+}
+
+export async function getAllExchangesPricesBySymbol (
+  asset: string,
+  fiat: string,
+  volume: number = 1.0
+): Promise<IExchangePricing[]> {
+  const prices = await Promise.all([
+    brokeragesPrices(asset, fiat),
+    exchangesPrices(asset, fiat, volume)
+  ])
+
+  return prices.flat()
 }
