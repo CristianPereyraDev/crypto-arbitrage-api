@@ -1,5 +1,5 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export type SatoshiTangoDataType = {
   [baseAsset: string]: {
@@ -17,7 +17,7 @@ export type SatoshiTangoDataType = {
 export async function getPairPrices (
   baseAsset: string,
   quoteAsset: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
       `https://api.satoshitango.com/v3/ticker/${quoteAsset}`
@@ -30,8 +30,8 @@ export async function getPairPrices (
 
       if (pairData !== undefined) {
         return {
-          asks: [[pairData.ask, 1]],
-          bids: [[pairData.bid, 1]]
+          ask: pairData.ask,
+          bid: pairData.bid
         }
       }
     }

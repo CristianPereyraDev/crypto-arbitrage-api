@@ -1,13 +1,11 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
-    let asks: number[][] = []
-    let bids: number[][] = []
     const response = await fetchWithTimeout(
       'https://www.bitmonedero.com/api/btc-ars'
     )
@@ -17,22 +15,20 @@ export async function getPairPrices (
 
       switch (asset) {
         case 'BTC':
-          asks = [[parseFloat(jsonResponse.buy_btc_ars), 1]]
-          bids = [[parseFloat(jsonResponse.sell_btc_ars), 1]]
-          break
-        case 'USDT':
-          asks = [[parseFloat(jsonResponse.buy_trxusdt_ars), 1]]
-          bids = [[parseFloat(jsonResponse.sell_trxusdt_ars), 1]]
-          break
-      }
+          return {
+            ask: parseFloat(jsonResponse.buy_btc_ars),
+            bid: parseFloat(jsonResponse.sell_btc_ars)
+          }
 
-      return {
-        asks,
-        bids
+        case 'USDT':
+          return {
+            ask: parseFloat(jsonResponse.buy_trxusdt_ars),
+            bid: parseFloat(jsonResponse.sell_trxusdt_ars)
+          }
       }
-    } else {
-      return undefined
     }
+
+    return undefined
   } catch (error) {
     console.error(error)
     return undefined

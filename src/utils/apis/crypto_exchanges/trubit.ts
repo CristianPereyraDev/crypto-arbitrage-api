@@ -1,10 +1,10 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { ExchangeCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   baseAsset: string,
   quoteAsset: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<ExchangeCollectorReturnType | undefined> {
   try {
     const apiResponse = await fetchWithTimeout(
       `https://api.mexo.io/openapi/quote/v1/option/depth?symbol=${baseAsset}${quoteAsset}`

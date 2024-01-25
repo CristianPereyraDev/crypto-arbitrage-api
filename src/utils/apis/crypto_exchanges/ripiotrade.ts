@@ -1,10 +1,10 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { ExchangeCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   baseAsset: string,
   quoteAsset: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<ExchangeCollectorReturnType | undefined> {
   try {
     const apiResponse = await fetchWithTimeout(
       `https://api.ripiotrade.co/v4/public/orders/level-3?pair=${baseAsset}_${quoteAsset}`

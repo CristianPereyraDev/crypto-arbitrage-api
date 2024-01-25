@@ -6,17 +6,21 @@ import {
   calculateArbitragesFromPairData
 } from '../arbitrage-calculator.js'
 import {
-  CollectorFunctionReturnType,
+  BrokerageCollectorReturnType,
+  ExchangeCollectorReturnType,
   p2pOrderCollectors,
-  priceCollectors
+  exchangePriceCollectors,
+  brokeragePriceCollectors
 } from '../apis/crypto_exchanges/index.js'
 import {
+  updateBrokeragePrices,
   updateExchangePrices,
   updateP2POrders
 } from 'src/services/exchanges.service.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js'
 import { updateCurrencyPairRate } from 'src/services/currency.service.js'
+import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -114,7 +118,7 @@ type PromiseAllElemResultType = {
   exchangeName: string
   baseAsset: string
   quoteAsset: string
-  prices: CollectorFunctionReturnType | undefined
+  prices: ExchangeCollectorReturnType | undefined
 }
 
 export async function collectCryptoExchangesPricesToDB () {
@@ -123,7 +127,7 @@ export async function collectCryptoExchangesPricesToDB () {
     const collectors: Promise<PromiseAllElemResultType>[] = []
 
     for (let exchange of exchanges) {
-      const priceCollector = priceCollectors.get(exchange.name)
+      const priceCollector = exchangePriceCollectors.get(exchange.name)
       if (priceCollector === undefined) continue
 
       for (let pair of exchange.pricesByPair) {
@@ -151,6 +155,56 @@ export async function collectCryptoExchangesPricesToDB () {
           priceCollectorResult.baseAsset,
           priceCollectorResult.quoteAsset,
           priceCollectorResult.prices
+        )
+      }
+    }
+  } catch (error) {
+    console.log('Error en collectExchangesPricesToBD', error)
+  }
+}
+
+type BrokeragePromiseAllElemResultType = {
+  exchangeName: string
+  baseAsset: string
+  quoteAsset: string
+  prices: BrokerageCollectorReturnType | undefined
+}
+
+export async function collectCryptoBrokeragesPricesToDB () {
+  try {
+    const exchanges = await Brokerage.find({})
+    const collectors: Promise<BrokeragePromiseAllElemResultType>[] = []
+
+    for (let exchange of exchanges) {
+      const priceCollector = brokeragePriceCollectors.get(exchange.name)
+      if (priceCollector === undefined) continue
+
+      for (let pair of exchange.pricesByPair) {
+        collectors.push(
+          new Promise<BrokeragePromiseAllElemResultType>((resolve, _reject) => {
+            priceCollector(pair.crypto, pair.fiat).then(prices => {
+              resolve({
+                exchangeName: exchange.name,
+                baseAsset: pair.crypto,
+                quoteAsset: pair.fiat,
+                prices
+              })
+            })
+          })
+        )
+      }
+    }
+
+    // Call collectors in parallel
+    const priceCollectorResults = await Promise.all(collectors)
+    for (let priceCollectorResult of priceCollectorResults) {
+      if (priceCollectorResult.prices !== undefined) {
+        updateBrokeragePrices(
+          priceCollectorResult.exchangeName,
+          priceCollectorResult.baseAsset,
+          priceCollectorResult.quoteAsset,
+          priceCollectorResult.prices.ask,
+          priceCollectorResult.prices.bid
         )
       }
     }

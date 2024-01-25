@@ -1,5 +1,5 @@
 import { RestClientV2 } from 'bitget-api'
-import { CollectorFunctionReturnType } from '../index.js'
+import { ExchangeCollectorReturnType } from '../index.js'
 
 const API_KEY = process.env.BITGET_API_KEY
 const API_SECRET = process.env.BITGET_API_SECRET
@@ -16,7 +16,7 @@ let url = 'https://api.bitget.com/api/v2/p2p/merchantList?online=yes&limit=20'
 export async function getBitgetPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<ExchangeCollectorReturnType | undefined> {
   try {
     const endTime = Date.now()
     const startTime = endTime - 1000 * 60 * 60 * 2

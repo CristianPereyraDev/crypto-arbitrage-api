@@ -21,32 +21,46 @@ import {
 /**
  * bids & asks are arrays like -> [[price, qty], [price, qty], ...]
  */
-export type CollectorFunctionReturnType = {
+export type ExchangeCollectorReturnType = {
   bids: number[][]
   asks: number[][]
 }
 
-export type CollectorFunctionType = (
+export type BrokerageCollectorReturnType = {
+  ask: number
+  bid: number
+}
+
+export type ExchangeCollectorType = (
   baseAsset: string,
   quoteAsset: string
-) => Promise<CollectorFunctionReturnType | undefined>
+) => Promise<ExchangeCollectorReturnType | undefined>
 
-const priceCollectors = new Map<string, CollectorFunctionType>()
+export type BrokerageCollectorType = (
+  baseAsset: string,
+  quoteAsset: string
+) => Promise<BrokerageCollectorReturnType | undefined>
 
-priceCollectors.set('Binance', binance.getSpotAskBidPrices) // Implemented
-priceCollectors.set('ArgenBTC', argenbtc.getPairPrices) // Implemented
-priceCollectors.set('Bitmonedero', bitmonedero.getPairPrices) // Implemented
+const exchangePriceCollectors = new Map<string, ExchangeCollectorType>()
+const brokeragePriceCollectors = new Map<string, BrokerageCollectorType>()
+
+// Exchange collectors
+exchangePriceCollectors.set('Binance', binance.getSpotAskBidPrices) // Implemented
 // priceCollectors.set('Bitget', getBitgetPairPrices) // Not implemented
-priceCollectors.set('CryptoMarket', cryptomarket.getPairPrices) // Implemented
-priceCollectors.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
-priceCollectors.set('Saldo', saldo.getPairPrices) // Implemented
-priceCollectors.set('TruBit', trubit.getPairPrices) // Implemented
-priceCollectors.set('Bitso', bitso.getPairPrices) // Implemented
-priceCollectors.set('Plus Crypto', pluscrypto.getPairPrices) // Implemented
-priceCollectors.set('Fiwind', fiwind.getPairPrices) // Implemented
-priceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
-priceCollectors.set('satoshitango', satoshitango.getPairPrices) // Implemented
+exchangePriceCollectors.set('CryptoMarket', cryptomarket.getPairPrices) // Implemented
+exchangePriceCollectors.set('Ripio Trade', ripiotrade.getPairPrices) // Implemented
+exchangePriceCollectors.set('TruBit', trubit.getPairPrices) // Implemented
+exchangePriceCollectors.set('Bitso', bitso.getPairPrices) // Implemented
 //bybit.getPairPrices()
+
+// Brokerage collectors
+brokeragePriceCollectors.set('Plus Crypto', pluscrypto.getPairPrices) // Implemented
+brokeragePriceCollectors.set('ArgenBTC', argenbtc.getPairPrices) // Implemented
+brokeragePriceCollectors.set('Bitmonedero', bitmonedero.getPairPrices) // Implemented
+brokeragePriceCollectors.set('Fiwind', fiwind.getPairPrices) // Implemented
+brokeragePriceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
+brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices) // Implemented
+brokeragePriceCollectors.set('Saldo', saldo.getPairPrices) // Implemented
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (
@@ -59,4 +73,4 @@ const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>()
 
 p2pOrderCollectors.set('Binance P2P', binancep2p.getP2POrders)
 
-export { priceCollectors, p2pOrderCollectors }
+export { exchangePriceCollectors, brokeragePriceCollectors, p2pOrderCollectors }

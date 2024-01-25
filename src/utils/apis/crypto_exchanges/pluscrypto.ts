@@ -1,10 +1,10 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
       `https://api.pluscambio.com.ar/crypto/coins?front-web=true`,
@@ -27,8 +27,8 @@ export async function getPairPrices (
 
       if (pairData) {
         return {
-          asks: [[pairData.buy, 1]],
-          bids: [[pairData.sell, 1]]
+          ask: pairData.buy,
+          bid: pairData.sell
         }
       }
     }

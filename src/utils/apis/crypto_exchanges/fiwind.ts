@@ -1,5 +1,5 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export type FiwindAPIResponseType = {
   s: string
@@ -12,7 +12,7 @@ export type FiwindAPIResponseType = {
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
       'https://api.fiwind.io/v1.0/prices/list'
@@ -26,8 +26,8 @@ export async function getPairPrices (
 
       if (pairData !== undefined) {
         return {
-          asks: [[pairData.buy, 1]],
-          bids: [[pairData.sell, 1]]
+          ask: pairData.buy,
+          bid: pairData.sell
         }
       }
     }

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import { RestMarketTypes, Spot } from '@binance/connector-typescript'
-import { CollectorFunctionReturnType } from './index.js'
+import { ExchangeCollectorReturnType } from './index.js'
 
 dotenv.config()
 
@@ -16,7 +16,7 @@ const client = new Spot(API_KEY, API_SECRET, {
 export async function getSpotAskBidPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<ExchangeCollectorReturnType | undefined> {
   const options: RestMarketTypes.orderBookOptions = {
     limit: 5
   }

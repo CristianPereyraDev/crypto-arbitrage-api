@@ -15,8 +15,13 @@ export interface IPair {
   fiat: string
 }
 
-export interface ICurrencyPairPrices extends IPair {
+export interface IExchangePairPrices extends IPair {
   asksAndBids: IAskBid[]
+}
+
+export interface IBrokeragePairPrices extends IPair {
+  ask: number
+  bid: number
 }
 
 export interface INetworkFee {
@@ -41,11 +46,17 @@ export interface IExchangeBase {
   buyFee: number
   sellFee: number
   exchangeType: string
+  available: boolean
 }
 
 // Exchange Spot like
 export interface IExchange extends IExchangeBase {
-  pricesByPair: ICurrencyPairPrices[]
+  pricesByPair: IExchangePairPrices[]
+}
+
+// Broker exchange
+export interface IBrokerage extends IExchangeBase {
+  pricesByPair: IBrokeragePairPrices[]
 }
 
 // Exchange P2P

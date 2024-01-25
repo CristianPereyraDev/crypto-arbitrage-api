@@ -1,5 +1,8 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import {
+  BrokerageCollectorReturnType,
+  ExchangeCollectorReturnType
+} from './index.js'
 
 export type TiendaCryptoAPIResponseType = {
   [pair: string]: {
@@ -13,7 +16,7 @@ export type TiendaCryptoAPIResponseType = {
 export async function getPairPrices (
   baseAsset: string,
   quoteAsset: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
       'https://api.tiendacrypto.com/v1/price/all'
@@ -27,8 +30,8 @@ export async function getPairPrices (
 
       if (pairData !== undefined) {
         return {
-          asks: [[parseFloat(pairData.buy), 1]],
-          bids: [[parseFloat(pairData.sell), 1]]
+          ask: parseFloat(pairData.buy),
+          bid: parseFloat(pairData.sell)
         }
       }
     }

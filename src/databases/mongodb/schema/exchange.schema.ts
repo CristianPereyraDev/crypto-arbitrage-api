@@ -1,14 +1,11 @@
-import mongoose, { Model, Schema, Types } from 'mongoose'
+import { Model, Schema, Types } from 'mongoose'
 import {
-  type ICurrencyPairPrices,
+  type IExchangePairPrices,
   IExchange,
   IAskBid
 } from '../model/exchange.model.js'
 import { ExchangeBase } from './exchange_base.schema.js'
 
-//mongoose.set('debug', true)
-
-// Exchange
 const askBidSchema = new Schema<IAskBid>(
   {
     asks: { type: [[Number]], required: true },
@@ -23,13 +20,13 @@ type CurrencyPairDocumentProps = {
 }
 
 type CurrencyPairModelType = Model<
-  ICurrencyPairPrices,
+  IExchangePairPrices,
   {},
   CurrencyPairDocumentProps
 >
 
-const currencyPairSchema = new Schema<
-  ICurrencyPairPrices,
+const cryptoAssetPairSchema = new Schema<
+  IExchangePairPrices,
   CurrencyPairModelType
 >({
   crypto: { type: String, required: true },
@@ -38,7 +35,7 @@ const currencyPairSchema = new Schema<
 })
 
 type ExchangeDocumentProps = {
-  pricesByPair: Types.DocumentArray<ICurrencyPairPrices>
+  pricesByPair: Types.DocumentArray<IExchangePairPrices>
 }
 
 type ExchangeModelType = Model<IExchange, {}, ExchangeDocumentProps>
@@ -46,7 +43,7 @@ type ExchangeModelType = Model<IExchange, {}, ExchangeDocumentProps>
 const exchangeSchema = new Schema<IExchange, ExchangeModelType>(
   {
     pricesByPair: {
-      type: [currencyPairSchema]
+      type: [cryptoAssetPairSchema]
     }
   },
   {

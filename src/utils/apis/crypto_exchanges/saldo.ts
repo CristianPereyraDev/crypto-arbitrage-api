@@ -1,13 +1,11 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
-    let asks: number[][] = []
-    let bids: number[][] = []
     const response = await fetchWithTimeout(
       'https://api.saldo.com.ar/json/rates/banco'
     )
@@ -17,28 +15,23 @@ export async function getPairPrices (
 
       switch (asset) {
         case 'BTC':
-          asks = [[jsonResponse.bitcoin.ask, 1]]
-          bids = [[jsonResponse.bitcoin.bid, 1]]
-          break
+          return {
+            ask: jsonResponse.bitcoin.ask,
+            bid: jsonResponse.bitcoin.bid
+          }
+
         case 'USDT':
-          asks = [[jsonResponse.usdt.ask, 1]]
-          bids = [[jsonResponse.usdt.bid, 1]]
-          break
+          return { ask: jsonResponse.usdt.ask, bid: jsonResponse.usdt.bid }
+
         case 'DAI':
-          asks = [[jsonResponse.dai.ask, 1]]
-          bids = [[jsonResponse.dai.bid, 1]]
-          break
+          return { ask: jsonResponse.dai.ask, bid: jsonResponse.dai.bid }
+
         default:
           return undefined
       }
-
-      return {
-        asks,
-        bids
-      }
-    } else {
-      return undefined
     }
+
+    return undefined
   } catch (error) {
     console.error(error)
     return undefined

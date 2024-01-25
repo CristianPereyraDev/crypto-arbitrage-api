@@ -20,6 +20,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
 
 AdminJS.registerAdapter({
   Resource: AdminJSMongoose.Resource,
@@ -49,6 +50,9 @@ const routerSetup = async (app: Express): Promise<Express> => {
             }
           }
         }
+      },
+      {
+        resource: Brokerage
       },
       {
         resource: P2PExchange,

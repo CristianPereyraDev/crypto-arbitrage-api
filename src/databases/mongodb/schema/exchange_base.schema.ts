@@ -38,7 +38,8 @@ const exchangeBaseSchema = new Schema<IExchangeBase>(
         },
         message: 'Repeated pairs is not allowed.'
       }
-    }
+    },
+    available: { type: Boolean, required: true, default: true }
   },
   {
     discriminatorKey: 'exchangeType'

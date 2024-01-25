@@ -6,8 +6,9 @@ import {
   IPair,
   P2POrderType
 } from 'src/databases/mongodb/model/exchange.model.js'
-import { CollectorFunctionReturnType } from '../utils/apis/crypto_exchanges/index.js'
+import { ExchangeCollectorReturnType } from '../utils/apis/crypto_exchanges/index.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
 
 export async function updateP2POrders (
   exchangeName: string,
@@ -39,11 +40,43 @@ export async function updateP2POrders (
   }
 }
 
+export async function updateBrokeragePrices (
+  exchangeName: string,
+  baseAsset: string,
+  quoteAsset: string,
+  ask: number,
+  bid: number
+) {
+  try {
+    await Brokerage.findOneAndUpdate(
+      {
+        name: exchangeName
+      },
+      {
+        $set: {
+          'pricesByPair.$[i].ask': ask,
+          'pricesByPair.$[i].bid': bid
+        }
+      },
+      {
+        arrayFilters: [
+          {
+            'i.crypto': baseAsset,
+            'i.fiat': quoteAsset
+          }
+        ]
+      }
+    ).exec()
+  } catch (error) {
+    console.error('An error in updateExchangePrices has ocurred: %s', error)
+  }
+}
+
 export async function updateExchangePrices (
   exchangeName: string,
   baseAsset: string,
   quoteAsset: string,
-  prices: CollectorFunctionReturnType
+  prices: ExchangeCollectorReturnType
 ) {
   try {
     await Exchange.findOneAndUpdate(

@@ -1,13 +1,16 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import { CollectorFunctionReturnType } from './index.js'
+import {
+  BrokerageCollectorReturnType,
+  ExchangeCollectorReturnType
+} from './index.js'
 
 export async function getPairPrices (
   asset: string,
   fiat: string
-): Promise<CollectorFunctionReturnType | undefined> {
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
-    let asks: number[][] = []
-    let bids: number[][] = []
+    let ask: number = 0
+    let bid: number = 0
     const response = await fetchWithTimeout('https://argenbtc.com/cotizacion', {
       method: 'POST'
     })
@@ -17,22 +20,22 @@ export async function getPairPrices (
 
       switch (asset) {
         case 'BTC':
-          asks = [[parseFloat(jsonResponse.precio_compra), 1]]
-          bids = [[parseFloat(jsonResponse.precio_venta), 1]]
+          ask = parseFloat(jsonResponse.precio_compra)
+          bid = parseFloat(jsonResponse.precio_venta)
           break
         case 'USDT':
-          asks = [[parseFloat(jsonResponse.usdt_compra), 1]]
-          bids = [[parseFloat(jsonResponse.usdt_venta), 1]]
+          ask = parseFloat(jsonResponse.usdt_compra)
+          bid = parseFloat(jsonResponse.usdt_venta)
           break
         case 'DAI':
-          asks = [[parseFloat(jsonResponse.dai_compra), 1]]
-          bids = [[parseFloat(jsonResponse.dai_venta), 1]]
+          ask = parseFloat(jsonResponse.dai_compra)
+          bid = parseFloat(jsonResponse.dai_venta)
           break
       }
 
       return {
-        asks,
-        bids
+        ask,
+        bid
       }
     } else {
       return undefined
