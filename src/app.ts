@@ -11,8 +11,11 @@ import {
   collectCurrencyExchangesPricesToDB,
   collectP2POrdersToDB
 } from './utils/pricing_collector/pricing_collector.js'
-import { removeOlderPrices } from './services/exchanges.service.js'
+import ExchangeService from './services/exchanges.service.js'
 import websocket from './startup/websocket/index.js'
+import ExchangeRepositoryMongoDB from './repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from './repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from './repository/impl/exchange-p2p-repository-mongodb.js'
 
 dotenv.config()
 
@@ -36,12 +39,18 @@ appSetup(app)
       collectCurrencyExchangesPricesToDB().catch(reason => console.log(reason))
     }, Number(process.env.CURRENCY_COLLECTOR_INTERVAL ?? 1000 * 60))
 
+    const exchangeService = new ExchangeService(
+      new ExchangeRepositoryMongoDB(),
+      new BrokerageRepositoryMongoDB(),
+      new ExchangeP2PRepositoryMongoDB()
+    )
+
     // Scheduled Jobs
     const removeOlderPricesJob = new CronJob(
       '0 * * * * *',
       function () {
         console.log('Deleting older prices...')
-        removeOlderPrices()
+        exchangeService.removeOlderPrices()
       },
       null,
       true

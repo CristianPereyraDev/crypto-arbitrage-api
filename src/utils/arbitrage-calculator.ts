@@ -1,8 +1,6 @@
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
-import {
-  IExchangePricing,
-  type IExchangePairPricing
-} from '../types/exchange.js'
+import { type IExchangePairPricing } from '../types/exchange.js'
+import { IExchangePricingDTO } from 'src/types/dto/index.js'
 
 export interface ICryptoArbitrageResult {
   askExchange: string
@@ -23,7 +21,7 @@ export async function calculateArbitragesFromPairData (
   // Get exchange fees. Se supone que los fees son porcentajes (hay que dividir por 100).
   const fees = await getExchangesFees()
 
-  const exchangesArr: { exchange: string; value: IExchangePricing }[] = []
+  const exchangesArr: { exchange: string; value: IExchangePricingDTO }[] = []
   data.forEach((value, exchange) => {
     exchangesArr.push({ exchange, value })
   })

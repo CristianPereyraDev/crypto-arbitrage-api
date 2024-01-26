@@ -1,7 +1,7 @@
 import {
   IP2POrder,
   P2POrderType
-} from 'src/databases/mongodb/model/exchange.model.js'
+} from 'src/databases/model/exchange_p2p.model.js'
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
 
 export type BinanceP2PTradeMethodType = {

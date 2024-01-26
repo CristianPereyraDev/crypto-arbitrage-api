@@ -1,5 +1,9 @@
 import { Schema, model } from 'mongoose'
-import { ICryptoFee, IExchangeBase, IPair } from '../model/exchange.model.js'
+import {
+  ICryptoFee,
+  IExchangeBase,
+  IPair
+} from '../../model/exchange_base.model.js'
 
 const pairSchema = new Schema<IPair>({
   crypto: { type: String, required: true },

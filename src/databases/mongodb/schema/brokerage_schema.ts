@@ -1,6 +1,9 @@
 import { Model, Schema, Types } from 'mongoose'
 import { ExchangeBase } from './exchange_base.schema.js'
-import { IBrokerage, IBrokeragePairPrices } from '../model/exchange.model.js'
+import {
+  IBrokerage,
+  IBrokeragePairPrices
+} from '../../model/brokerage.model.js'
 
 const cryptoAssetPairSchema = new Schema<IBrokeragePairPrices>({
   crypto: { type: String, required: true },

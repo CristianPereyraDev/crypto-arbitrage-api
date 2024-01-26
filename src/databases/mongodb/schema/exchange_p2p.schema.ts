@@ -3,7 +3,7 @@ import {
   IP2PExchange,
   IP2POrder,
   IPaymentMethod
-} from '../model/exchange.model.js'
+} from '../../model/exchange_p2p.model.js'
 import { ExchangeBase } from './exchange_base.schema.js'
 
 const p2pOrderSchema = new Schema<IP2POrder>(

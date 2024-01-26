@@ -15,7 +15,7 @@ const appSetup = async (app: Express): Promise<Server | undefined> => {
     })
 
     server.setTimeout(5000, () => {
-      console.log('timeout')
+      console.log("An socket's timeout")
     })
 
     return server

@@ -1,14 +1,6 @@
-export interface IExchangePricing {
-  exchange: string
-  exchangeLogoURL: string
-  ask: number
-  totalAsk: number
-  bid: number
-  totalBid: number
-  time: number
-}
+import { IExchangePricingDTO } from './dto/index.js'
 
-export type IExchangePairPricing = Map<string, IExchangePricing>
+export type IExchangePairPricing = Map<string, IExchangePricingDTO>
 
 export interface IPairPricing {
   bids: string[][]

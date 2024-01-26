@@ -1,8 +1,6 @@
 import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import {
-  IExchangePairPricing,
-  IExchangePricing
-} from '../../../types/exchange.js'
+import { IExchangePairPricing } from '../../../types/exchange.js'
+import { IExchangePricingDTO } from 'src/types/dto/index.js'
 
 export async function pricesByCurrencyPair (
   crypto: string,
@@ -17,7 +15,7 @@ export async function pricesByCurrencyPair (
     if (response.ok) {
       const jsonResponse: any = await response.json()
 
-      return new Map<string, IExchangePricing>(Object.entries(jsonResponse))
+      return new Map<string, IExchangePricingDTO>(Object.entries(jsonResponse))
     } else {
       throw new Error(
         `An error has ocurred during the request to the API: ${response.statusText}`

@@ -1,18 +1,27 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
-import { INetworkFee } from '../databases/mongodb/model/exchange.model.js'
+import { INetworkFee } from '../databases/model/exchange_base.model.js'
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import { performScraping } from '../utils/scraping/cryptoya.js'
-import { getAvailablePairs } from 'src/services/exchanges.service.js'
+import ExchangeService from 'src/services/exchanges.service.js'
+import ExchangeRepositoryMongoDB from 'src/repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from 'src/repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from 'src/repository/impl/exchange-p2p-repository-mongodb.js'
 
 const controller = Router()
+
+const exchangeService = new ExchangeService(
+  new ExchangeRepositoryMongoDB(),
+  new BrokerageRepositoryMongoDB(),
+  new ExchangeP2PRepositoryMongoDB()
+)
 
 controller
   .get(
     '/pairs_available',
     async (req: Request, res: Response, next: NextFunction) => {
-      const availablePairs = await getAvailablePairs()
+      const availablePairs = await exchangeService.getAvailablePairs()
       const response: string[] = availablePairs.map(
         pair => pair.crypto + '-' + pair.fiat
       )

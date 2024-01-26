@@ -3,7 +3,7 @@ import {
   type IExchangePairPrices,
   IExchange,
   IAskBid
-} from '../model/exchange.model.js'
+} from '../../model/exchange.model.js'
 import { ExchangeBase } from './exchange_base.schema.js'
 
 const askBidSchema = new Schema<IAskBid>(

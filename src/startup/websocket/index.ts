@@ -1,10 +1,19 @@
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
-import { getAllExchangesPricesBySymbol } from 'src/services/exchanges.service.js'
+import ExchangeService from 'src/services/exchanges.service.js'
 import path, { parse } from 'path'
 import pug from 'pug'
-import { IExchangePricing } from 'src/types/exchange.js'
+import { IExchangePricingDTO } from 'src/types/dto/index.js'
 import { getCurrencyPairRates } from 'src/services/currency.service.js'
+import ExchangeRepositoryMongoDB from 'src/repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from 'src/repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from 'src/repository/impl/exchange-p2p-repository-mongodb.js'
+
+const exchangeService = new ExchangeService(
+  new ExchangeRepositoryMongoDB(),
+  new BrokerageRepositoryMongoDB(),
+  new ExchangeP2PRepositoryMongoDB()
+)
 
 /**
  *
@@ -43,6 +52,10 @@ export default function (expressServer: Server | undefined) {
     let exchangePricesTimeout: ReturnType<typeof setInterval>
 
     websocket.on('error', error => {
+      console.error(
+        'An error has ocurred with the websocket connection: %s',
+        error
+      )
       clearInterval(exchangePricesTimeout)
     })
 
@@ -54,18 +67,18 @@ export default function (expressServer: Server | undefined) {
     websocket.on('message', message => {
       const parsedMessage = JSON.parse(message.toString())
 
-      if (Object.hasOwn(parsedMessage, 'prices')) {
+      if (Object.hasOwn(parsedMessage, 'crypto')) {
         async function sendMessage () {
-          const prices: IExchangePricing[] =
-            await getAllExchangesPricesBySymbol(
-              parsedMessage.prices.asset,
-              parsedMessage.prices.fiat
+          const prices: IExchangePricingDTO[] =
+            await exchangeService.getAllExchangesPricesBySymbol(
+              parsedMessage.crypto.asset,
+              parsedMessage.crypto.fiat
             )
 
           websocket.send(
             JSON.stringify({
-              asset: parsedMessage.prices.asset,
-              fiat: parsedMessage.prices.fiat,
+              asset: parsedMessage.crypto.asset,
+              fiat: parsedMessage.crypto.fiat,
               prices
             })
           )
@@ -136,10 +149,8 @@ async function compileCryptoMessage (
   fiat: string,
   volume: number
 ) {
-  const prices: IExchangePricing[] = await getAllExchangesPricesBySymbol(
-    asset,
-    fiat
-  )
+  const prices: IExchangePricingDTO[] =
+    await exchangeService.getAllExchangesPricesBySymbol(asset, fiat)
 
   const symbolPricesTemplate = pug.compileFile(
     path.join(process.cwd(), 'src', 'views', 'symbol_prices.pug')

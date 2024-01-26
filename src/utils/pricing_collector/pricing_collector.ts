@@ -12,15 +12,14 @@ import {
   exchangePriceCollectors,
   brokeragePriceCollectors
 } from '../apis/crypto_exchanges/index.js'
-import {
-  updateBrokeragePrices,
-  updateExchangePrices,
-  updateP2POrders
-} from 'src/services/exchanges.service.js'
+import ExchangeService from 'src/services/exchanges.service.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js'
 import { updateCurrencyPairRate } from 'src/services/currency.service.js'
 import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
+import ExchangeRepositoryMongoDB from 'src/repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from 'src/repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from 'src/repository/impl/exchange-p2p-repository-mongodb.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -29,6 +28,12 @@ export const currencyPairs = [
   { crypto: 'USDT', fiat: 'ARS' },
   { crypto: 'MANA', fiat: 'ARS' }
 ]
+
+const exchangeService = new ExchangeService(
+  new ExchangeRepositoryMongoDB(),
+  new BrokerageRepositoryMongoDB(),
+  new ExchangeP2PRepositoryMongoDB()
+)
 
 // Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
 
@@ -86,7 +91,7 @@ export async function collectP2POrdersToDB () {
         for (let p2pPair of p2pExchange.ordersByPair) {
           orderCollector(p2pPair.crypto, p2pPair.fiat, 'BUY').then(orders => {
             if (orders !== undefined) {
-              updateP2POrders(
+              exchangeService.updateP2POrders(
                 p2pExchange.name,
                 p2pPair.crypto,
                 p2pPair.fiat,
@@ -97,7 +102,7 @@ export async function collectP2POrdersToDB () {
           })
           orderCollector(p2pPair.crypto, p2pPair.fiat, 'SELL').then(orders => {
             if (orders !== undefined) {
-              updateP2POrders(
+              exchangeService.updateP2POrders(
                 p2pExchange.name,
                 p2pPair.crypto,
                 p2pPair.fiat,
@@ -150,7 +155,7 @@ export async function collectCryptoExchangesPricesToDB () {
     const priceCollectorResults = await Promise.all(collectors)
     for (let priceCollectorResult of priceCollectorResults) {
       if (priceCollectorResult.prices !== undefined) {
-        updateExchangePrices(
+        exchangeService.updateExchangePrices(
           priceCollectorResult.exchangeName,
           priceCollectorResult.baseAsset,
           priceCollectorResult.quoteAsset,
@@ -199,7 +204,7 @@ export async function collectCryptoBrokeragesPricesToDB () {
     const priceCollectorResults = await Promise.all(collectors)
     for (let priceCollectorResult of priceCollectorResults) {
       if (priceCollectorResult.prices !== undefined) {
-        updateBrokeragePrices(
+        exchangeService.updateBrokeragePrices(
           priceCollectorResult.exchangeName,
           priceCollectorResult.baseAsset,
           priceCollectorResult.quoteAsset,

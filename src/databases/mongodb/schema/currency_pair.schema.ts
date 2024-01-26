@@ -1,5 +1,8 @@
 import { Schema, model } from 'mongoose'
-import { ICurrencyPair, ICurrencyRate } from '../model/currency_pair.model.js'
+import {
+  ICurrencyPair,
+  ICurrencyRate
+} from '../../model/currency_pair.model.js'
 
 const currencyRateSchema = new Schema<ICurrencyRate>({
   exchangeSlug: { type: String, unique: true, required: true },

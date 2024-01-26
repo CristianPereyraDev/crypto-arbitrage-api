@@ -1,6 +1,4 @@
-import { type Document } from 'mongoose'
-
-export interface ICryptoArbitrage extends Document {
+export interface ICryptoArbitrage {
   cryptocurrency: string
   fiat: string
   askExchange: string
