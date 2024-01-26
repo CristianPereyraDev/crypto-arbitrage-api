@@ -98,6 +98,7 @@ export default class ExchangeRepositoryMongoDB
 
           return {
             exchange: exchange.name,
+            exchangeType: exchange.exchangeType,
             exchangeLogoURL: exchange.logoURL,
             ask: avgAsk,
             totalAsk: avgAsk,
@@ -108,6 +109,7 @@ export default class ExchangeRepositoryMongoDB
         } else {
           return {
             exchange: exchange.name,
+            exchangeType: exchange.exchangeType,
             exchangeLogoURL: exchange.logoURL,
             ask: 0,
             totalAsk: 0,
@@ -129,8 +131,13 @@ export default class ExchangeRepositoryMongoDB
     throw new Error('Method not implemented.')
   }
 
-  getAllExchanges (): Promise<IExchange[]> {
-    throw new Error('Method not implemented.')
+  async getAllExchanges (): Promise<IExchange[]> {
+    try {
+      return await Exchange.find({ available: true })
+    } catch (error) {
+      console.error(error)
+      return []
+    }
   }
 
   private calculateOrderBookAvgPrice (orders: number[][], volume: number) {

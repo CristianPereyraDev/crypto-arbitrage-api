@@ -70,31 +70,27 @@ export default class ExchangeService {
     return await this.exchangeRepository.getAllAvailablePairs()
   }
 
-  private async brokeragesPrices (asset: string, fiat: string) {
-    return this.brokerageRepository.getAllPricesByPair({ crypto: asset, fiat })
-  }
-
-  private async exchangesPrices (
-    asset: string,
-    fiat: string,
-    volume: number = 1.0
-  ) {
-    return this.exchangeRepository.getAllPricesByPair(
-      { crypto: asset, fiat },
-      volume
-    )
-  }
-
   async getAllExchangesPricesBySymbol (
     asset: string,
     fiat: string,
     volume: number = 1.0
   ): Promise<IExchangePricingDTO[]> {
     const prices = await Promise.all([
-      this.brokeragesPrices(asset, fiat),
-      this.exchangesPrices(asset, fiat, volume)
+      this.brokerageRepository.getAllPricesByPair({ crypto: asset, fiat }),
+      this.exchangeRepository.getAllPricesByPair(
+        { crypto: asset, fiat },
+        volume
+      )
     ])
 
     return prices.flat()
+  }
+
+  async getAvailableExchanges () {
+    return this.exchangeRepository.getAllExchanges()
+  }
+
+  async getAvailableBrokerages () {
+    return this.brokerageRepository.getAllExchanges()
   }
 }

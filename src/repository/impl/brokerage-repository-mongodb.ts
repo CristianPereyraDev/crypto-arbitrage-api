@@ -63,6 +63,7 @@ export default class BrokerageRepositoryMongoDB
         if (pairPrices !== undefined) {
           return {
             exchange: brokerage.name,
+            exchangeType: brokerage.exchangeType,
             exchangeLogoURL: brokerage.logoURL,
             ask: pairPrices.ask,
             totalAsk: pairPrices.ask,
@@ -73,6 +74,7 @@ export default class BrokerageRepositoryMongoDB
         } else {
           return {
             exchange: brokerage.name,
+            exchangeType: brokerage.exchangeType,
             exchangeLogoURL: brokerage.logoURL,
             ask: 0,
             totalAsk: 0,
@@ -94,7 +96,12 @@ export default class BrokerageRepositoryMongoDB
     throw new Error('Method not implemented.')
   }
 
-  getAllExchanges (): Promise<IBrokerage[]> {
-    throw new Error('Method not implemented.')
+  async getAllExchanges (): Promise<IBrokerage[]> {
+    try {
+      return await Brokerage.find({ available: true })
+    } catch (error) {
+      console.error(error)
+      return []
+    }
   }
 }

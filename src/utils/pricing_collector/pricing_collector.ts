@@ -1,4 +1,3 @@
-import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js'
 import CryptoArbitrageModel from '../../databases/mongodb/schema/arbitrage.schema.js'
 import { pricesByCurrencyPair } from '../apis/crypto_exchanges/cryptoya.js'
 import {
@@ -16,10 +15,10 @@ import ExchangeService from 'src/services/exchanges.service.js'
 import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
 import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js'
 import { updateCurrencyPairRate } from 'src/services/currency.service.js'
-import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
 import ExchangeRepositoryMongoDB from 'src/repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from 'src/repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from 'src/repository/impl/exchange-p2p-repository-mongodb.js'
+import { IExchange } from 'src/databases/model/exchange.model.js'
 
 export const currencyPairs = [
   { crypto: 'MATIC', fiat: 'ARS' },
@@ -128,7 +127,7 @@ type PromiseAllElemResultType = {
 
 export async function collectCryptoExchangesPricesToDB () {
   try {
-    const exchanges = await Exchange.find({})
+    const exchanges: IExchange[] = await exchangeService.getAvailableExchanges()
     const collectors: Promise<PromiseAllElemResultType>[] = []
 
     for (let exchange of exchanges) {
@@ -177,7 +176,7 @@ type BrokeragePromiseAllElemResultType = {
 
 export async function collectCryptoBrokeragesPricesToDB () {
   try {
-    const exchanges = await Brokerage.find({})
+    const exchanges = await exchangeService.getAvailableBrokerages()
     const collectors: Promise<BrokeragePromiseAllElemResultType>[] = []
 
     for (let exchange of exchanges) {
