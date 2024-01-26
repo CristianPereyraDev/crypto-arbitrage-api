@@ -1,4 +1,4 @@
-import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
+import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 
 const resolvers = {
   Query: {

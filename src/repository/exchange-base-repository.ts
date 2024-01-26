@@ -1,5 +1,5 @@
-import { IPair } from 'src/databases/model/exchange_base.model.js'
-import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
+import { IPair } from '../databases/model/exchange_base.model.js'
+import { ExchangeBase } from '../databases/mongodb/schema/exchange_base.schema.js'
 
 export abstract class ExchangeBaseRepository<T> {
   /**

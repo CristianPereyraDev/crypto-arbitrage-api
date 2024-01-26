@@ -2,10 +2,10 @@ import {
   IP2PExchange,
   IP2POrder,
   P2POrderType
-} from 'src/databases/model/exchange_p2p.model.js'
+} from '../../databases/model/exchange_p2p.model.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { IExchangeP2PRepository } from '../exchange-p2p-repository.js'
-import { P2PExchange } from 'src/databases/mongodb/schema/exchange_p2p.schema.js'
+import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js'
 
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>

@@ -1,6 +1,6 @@
 import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import { type IExchangePairPricing } from '../types/exchange.js'
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IExchangePricingDTO } from '../types/dto/index.js'
 
 export interface ICryptoArbitrageResult {
   askExchange: string

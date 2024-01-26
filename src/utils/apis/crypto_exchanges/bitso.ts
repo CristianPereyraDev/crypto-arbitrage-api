@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from 'src/utils/network.utils.js'
+import { fetchWithTimeout } from '../../../utils/network.utils.js'
 import { ExchangeCollectorReturnType } from './index.js'
 
 export async function getPairPrices (

@@ -1,13 +1,13 @@
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IExchangePricingDTO } from '../types/dto/index.js'
 import {
   IP2POrder,
   P2POrderType
-} from 'src/databases/model/exchange_p2p.model.js'
-import { IPair } from 'src/databases/model/exchange_base.model.js'
+} from '../databases/model/exchange_p2p.model.js'
+import { IPair } from '../databases/model/exchange_base.model.js'
 import { ExchangeCollectorReturnType } from '../utils/apis/crypto_exchanges/index.js'
-import { IExchangeRepository } from 'src/repository/exchange-repository.js'
-import { IBrokerageRepository } from 'src/repository/brokerage-repository.js'
-import { IExchangeP2PRepository } from 'src/repository/exchange-p2p-repository.js'
+import { IExchangeRepository } from '../repository/exchange-repository.js'
+import { IBrokerageRepository } from '../repository/brokerage-repository.js'
+import { IExchangeP2PRepository } from '../repository/exchange-p2p-repository.js'
 
 export default class ExchangeService {
   constructor (

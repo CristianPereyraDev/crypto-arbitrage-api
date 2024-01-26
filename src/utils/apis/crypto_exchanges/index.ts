@@ -16,7 +16,7 @@ import * as satoshitango from './satoshitango.js'
 import {
   IP2POrder,
   P2POrderType
-} from 'src/databases/model/exchange_p2p.model.js'
+} from '../../../databases/model/exchange_p2p.model.js'
 
 /**
  * bids & asks are arrays like -> [[price, qty], [price, qty], ...]

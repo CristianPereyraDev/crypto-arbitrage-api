@@ -1,10 +1,10 @@
-import { IExchange } from 'src/databases/model/exchange.model.js'
-import { IPair } from 'src/databases/model/exchange_base.model.js'
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IExchange } from '../../databases/model/exchange.model.js'
+import { IPair } from '../../databases/model/exchange_base.model.js'
+import { IExchangePricingDTO } from '../../types/dto/index.js'
 import { IExchangeRepository } from '../exchange-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
-import { Exchange } from 'src/databases/mongodb/schema/exchange.schema.js'
-import { ExchangeCollectorReturnType } from 'src/utils/apis/crypto_exchanges/index.js'
+import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js'
+import { ExchangeCollectorReturnType } from '../../utils/apis/crypto_exchanges/index.js'
 
 export default class ExchangeRepositoryMongoDB
   extends ExchangeBaseRepository<IExchange>

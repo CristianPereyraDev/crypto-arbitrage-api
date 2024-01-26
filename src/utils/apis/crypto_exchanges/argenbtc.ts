@@ -1,8 +1,5 @@
-import { fetchWithTimeout } from 'src/utils/network.utils.js'
-import {
-  BrokerageCollectorReturnType,
-  ExchangeCollectorReturnType
-} from './index.js'
+import { fetchWithTimeout } from '../../../utils/network.utils.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
 export async function getPairPrices (
   asset: string,

@@ -2,7 +2,7 @@ import {
   IP2PExchange,
   IP2POrder,
   P2POrderType
-} from 'src/databases/model/exchange_p2p.model.js'
+} from '../databases/model/exchange_p2p.model.js'
 import { ExchangeBaseRepository } from './exchange-base-repository.js'
 
 export interface IExchangeP2PRepository

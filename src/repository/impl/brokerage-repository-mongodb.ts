@@ -1,9 +1,9 @@
-import { IBrokerage } from 'src/databases/model/brokerage.model.js'
-import { IPair } from 'src/databases/model/exchange_base.model.js'
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IBrokerage } from '../../databases/model/brokerage.model.js'
+import { IPair } from '../../databases/model/exchange_base.model.js'
+import { IExchangePricingDTO } from '../../types/dto/index.js'
 import { IBrokerageRepository } from '../brokerage-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
-import { Brokerage } from 'src/databases/mongodb/schema/brokerage_schema.js'
+import { Brokerage } from '../../databases/mongodb/schema/brokerage_schema.js'
 
 export default class BrokerageRepositoryMongoDB
   extends ExchangeBaseRepository<IBrokerage>

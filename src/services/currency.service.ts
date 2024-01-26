@@ -1,5 +1,5 @@
-import { ICurrencyRate } from 'src/databases/model/currency_pair.model.js'
-import { CurrencyPair } from 'src/databases/mongodb/schema/currency_pair.schema.js'
+import { ICurrencyRate } from '../databases/model/currency_pair.model.js'
+import { CurrencyPair } from '../databases/mongodb/schema/currency_pair.schema.js'
 
 export async function updateCurrencyPairRate (
   currencyBase: string,

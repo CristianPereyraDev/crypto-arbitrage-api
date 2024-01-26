@@ -1,8 +1,8 @@
-import { IPair } from 'src/databases/model/exchange_base.model.js'
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IPair } from '../databases/model/exchange_base.model.js'
+import { IExchangePricingDTO } from '../types/dto/index.js'
 import { ExchangeBaseRepository } from './exchange-base-repository.js'
-import { IExchange } from 'src/databases/model/exchange.model.js'
-import { ExchangeCollectorReturnType } from 'src/utils/apis/crypto_exchanges/index.js'
+import { IExchange } from '../databases/model/exchange.model.js'
+import { ExchangeCollectorReturnType } from '../utils/apis/crypto_exchanges/index.js'
 
 export interface IExchangeRepository extends ExchangeBaseRepository<IExchange> {
   getAllPricesByPair(

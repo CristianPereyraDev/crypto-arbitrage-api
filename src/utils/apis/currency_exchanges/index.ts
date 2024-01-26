@@ -1,4 +1,4 @@
-import { ICurrencyRate } from 'src/databases/model/currency_pair.model.js'
+import { ICurrencyRate } from '../../../databases/model/currency_pair.model.js'
 import * as dolarapi from './dolarapi.js'
 
 export type CurrencyCollectorFunctionReturnType = ICurrencyRate[]

@@ -1,6 +1,6 @@
-import { fetchWithTimeout } from 'src/utils/network.utils.js'
+import { fetchWithTimeout } from '../../../utils/network.utils.js'
 import { IExchangePairPricing } from '../../../types/exchange.js'
-import { IExchangePricingDTO } from 'src/types/dto/index.js'
+import { IExchangePricingDTO } from '../../../types/dto/index.js'
 
 export async function pricesByCurrencyPair (
   crypto: string,

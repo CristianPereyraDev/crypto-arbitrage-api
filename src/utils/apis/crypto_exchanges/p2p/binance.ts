@@ -1,8 +1,8 @@
 import {
   IP2POrder,
   P2POrderType
-} from 'src/databases/model/exchange_p2p.model.js'
-import { fetchWithTimeout } from 'src/utils/network.utils.js'
+} from '../../../../databases/model/exchange_p2p.model.js'
+import { fetchWithTimeout } from '../../../../utils/network.utils.js'
 
 export type BinanceP2PTradeMethodType = {
   payId: string | null
