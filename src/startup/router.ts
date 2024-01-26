@@ -93,27 +93,29 @@ const routerSetup = async (app: Express): Promise<Express> => {
   )
 
   // GraphQL
-  const __dirname = new URL('.', import.meta.url).pathname
-  const filePath = path.resolve(__dirname, '../graphql/schema.graphql')
-  console.log('filePath:', filePath)
-  const typeDefs = gql(readFileSync(filePath, { encoding: 'utf-8' }))
-  const server = new ApolloServer({
-    schema: buildSubgraphSchema({ typeDefs, resolvers })
-  })
-  await server.start()
+  // const __dirname = new URL('.', import.meta.url).pathname
+  // const filePath = path.resolve(__dirname, '../graphql/schema.graphql')
+  // console.log('filePath:', filePath)
+  // const typeDefs = gql(readFileSync(filePath, { encoding: 'utf-8' }))
+  // const server = new ApolloServer({
+  //   schema: buildSubgraphSchema({ typeDefs, resolvers })
+  // })
+  // await server.start()
 
-  return app
-    .get('/', (req: Request, res: Response) => {
-      res
-        .status(200)
-        .send(
-          `<h1 style="text-align: center">Welcome to Crypto Arbitrage Api<h1>`
-        )
-    })
-    .use('/graphql', expressMiddleware(server))
-    .use('/api', infoRouter)
-    .use('/api/arbitrages', arbitragesRouter)
-    .use(admin.options.rootPath, adminRouter)
+  return (
+    app
+      .get('/', (req: Request, res: Response) => {
+        res
+          .status(200)
+          .send(
+            `<h1 style="text-align: center">Welcome to Crypto Arbitrage Api<h1>`
+          )
+      })
+      //.use('/graphql', expressMiddleware(server))
+      .use('/api', infoRouter)
+      .use('/api/arbitrages', arbitragesRouter)
+      .use(admin.options.rootPath, adminRouter)
+  )
 }
 
 export default routerSetup
