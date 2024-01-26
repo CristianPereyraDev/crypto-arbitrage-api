@@ -153,7 +153,7 @@ async function compileCryptoMessage (
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat)
 
   const symbolPricesTemplate = pug.compileFile(
-    path.join(process.cwd(), 'src', 'views', 'symbol_prices.pug')
+    path.join(process.cwd(), 'dist', 'views', 'symbol_prices.pug')
   )
 
   return symbolPricesTemplate({
