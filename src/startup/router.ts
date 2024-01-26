@@ -93,7 +93,9 @@ const routerSetup = async (app: Express): Promise<Express> => {
   )
 
   // GraphQL
-  const filePath = path.join(process.cwd(), 'src', 'graphql', 'schema.graphql')
+  const __dirname = new URL('.', import.meta.url).pathname
+  const filePath = path.resolve(__dirname, '../graphql/schema.graphql')
+  console.log('filePath:', filePath)
   const typeDefs = gql(readFileSync(filePath, { encoding: 'utf-8' }))
   const server = new ApolloServer({
     schema: buildSubgraphSchema({ typeDefs, resolvers })
