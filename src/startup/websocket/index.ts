@@ -175,7 +175,7 @@ async function compileCurrencyPairMessage (
   const rates = await getCurrencyPairRates(currencyBase, currencyQuote)
 
   const template = pug.compileFile(
-    path.join(process.cwd(), 'src', 'views', 'currency_pair_prices.pug')
+    path.join(process.cwd(), 'dist', 'views', 'currency_pair_prices.pug')
   )
 
   return template({
