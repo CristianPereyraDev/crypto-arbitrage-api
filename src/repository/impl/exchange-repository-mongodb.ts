@@ -67,8 +67,8 @@ export default class ExchangeRepositoryMongoDB
   ): Promise<IExchangePricingDTO[]> {
     try {
       const exchanges = await Exchange.find({
-        'availablePairs.crypto': pair.crypto,
-        'availablePairs.fiat': pair.fiat,
+        'pricesByPair.crypto': pair.crypto,
+        'pricesByPair.fiat': pair.fiat,
         available: true
       })
 

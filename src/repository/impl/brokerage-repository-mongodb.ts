@@ -48,8 +48,8 @@ export default class BrokerageRepositoryMongoDB
   async getAllPricesByPair (pair: IPair): Promise<IExchangePricingDTO[]> {
     try {
       const exchanges = await Brokerage.find({
-        'availablePairs.crypto': pair.crypto,
-        'availablePairs.fiat': pair.fiat,
+        'pricesByPair.crypto': pair.crypto,
+        'pricesByPair.fiat': pair.fiat,
         available: true
       })
 

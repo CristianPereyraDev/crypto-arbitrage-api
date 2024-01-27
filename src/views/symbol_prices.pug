@@ -1,21 +1,23 @@
 div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
     div(class='symbol-table-ask')
         each val in pricesSortedByAsk
-            div(class='symbol-table-row')
+            div(class=`symbol-table-row ${val.exchangeType.toLowerCase()}`)
                 span
                     img(src=`${val.exchangeLogoURL}` class='exchange-logo')
-                    span=val.exchange                
+                    span(class="exchange-type")=val.exchangeType
+                    span=val.exchange                    
                 if val.ask
-                    span=val.ask.toFixed(2)
+                    span(class="price")=val.ask.toFixed(2)
                 else
                     span="Not available"
     div(class='symbol-table-bid')
         each val in pricesSortedByBid
-            div(class='symbol-table-row')
+            div(class=`symbol-table-row ${val.exchangeType.toLowerCase()}`)
                 span
                     img(src=`${val.exchangeLogoURL}` class='exchange-logo')
+                    span(class="exchange-type")=exchangeType
                     span=val.exchange
                 if val.bid
-                    span=val.bid.toFixed(2)
+                    span(class="price")=val.bid.toFixed(2)
                 else
                     span="Not available"
