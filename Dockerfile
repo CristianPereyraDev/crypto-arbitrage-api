@@ -8,6 +8,7 @@ FROM node:latest AS final
 WORKDIR /app
 COPY --from=builder ./app/dist ./dist
 COPY --from=builder ./app/src/graphql/*.graphql /app/dist/graphql
+RUN mkdir -p app/dist/views
 COPY --from=builder ./app/src/views/* /app/dist/views
 COPY package*.json .
 RUN npm install --production
