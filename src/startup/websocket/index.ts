@@ -152,11 +152,13 @@ async function compileCryptoMessage (
   const prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat)
 
-  const symbolPricesTemplate = pug.compileFile(
-    path.join(process.cwd(), 'dist', 'views', 'symbol_prices.pug')
+  const __dirname = new URL('.', import.meta.url).pathname
+
+  const template = pug.compileFile(
+    path.resolve(__dirname, '../../views/symbol_prices.pug')
   )
 
-  return symbolPricesTemplate({
+  return template({
     asset: asset,
     fiat: fiat,
     pricesSortedByAsk: [...prices].sort((p1, p2) =>
@@ -174,8 +176,10 @@ async function compileCurrencyPairMessage (
 ) {
   const rates = await getCurrencyPairRates(currencyBase, currencyQuote)
 
+  const __dirname = new URL('.', import.meta.url).pathname
+
   const template = pug.compileFile(
-    path.join(process.cwd(), 'dist', 'views', 'currency_pair_prices.pug')
+    path.resolve(__dirname, '../../views/currency_pair_prices.pug')
   )
 
   return template({

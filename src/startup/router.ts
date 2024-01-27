@@ -11,13 +11,13 @@ import infoRouter from '../controllers/info.controller.js'
 
 import { ExchangeBase } from '../databases/mongodb/schema/exchange_base.schema.js'
 
-// import { gql } from 'graphql-tag'
-// import { ApolloServer } from '@apollo/server'
-// import { buildSubgraphSchema } from '@apollo/subgraph'
-// import { expressMiddleware } from '@apollo/server/express4'
-// import resolvers from '../graphql/resolvers.js'
-// import { readFileSync } from 'fs'
-// import path from 'path'
+import { gql } from 'graphql-tag'
+import { ApolloServer } from '@apollo/server'
+import { buildSubgraphSchema } from '@apollo/subgraph'
+import { expressMiddleware } from '@apollo/server/express4'
+import resolvers from '../graphql/resolvers.js'
+import { readFileSync } from 'fs'
+import path from 'path'
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 import { P2PExchange } from '../databases/mongodb/schema/exchange_p2p.schema.js'
 import { Brokerage } from '../databases/mongodb/schema/brokerage_schema.js'
@@ -93,29 +93,26 @@ const routerSetup = async (app: Express): Promise<Express> => {
   )
 
   // GraphQL
-  // const __dirname = new URL('.', import.meta.url).pathname
-  // const filePath = path.resolve(__dirname, '../graphql/schema.graphql')
-  // console.log('filePath:', filePath)
-  // const typeDefs = gql(readFileSync(filePath, { encoding: 'utf-8' }))
-  // const server = new ApolloServer({
-  //   schema: buildSubgraphSchema({ typeDefs, resolvers })
-  // })
-  // await server.start()
+  const __dirname = new URL('.', import.meta.url).pathname
+  const filePath = path.resolve(__dirname, '../graphql/schema.graphql')
+  const typeDefs = gql(readFileSync(filePath, { encoding: 'utf-8' }))
+  const server = new ApolloServer({
+    schema: buildSubgraphSchema({ typeDefs, resolvers })
+  })
+  await server.start()
 
-  return (
-    app
-      .get('/', (req: Request, res: Response) => {
-        res
-          .status(200)
-          .send(
-            `<h1 style="text-align: center">Welcome to Crypto Arbitrage Api<h1>`
-          )
-      })
-      //.use('/graphql', expressMiddleware(server))
-      .use('/api', infoRouter)
-      .use('/api/arbitrages', arbitragesRouter)
-      .use(admin.options.rootPath, adminRouter)
-  )
+  return app
+    .get('/', (req: Request, res: Response) => {
+      res
+        .status(200)
+        .send(
+          `<h1 style="text-align: center">Welcome to Crypto Arbitrage Api<h1>`
+        )
+    })
+    .use('/graphql', expressMiddleware(server))
+    .use('/api', infoRouter)
+    .use('/api/arbitrages', arbitragesRouter)
+    .use(admin.options.rootPath, adminRouter)
 }
 
 export default routerSetup
