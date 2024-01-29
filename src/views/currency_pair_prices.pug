@@ -1,11 +1,19 @@
-div(id=`${currencyBase}-${currencyQuote}-container` hx-swap-oob='innerHTML')
-    ul(class='currency-pair-rates')
-        each rate in rates
-            li
-                span=rate.exchangeName
-                span
-                    span="Compra"
-                    span=rate.buy                
-                span
-                    span="Venta"
-                    span=rate.sell
+div(id=`${currencyBase}-${currencyQuote}-rates` hx-swap-oob='innerHTML')
+    each rate, index in rates
+        div(class="currency-pair-rate")
+            span=rate.exchangeName
+            span
+                span="Compra"
+                span=rate.buy                
+            span
+                span="Venta"
+                span=rate.sell
+    
+    div(class="currency-pair-rate")
+        span=rates[0].exchangeName
+        span
+            span="Compra"
+            span=rates[0].buy                
+        span
+            span="Venta"
+            span=rates[0].sell
