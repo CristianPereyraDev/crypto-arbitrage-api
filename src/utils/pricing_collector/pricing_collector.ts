@@ -37,30 +37,28 @@ const exchangeService = new ExchangeService(
 // Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
 
 export async function collectArbitragesToDB (): Promise<void> {
-  for (const pair of currencyPairs) {
-    try {
-      const prices = await getBrokeragePairPrices(pair.crypto, pair.fiat, 0.1)
-      const arbitrageResult = await calculateArbitragesFromPairData(prices)
-
-      for (let arbitrage of arbitrageResult) {
-        let doc = new CryptoArbitrageModel({
-          cryptocurrency: pair.crypto,
-          fiat: pair.fiat,
-          askExchange: arbitrage.askExchange,
-          askPrice: arbitrage.askPrice,
-          bidExchange: arbitrage.bidExchange,
-          bidPrice: arbitrage.bidPrice,
-          profit: arbitrage.profit,
-          time: arbitrage.time
-        })
-
-        await doc.save()
-      }
-    } catch (error) {
-      console.log(error)
-      continue
-    }
-  }
+  // for (const pair of currencyPairs) {
+  //   try {
+  //     const prices = await getBrokeragePairPrices(pair.crypto, pair.fiat, 0.1)
+  //     const arbitrageResult = await calculateArbitragesFromPairData(prices)
+  //     for (let arbitrage of arbitrageResult) {
+  //       let doc = new CryptoArbitrageModel({
+  //         cryptocurrency: pair.crypto,
+  //         fiat: pair.fiat,
+  //         askExchange: arbitrage.askExchange,
+  //         askPrice: arbitrage.askPrice,
+  //         bidExchange: arbitrage.bidExchange,
+  //         bidPrice: arbitrage.bidPrice,
+  //         profit: arbitrage.profit,
+  //         time: arbitrage.time
+  //       })
+  //       await doc.save()
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //     continue
+  //   }
+  // }
 }
 
 export async function collectArbitrages (
@@ -68,15 +66,16 @@ export async function collectArbitrages (
   fiat: string,
   volume: number
 ): Promise<ICryptoArbitrageResult[]> {
-  try {
-    const prices = await getBrokeragePairPrices(crypto, fiat, volume)
-    const arbitrageResult = await calculateArbitragesFromPairData(prices)
+  // try {
+  //   const prices = await getBrokeragePairPrices(crypto, fiat, volume)
+  //   const arbitrageResult = await calculateArbitragesFromPairData(prices)
 
-    return arbitrageResult
-  } catch (error) {
-    //console.log(error)
-    return []
-  }
+  //   return arbitrageResult
+  // } catch (error) {
+  //   //console.log(error)
+  //   return []
+  // }
+  return []
 }
 
 export async function collectP2POrdersToDB () {
