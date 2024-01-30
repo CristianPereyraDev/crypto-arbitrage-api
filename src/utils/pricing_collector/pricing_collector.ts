@@ -1,5 +1,5 @@
 import CryptoArbitrageModel from '../../databases/mongodb/schema/arbitrage.schema.js'
-import { pricesByCurrencyPair } from '../apis/crypto_exchanges/cryptoya.js'
+import { getBrokeragePairPrices } from '../apis/crypto_exchanges/cryptoya.js'
 import {
   ICryptoArbitrageResult,
   calculateArbitragesFromPairData
@@ -39,7 +39,7 @@ const exchangeService = new ExchangeService(
 export async function collectArbitragesToDB (): Promise<void> {
   for (const pair of currencyPairs) {
     try {
-      const prices = await pricesByCurrencyPair(pair.crypto, pair.fiat, 0.1)
+      const prices = await getBrokeragePairPrices(pair.crypto, pair.fiat, 0.1)
       const arbitrageResult = await calculateArbitragesFromPairData(prices)
 
       for (let arbitrage of arbitrageResult) {
@@ -69,7 +69,7 @@ export async function collectArbitrages (
   volume: number
 ): Promise<ICryptoArbitrageResult[]> {
   try {
-    const prices = await pricesByCurrencyPair(crypto, fiat, volume)
+    const prices = await getBrokeragePairPrices(crypto, fiat, volume)
     const arbitrageResult = await calculateArbitragesFromPairData(prices)
 
     return arbitrageResult

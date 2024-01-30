@@ -13,6 +13,8 @@ import * as bybit from './bybit.js'
 import * as fiwind from './fiwind.js'
 import * as tiendacrypto from './tiendacrypto.js'
 import * as satoshitango from './satoshitango.js'
+import * as cryptoya from './cryptoya.js'
+
 import {
   IP2POrder,
   P2POrderType
@@ -61,6 +63,12 @@ brokeragePriceCollectors.set('Fiwind', fiwind.getPairPrices) // Implemented
 brokeragePriceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices) // Implemented
 brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices) // Implemented
 brokeragePriceCollectors.set('Saldo', saldo.getPairPrices) // Implemented
+brokeragePriceCollectors.set('Lemon Cash', (baseAsset, quoteAsset) =>
+  cryptoya.getBrokeragePairPrices(baseAsset, quoteAsset, 'lemoncash')
+) // Implemented
+brokeragePriceCollectors.set('belo', (baseAsset, quoteAsset) =>
+  cryptoya.getBrokeragePairPrices(baseAsset, quoteAsset, 'belo')
+) // Implemented
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (

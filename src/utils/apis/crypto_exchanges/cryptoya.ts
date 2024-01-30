@@ -1,27 +1,33 @@
 import { fetchWithTimeout } from '../../../utils/network.utils.js'
-import { IExchangePairPricing } from '../../../types/exchange.js'
-import { IExchangePricingDTO } from '../../../types/dto/index.js'
+import { BrokerageCollectorReturnType } from './index.js'
 
-export async function pricesByCurrencyPair (
-  crypto: string,
+type CryptoYaAPIResponseType = {
+  ask: number
+  totalAsk: number
+  bid: number
+  totalBid: number
+  time: number
+}
+
+export async function getBrokeragePairPrices (
+  asset: string,
   fiat: string,
-  volume: number | undefined
-): Promise<IExchangePairPricing> {
+  exchange: string
+): Promise<BrokerageCollectorReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
-      `https://criptoya.com/api/${crypto}/${fiat}/${volume ?? ''}`
+      `https://criptoya.com/api/${exchange}/${asset}/${fiat}`
     )
 
     if (response.ok) {
-      const jsonResponse: any = await response.json()
+      const jsonResponse = (await response.json()) as CryptoYaAPIResponseType
 
-      return new Map<string, IExchangePricingDTO>(Object.entries(jsonResponse))
-    } else {
-      throw new Error(
-        `An error has ocurred during the request to the API: ${response.statusText}`
-      )
+      return { ask: jsonResponse.ask, bid: jsonResponse.bid }
     }
+
+    return undefined
   } catch (error) {
-    throw new Error('Error al hacer una petición a la api')
+    console.error(error)
+    return undefined
   }
 }
