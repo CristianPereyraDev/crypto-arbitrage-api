@@ -6,11 +6,15 @@ import {
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { IExchangeP2PRepository } from '../exchange-p2p-repository.js'
 import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js'
+import { IPair } from 'src/databases/model/exchange_base.model.js'
 
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>
   implements IExchangeP2PRepository
 {
+  getAllAvailablePairs (): Promise<IPair[]> {
+    throw new Error('Method not implemented.')
+  }
   async updateP2POrders (
     exchangeName: string,
     baseAsset: string,
