@@ -8,6 +8,7 @@ import ExchangeService from '../services/exchanges.service.js'
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
+import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
 
 const controller = Router()
 
@@ -90,36 +91,43 @@ controller
     }
   })
   .put(
-    '/generate_exchanges',
+    '/update_fees',
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const response = await fetch('https://criptoya.com/api/fees')
         const jsonResponse: any = await response.json()
 
-        // First delete collection
-        await Exchange.deleteMany({})
+        if (response.ok) {
+          for (let exchange in jsonResponse) {
+            const dbExchange = await ExchangeBase.findOne({ slug: exchange })
 
-        for (let exchange in jsonResponse) {
-          const dbExchange = new Exchange({ name: exchange })
+            if (dbExchange) {
+              dbExchange.networkFees = []
+              for (let crypto in jsonResponse[exchange]) {
+                let networks: INetworkFee[] = []
+                for (let network in jsonResponse[exchange][crypto]) {
+                  networks.push({
+                    network,
+                    fee: jsonResponse[exchange][crypto][network]
+                  })
+                }
 
-          for (let crypto in jsonResponse[exchange]) {
-            let networks: INetworkFee[] = []
-            for (let network in jsonResponse[exchange][crypto]) {
-              networks.push({
-                network,
-                fee: jsonResponse[exchange][crypto][network]
-              })
+                dbExchange.networkFees.push({
+                  crypto,
+                  networks: networks
+                })
+              }
+
+              await dbExchange.save()
             }
-            dbExchange.networkFees.push({
-              crypto,
-              networks: networks
-            })
           }
 
-          await dbExchange.save()
+          return res.status(200).json(jsonResponse)
         }
 
-        return res.status(200).json(jsonResponse)
+        return res
+          .status(400)
+          .json({ message: 'An error has been occurred while getting fees' })
       } catch (error) {
         return res.status(404).json({ message: error })
       }

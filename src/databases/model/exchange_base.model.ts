@@ -15,6 +15,8 @@ export interface ICryptoFee {
 
 export interface IExchangeBase {
   name: string
+  slug: string
+  URL: string
   logoURL: string
   availablePairs: IPair[]
   networkFees: ICryptoFee[] // Represents crypto withdrawal fees. Deposits is supposed to be free.

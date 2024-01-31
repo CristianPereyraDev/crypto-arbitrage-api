@@ -21,8 +21,13 @@ const p2pOrderSchema = new Schema<IP2POrder>(
       })
     ],
     merchantId: { type: String, required: true },
-    merchantName: { type: String, required: true },
-    userType: { type: String, required: true, enum: ['user', 'merchant'] },
+    merchantName: { type: String },
+    userType: {
+      type: String,
+      required: true,
+      enum: ['user', 'merchant'],
+      default: 'user'
+    },
     monthOrderCount: { type: Number },
     monthFinishRate: { type: Number },
     positiveRate: { type: Number },

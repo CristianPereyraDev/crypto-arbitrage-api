@@ -22,6 +22,8 @@ const exchangeBaseSchema = new Schema<IExchangeBase>(
       required: true,
       unique: true
     },
+    slug: { type: String },
+    URL: { type: String },
     logoURL: { type: String },
     depositFiatFee: { type: Number, default: 0 },
     withdrawalFiatFee: { type: Number, default: 0 },
