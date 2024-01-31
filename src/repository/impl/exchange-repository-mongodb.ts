@@ -10,6 +10,31 @@ export default class ExchangeRepositoryMongoDB
   extends ExchangeBaseRepository<IExchange>
   implements IExchangeRepository
 {
+  async getAllAvailablePairs (): Promise<IPair[]> {
+    const availablePairs: IPair[] = []
+
+    try {
+      const exchanges = await Exchange.find({})
+
+      for (let exchange of exchanges) {
+        for (let availablePair of exchange.pricesByPair) {
+          if (
+            !availablePairs.some(
+              pair =>
+                pair.crypto === availablePair.crypto &&
+                pair.fiat === availablePair.fiat
+            )
+          ) {
+            availablePairs.push(availablePair)
+          }
+        }
+      }
+
+      return availablePairs
+    } catch (error) {
+      return []
+    }
+  }
   async updateExchangePrices (
     exchangeName: string,
     baseAsset: string,

@@ -67,7 +67,16 @@ export default class ExchangeService {
   }
 
   async getAvailablePairs (): Promise<IPair[]> {
-    return await this.exchangeRepository.getAllAvailablePairs()
+    const exchangesPairs = await this.exchangeRepository.getAllAvailablePairs()
+    const brokeragePairs = await this.brokerageRepository.getAllAvailablePairs()
+    const allPairs = exchangesPairs.concat(brokeragePairs)
+    return allPairs.filter(
+      (outerPair, index) =>
+        allPairs.findIndex(
+          pair =>
+            pair.crypto === outerPair.crypto && pair.fiat === outerPair.fiat
+        ) === index
+    )
   }
 
   async getAllExchangesPricesBySymbol (
