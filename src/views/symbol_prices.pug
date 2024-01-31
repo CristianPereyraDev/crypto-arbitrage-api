@@ -9,7 +9,7 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                 if val.bid
                     span(class="price")=val.bid.toFixed(2)
                 else
-                    span="Not available"
+                    span(class="price")="Not available"
     div(class='symbol-table-ask')
         each val in pricesSortedByAsk
             div(class=`symbol-table-row ${val.exchangeType.toLowerCase()}`)
@@ -20,4 +20,4 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                 if val.ask
                     span(class="price")=val.ask.toFixed(2)
                 else
-                    span="Not available"
+                    span(class="price")="Not available"
