@@ -8,7 +8,7 @@ import ExchangeService from '../services/exchanges.service.js'
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
-import { ExchangeBase } from 'src/databases/mongodb/schema/exchange_base.schema.js'
+import { ExchangeBase } from '../databases/mongodb/schema/exchange_base.schema.js'
 
 const controller = Router()
 
