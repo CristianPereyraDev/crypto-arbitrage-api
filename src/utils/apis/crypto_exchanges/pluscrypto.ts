@@ -27,8 +27,8 @@ export async function getPairPrices (
 
       if (pairData) {
         return {
-          ask: pairData.buy,
-          bid: pairData.sell
+          ask: pairData.sell,
+          bid: pairData.buy
         }
       }
     }

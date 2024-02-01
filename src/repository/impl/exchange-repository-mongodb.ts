@@ -35,6 +35,7 @@ export default class ExchangeRepositoryMongoDB
       return []
     }
   }
+
   async updateExchangePrices (
     exchangeName: string,
     baseAsset: string,
@@ -167,16 +168,17 @@ export default class ExchangeRepositoryMongoDB
 
   private calculateOrderBookAvgPrice (orders: number[][], volume: number) {
     let avg = [0, volume]
+    let i = 0
 
-    for (let i = 0; i < orders.length; i++) {
+    while (i < orders.length && avg[1] > 0) {
       if (avg[1] > orders[i][1]) {
         avg[0] += orders[i][0] * orders[i][1]
         avg[1] -= orders[i][1]
       } else {
         avg[0] += orders[i][0] * avg[1]
         avg[1] = 0
-        break
       }
+      i++
     }
 
     return avg[0] / volume

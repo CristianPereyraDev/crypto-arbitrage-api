@@ -8,12 +8,17 @@ import { getCurrencyPairRates } from '../services/currency.service.js'
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
+import { val } from 'node_modules/cheerio/lib/api/attributes.js'
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),
   new BrokerageRepositoryMongoDB(),
   new ExchangeP2PRepositoryMongoDB()
 )
+
+type CryptoPairWebsocketConfig = {
+  volume: number
+}
 
 /**
  *
@@ -97,6 +102,17 @@ export default function (expressServer: Server | undefined) {
   wssWebApp.on('connection', async (websocket, connectionRequest) => {
     let exchangePricesTimeout: ReturnType<typeof setInterval>
     let currencyRatesTimeout: ReturnType<typeof setInterval>
+    const cryptoPairMsgConfig = new Map<string, CryptoPairWebsocketConfig>()
+
+    exchangePricesTimeout = setInterval(() => {
+      cryptoPairMsgConfig.forEach((value, key) => {
+        compileCryptoMessage(
+          key.split('-')[0],
+          key.split('-')[1],
+          value.volume
+        ).then(msg => websocket.send(msg))
+      })
+    }, 1000 * 6)
 
     websocket.on('error', error => {
       console.log('An error has ocurred in the websocket: %s', error)
@@ -114,20 +130,13 @@ export default function (expressServer: Server | undefined) {
       const parsedMessage = JSON.parse(message.toString())
 
       if (Object.hasOwn(parsedMessage, 'crypto')) {
-        compileCryptoMessage(
-          parsedMessage.crypto.asset,
-          parsedMessage.crypto.fiat,
-          parsedMessage.crypto.volume
-        ).then(msg => websocket.send(msg))
-
-        exchangePricesTimeout = setInterval(() => {
-          compileCryptoMessage(
-            parsedMessage.crypto.asset,
-            parsedMessage.crypto.fiat,
-            parsedMessage.crypto.volume
-          ).then(msg => websocket.send(msg))
-        }, 1000 * 6)
+        cryptoPairMsgConfig.set(
+          parsedMessage.crypto.asset + '-' + parsedMessage.crypto.fiat,
+          { volume: parsedMessage.crypto.volume }
+        )
       } else if (Object.hasOwn(parsedMessage, 'currency')) {
+        clearInterval(currencyRatesTimeout)
+
         compileCurrencyPairMessage(
           parsedMessage.currency.base,
           parsedMessage.currency.quote
@@ -163,14 +172,14 @@ async function compileCryptoMessage (
     fiat: fiat,
     pricesSortedByAsk: [...prices].sort((p1, p2) =>
       p1.totalAsk && p2.totalAsk
-        ? p2.totalAsk - p1.totalAsk
+        ? p1.totalAsk - p2.totalAsk
         : p1.totalAsk
         ? -1
         : 1
     ),
     pricesSortedByBid: [...prices].sort((p1, p2) =>
       p1.totalBid && p2.totalBid
-        ? p1.totalBid - p2.totalBid
+        ? p2.totalBid - p1.totalBid
         : p1.totalBid
         ? -1
         : 1

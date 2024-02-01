@@ -16,15 +16,15 @@ export async function getPairPrices (
       switch (asset) {
         case 'BTC':
           return {
-            ask: jsonResponse.bitcoin.ask,
-            bid: jsonResponse.bitcoin.bid
+            bid: jsonResponse.bitcoin.ask,
+            ask: jsonResponse.bitcoin.bid
           }
 
         case 'USDT':
-          return { ask: jsonResponse.usdt.ask, bid: jsonResponse.usdt.bid }
+          return { bid: jsonResponse.usdt.ask, ask: jsonResponse.usdt.bid }
 
         case 'DAI':
-          return { ask: jsonResponse.dai.ask, bid: jsonResponse.dai.bid }
+          return { bid: jsonResponse.dai.ask, ask: jsonResponse.dai.bid }
 
         default:
           return undefined
