@@ -1,13 +1,13 @@
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
-import ExchangeService from '../../services/exchanges.service.js'
+import ExchangeService from '../services/exchanges.service.js'
 import path from 'path'
 import pug from 'pug'
-import { IExchangePricingDTO } from '../../types/dto/index.js'
-import { getCurrencyPairRates } from '../../services/currency.service.js'
-import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js'
-import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js'
-import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js'
+import { IExchangePricingDTO } from '../types/dto/index.js'
+import { getCurrencyPairRates } from '../services/currency.service.js'
+import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),
@@ -150,22 +150,30 @@ async function compileCryptoMessage (
   volume: number
 ) {
   const prices: IExchangePricingDTO[] =
-    await exchangeService.getAllExchangesPricesBySymbol(asset, fiat)
+    await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume)
 
   const __dirname = new URL('.', import.meta.url).pathname
 
   const template = pug.compileFile(
-    path.resolve(__dirname, '../../views/symbol_prices.pug')
+    path.resolve(__dirname, '../views/symbol_prices.pug')
   )
 
   return template({
     asset: asset,
     fiat: fiat,
     pricesSortedByAsk: [...prices].sort((p1, p2) =>
-      p1.ask && p2.ask ? p1.ask - p2.ask : p1.ask ? -1 : 1
+      p1.totalAsk && p2.totalAsk
+        ? p2.totalAsk - p1.totalAsk
+        : p1.totalAsk
+        ? -1
+        : 1
     ),
     pricesSortedByBid: [...prices].sort((p1, p2) =>
-      p1.bid && p2.bid ? p2.bid - p1.bid : p1.bid ? -1 : 1
+      p1.totalBid && p2.totalBid
+        ? p1.totalBid - p2.totalBid
+        : p1.totalBid
+        ? -1
+        : 1
     )
   })
 }
@@ -179,7 +187,7 @@ async function compileCurrencyPairMessage (
   const __dirname = new URL('.', import.meta.url).pathname
 
   const template = pug.compileFile(
-    path.resolve(__dirname, '../../views/currency_pair_prices.pug')
+    path.resolve(__dirname, '../views/currency_pair_prices.pug')
   )
 
   return template({
