@@ -1,6 +1,7 @@
 import { Exchange } from '../schema/exchange.schema.js'
+import { ExchangeBase } from '../schema/exchange_base.schema.js'
 
-export enum Crypocurrency {
+export enum Cryptocurrency {
   BTC,
   ETH,
   USDT
@@ -20,7 +21,7 @@ export async function getExchangesFees (): Promise<{
   [exchange: string]: IExchangeFees
 }> {
   try {
-    const exchanges = await Exchange.find({}).exec()
+    const exchanges = await ExchangeBase.find({}).exec()
 
     const fees = Object.fromEntries(
       exchanges?.map(exchange => [

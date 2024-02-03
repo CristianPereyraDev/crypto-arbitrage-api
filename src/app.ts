@@ -12,7 +12,7 @@ import {
   collectP2POrdersToDB
 } from './utils/pricing_collector/pricing_collector.js'
 import ExchangeService from './services/exchanges.service.js'
-import websocket from './websocket/index.js'
+import websocketSetup from './websocket/index.js'
 import ExchangeRepositoryMongoDB from './repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from './repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from './repository/impl/exchange-p2p-repository-mongodb.js'
@@ -25,7 +25,7 @@ appSetup(app)
   .then(server => {
     securitySetup(app, express)
     routerSetup(app)
-    websocket(server)
+    websocketSetup(server)
 
     // Crypto rates collector interval
     setInterval(() => {
