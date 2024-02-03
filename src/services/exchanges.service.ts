@@ -8,7 +8,7 @@ import { ExchangeCollectorReturnType } from '../utils/apis/crypto_exchanges/inde
 import { IExchangeRepository } from '../repository/exchange-repository.js'
 import { IBrokerageRepository } from '../repository/brokerage-repository.js'
 import { IExchangeP2PRepository } from '../repository/exchange-p2p-repository.js'
-import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+import { IExchangeFees } from '../databases/mongodb/utils/queries.util.js'
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null
 

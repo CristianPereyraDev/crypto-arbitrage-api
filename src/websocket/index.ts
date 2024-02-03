@@ -14,7 +14,7 @@ import { val } from 'node_modules/cheerio/lib/api/attributes.js'
 import {
   calculateTotalAsk,
   calculateTotalBid
-} from 'src/utils/arbitrages/arbitrage-calculator.js'
+} from '../utils/arbitrages/arbitrage-calculator.js'
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),

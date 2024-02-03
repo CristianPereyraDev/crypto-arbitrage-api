@@ -5,7 +5,7 @@ import { IExchangeRepository } from '../exchange-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js'
 import { ExchangeCollectorReturnType } from '../../utils/apis/crypto_exchanges/index.js'
-import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
 
 export default class ExchangeRepositoryMongoDB
   extends ExchangeBaseRepository<IExchange>

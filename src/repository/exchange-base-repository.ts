@@ -1,4 +1,4 @@
-import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+import { IExchangeFees } from '../databases/mongodb/utils/queries.util.js'
 import { IPair } from '../databases/model/exchange_base.model.js'
 
 export abstract class ExchangeBaseRepository<T> {

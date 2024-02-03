@@ -4,7 +4,7 @@ import { IExchangePricingDTO } from '../../types/dto/index.js'
 import { IBrokerageRepository } from '../brokerage-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { Brokerage } from '../../databases/mongodb/schema/brokerage_schema.js'
-import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
 
 export default class BrokerageRepositoryMongoDB
   extends ExchangeBaseRepository<IBrokerage>

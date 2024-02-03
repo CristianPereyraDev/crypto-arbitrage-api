@@ -6,8 +6,8 @@ import {
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { IExchangeP2PRepository } from '../exchange-p2p-repository.js'
 import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js'
-import { IPair } from 'src/databases/model/exchange_base.model.js'
-import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+import { IPair } from '../../databases/model/exchange_base.model.js'
+import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
 
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>
