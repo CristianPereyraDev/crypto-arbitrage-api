@@ -1,6 +1,3 @@
-import { Exchange } from '../schema/exchange.schema.js'
-import { ExchangeBase } from '../schema/exchange_base.schema.js'
-
 export enum Cryptocurrency {
   BTC,
   ETH,
@@ -15,44 +12,4 @@ export interface IExchangeFees {
   networkFees: { [key: string]: { [key: string]: number } }
   buyFee: number
   sellFee: number
-}
-
-export async function getExchangesFees (): Promise<{
-  [exchange: string]: IExchangeFees
-}> {
-  try {
-    const exchanges = await ExchangeBase.find({}).exec()
-
-    const fees = Object.fromEntries(
-      exchanges?.map(exchange => [
-        exchange.name.toLowerCase().replaceAll(' ', ''),
-        Object.fromEntries([
-          ['depositFiatFee', exchange.depositFiatFee],
-          ['withdrawalFiatFee', exchange.withdrawalFiatFee],
-          ['makerFee', exchange.makerFee],
-          ['takerFee', exchange.takerFee],
-          [
-            'networkFees',
-            Object.fromEntries(
-              exchange.networkFees.map(cryptoFee => [
-                cryptoFee.crypto,
-                Object.fromEntries(
-                  cryptoFee.networks.map(network => [
-                    network.network,
-                    network.fee
-                  ])
-                )
-              ])
-            )
-          ],
-          ['buyFee', exchange.buyFee],
-          ['sellFee', exchange.sellFee]
-        ]) as IExchangeFees
-      ])
-    )
-
-    return fees
-  } catch (error) {
-    return {}
-  }
 }

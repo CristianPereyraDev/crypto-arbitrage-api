@@ -2,7 +2,6 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 import { INetworkFee } from '../databases/model/exchange_base.model.js'
-import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
 import { performScraping } from '../utils/scraping/cryptoya.js'
 import ExchangeService from '../services/exchanges.service.js'
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
@@ -83,7 +82,7 @@ controller
   )
   .get('/fees', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const fees = await getExchangesFees()
+      const fees = await exchangeService.getAllFees()
 
       return res.status(200).json(fees)
     } catch (error) {

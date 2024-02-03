@@ -7,11 +7,15 @@ import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { IExchangeP2PRepository } from '../exchange-p2p-repository.js'
 import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js'
 import { IPair } from 'src/databases/model/exchange_base.model.js'
+import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
 
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>
   implements IExchangeP2PRepository
 {
+  getExchangesFees (): Promise<{ [exchange: string]: IExchangeFees }> {
+    throw new Error('Method not implemented.')
+  }
   getAllAvailablePairs (): Promise<IPair[]> {
     throw new Error('Method not implemented.')
   }

@@ -5,11 +5,49 @@ import { IExchangeRepository } from '../exchange-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js'
 import { ExchangeCollectorReturnType } from '../../utils/apis/crypto_exchanges/index.js'
+import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
 
 export default class ExchangeRepositoryMongoDB
   extends ExchangeBaseRepository<IExchange>
   implements IExchangeRepository
 {
+  async getExchangesFees (): Promise<{ [exchange: string]: IExchangeFees }> {
+    try {
+      const exchanges = await Exchange.find({}).exec()
+
+      const fees = Object.fromEntries(
+        exchanges?.map(exchange => [
+          exchange.name.toLowerCase().replaceAll(' ', ''),
+          Object.fromEntries([
+            ['depositFiatFee', exchange.depositFiatFee],
+            ['withdrawalFiatFee', exchange.withdrawalFiatFee],
+            ['makerFee', exchange.makerFee],
+            ['takerFee', exchange.takerFee],
+            [
+              'networkFees',
+              Object.fromEntries(
+                exchange.networkFees.map(cryptoFee => [
+                  cryptoFee.crypto,
+                  Object.fromEntries(
+                    cryptoFee.networks.map(network => [
+                      network.network,
+                      network.fee
+                    ])
+                  )
+                ])
+              )
+            ],
+            ['buyFee', exchange.buyFee],
+            ['sellFee', exchange.sellFee]
+          ]) as IExchangeFees
+        ])
+      )
+
+      return fees
+    } catch (error) {
+      return {}
+    }
+  }
   async getAllAvailablePairs (): Promise<IPair[]> {
     const availablePairs: IPair[] = []
 

@@ -1,6 +1,16 @@
-import { getExchangesFees } from '../databases/mongodb/utils/queries.util.js'
-import { type IExchangePairPricing } from '../types/exchange.js'
-import { IExchangePricingDTO } from '../types/dto/index.js'
+import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
+import { type IExchangePairPricing } from '../../types/exchange.js'
+import { IExchangePricingDTO } from '../../types/dto/index.js'
+import ExchangeService from '../../services/exchanges.service.js'
+import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js'
+import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js'
+import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js'
+
+const exchangeService = new ExchangeService(
+  new ExchangeRepositoryMongoDB(),
+  new BrokerageRepositoryMongoDB(),
+  new ExchangeP2PRepositoryMongoDB()
+)
 
 export interface ICryptoArbitrageResult {
   askExchange: string
@@ -19,7 +29,7 @@ export async function calculateArbitragesFromPairData (
   const arbitrages: ICryptoArbitrageResult[] = []
 
   // Get exchange fees. Se supone que los fees son porcentajes (hay que dividir por 100).
-  const fees = await getExchangesFees()
+  const fees = await exchangeService.getAllFees()
 
   const exchangesArr: { exchange: string; value: IExchangePricingDTO }[] = []
   data.forEach((value, exchange) => {
@@ -118,4 +128,43 @@ export async function calculateArbitragesFromPairData (
   }
 
   return arbitrages
+}
+
+export function calculateTotalBid ({
+  baseBid,
+  fees,
+  includeWithdrawalFiatFee
+}: {
+  baseBid: number
+  fees?: IExchangeFees
+  includeWithdrawalFiatFee: boolean
+}) {
+  if (fees !== undefined) {
+    const totalFees = includeWithdrawalFiatFee
+      ? fees.sellFee + fees.withdrawalFiatFee
+      : fees.sellFee
+    return baseBid * (1 - totalFees / 100)
+  } else {
+    return baseBid
+  }
+}
+
+export function calculateTotalAsk ({
+  baseAsk,
+  fees,
+  includeDepositFiatFee
+}: {
+  baseAsk: number
+  fees?: IExchangeFees
+  includeDepositFiatFee: boolean
+}) {
+  if (fees !== undefined) {
+    const totalFees = includeDepositFiatFee
+      ? fees.buyFee + fees.depositFiatFee
+      : fees.buyFee
+
+    return baseAsk * (1 + totalFees / 100)
+  } else {
+    return baseAsk
+  }
 }

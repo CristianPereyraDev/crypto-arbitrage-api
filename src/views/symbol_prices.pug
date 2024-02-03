@@ -7,7 +7,7 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                     span(class="exchange-type")=val.exchangeType
                     span(class="exchange-name")=val.exchange                    
                 if val.ask
-                    span(class="price")=val.ask.toFixed(2)
+                    span(class="price")=val.totalAsk.toFixed(2)
                 else
                     span(class="price")="Not available"
     div(class='symbol-table-bid sell')
@@ -18,6 +18,6 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                     span(class="exchange-type")=exchangeType
                     span(class="exchange-name")=val.exchange
                 if val.bid
-                    span(class="price")=val.bid.toFixed(2)
+                    span(class="price")=val.totalBid.toFixed(2)
                 else
                     span(class="price")="Not available"

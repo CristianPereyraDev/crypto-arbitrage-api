@@ -4,11 +4,50 @@ import { IExchangePricingDTO } from '../../types/dto/index.js'
 import { IBrokerageRepository } from '../brokerage-repository.js'
 import { ExchangeBaseRepository } from '../exchange-base-repository.js'
 import { Brokerage } from '../../databases/mongodb/schema/brokerage_schema.js'
+import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
 
 export default class BrokerageRepositoryMongoDB
   extends ExchangeBaseRepository<IBrokerage>
   implements IBrokerageRepository
 {
+  async getExchangesFees (): Promise<{ [exchange: string]: IExchangeFees }> {
+    try {
+      const exchanges = await Brokerage.find({}).exec()
+
+      const fees = Object.fromEntries(
+        exchanges?.map(exchange => [
+          exchange.name.toLowerCase().replaceAll(' ', ''),
+          Object.fromEntries([
+            ['depositFiatFee', exchange.depositFiatFee],
+            ['withdrawalFiatFee', exchange.withdrawalFiatFee],
+            ['makerFee', exchange.makerFee],
+            ['takerFee', exchange.takerFee],
+            [
+              'networkFees',
+              Object.fromEntries(
+                exchange.networkFees.map(cryptoFee => [
+                  cryptoFee.crypto,
+                  Object.fromEntries(
+                    cryptoFee.networks.map(network => [
+                      network.network,
+                      network.fee
+                    ])
+                  )
+                ])
+              )
+            ],
+            ['buyFee', exchange.buyFee],
+            ['sellFee', exchange.sellFee]
+          ]) as IExchangeFees
+        ])
+      )
+
+      return fees
+    } catch (error) {
+      return {}
+    }
+  }
+
   async getAllAvailablePairs (): Promise<IPair[]> {
     const availablePairs: IPair[] = []
 
@@ -34,6 +73,7 @@ export default class BrokerageRepositoryMongoDB
       return []
     }
   }
+
   async updateBrokeragePrices (
     exchangeName: string,
     baseAsset: string,

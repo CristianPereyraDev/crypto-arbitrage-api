@@ -3,7 +3,7 @@ import { getBrokeragePairPrices } from '../apis/crypto_exchanges/cryptoya.js'
 import {
   ICryptoArbitrageResult,
   calculateArbitragesFromPairData
-} from '../arbitrage-calculator.js'
+} from '../arbitrages/arbitrage-calculator.js'
 import {
   BrokerageCollectorReturnType,
   ExchangeCollectorReturnType,

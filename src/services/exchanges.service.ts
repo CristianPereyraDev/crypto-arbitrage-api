@@ -8,6 +8,9 @@ import { ExchangeCollectorReturnType } from '../utils/apis/crypto_exchanges/inde
 import { IExchangeRepository } from '../repository/exchange-repository.js'
 import { IBrokerageRepository } from '../repository/brokerage-repository.js'
 import { IExchangeP2PRepository } from '../repository/exchange-p2p-repository.js'
+import { IExchangeFees } from 'src/databases/mongodb/utils/queries.util.js'
+
+export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null
 
 export default class ExchangeService {
   constructor (
@@ -101,5 +104,19 @@ export default class ExchangeService {
 
   async getAvailableBrokerages () {
     return this.brokerageRepository.getAllExchanges()
+  }
+
+  async getAllFees () {
+    const allFees: ExchangesFeesType = {}
+    const feesArray = await Promise.all([
+      this.brokerageRepository.getExchangesFees(),
+      this.exchangeRepository.getExchangesFees()
+    ])
+
+    feesArray.forEach(exchangeFees => {
+      Object.assign(allFees, exchangeFees)
+    })
+
+    return allFees
   }
 }
