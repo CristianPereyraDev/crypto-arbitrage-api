@@ -10,11 +10,12 @@ import { getCurrencyPairRates } from '../services/currency.service.js'
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
 import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
-import { val } from 'node_modules/cheerio/lib/api/attributes.js'
 import {
   calculateTotalAsk,
   calculateTotalBid
 } from '../utils/arbitrages/arbitrage-calculator.js'
+import { Request } from 'express'
+import { validToken } from '../auth/index.js'
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),
@@ -31,7 +32,7 @@ type CryptoPairWebsocketConfig = {
  * @param expressServer the express http server to binding the websocket server
  * @returns
  */
-export default function (expressServer: Server | undefined) {
+export default function configure (expressServer: Server | undefined) {
   if (expressServer === undefined) return
 
   const wss = new WebSocketServer({ noServer: true, path: '/websocket' })
@@ -40,20 +41,27 @@ export default function (expressServer: Server | undefined) {
     path: '/websocket/web'
   })
 
-  expressServer.on('upgrade', (request, socket, head) => {
-    if (request.url !== undefined) {
-      const pathname = request.url
+  expressServer.on('upgrade', (req: Request, socket, head) => {
+    if (!!req.url) {
+      const url = new URL(req.url, `ws://${req.headers.host}`)
+      const at = url.searchParams.get('at')
 
-      if (pathname === '/websocket') {
-        wss.handleUpgrade(request, socket, head, websocket => {
-          wss.emit('connection', websocket, request)
-        })
-      } else if (pathname === '/websocket/web') {
-        wssWebApp.handleUpgrade(request, socket, head, websocket => {
-          wssWebApp.emit('connection', websocket, request)
-        })
+      if (at && validToken(at)) {
+        if (url.pathname === '/websocket') {
+          wss.handleUpgrade(req, socket, head, websocket => {
+            wss.emit('connection', websocket, req)
+          })
+        } else if (url.pathname === '/websocket/web') {
+          wssWebApp.handleUpgrade(req, socket, head, websocket => {
+            wssWebApp.emit('connection', websocket, req)
+          })
+        } else {
+          socket.destroy()
+        }
       } else {
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
         socket.destroy()
+        return
       }
     }
   })

@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js'
 import { INetworkFee } from '../databases/model/exchange_base.model.js'
@@ -146,6 +147,29 @@ controller
         res.status(200).json({ success: true, message: 'ok', data: response })
       else
         res.status(400).json({ success: false, message: 'error', data: null })
+    }
+  )
+  .post(
+    '/apiToken',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const apiKey = req.header('x-api-key')
+      const secret = process.env.WEBSOCKET_SECRET
+
+      if (!apiKey) {
+        return res.status(400).json({ message: 'Missing API key in header' })
+      }
+
+      if (apiKey !== process.env.ROOT_API_KEY) {
+        return res.status(400).json({ message: 'Invalid API key' })
+      }
+
+      if (secret) {
+        const token = jwt.sign({ foo: 'bar' }, secret, { expiresIn: 5 })
+
+        return res.status(200).json({ token })
+      } else {
+        return res.status(500).json({ message: 'Error' })
+      }
     }
   )
 
