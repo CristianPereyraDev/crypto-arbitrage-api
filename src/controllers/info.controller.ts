@@ -164,7 +164,7 @@ controller
       }
 
       if (secret) {
-        const token = jwt.sign({ foo: 'bar' }, secret, { expiresIn: 5 })
+        const token = jwt.sign({ foo: 'bar' }, secret, { expiresIn: 30 })
 
         return res.status(200).json({ token })
       } else {

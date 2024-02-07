@@ -15,7 +15,7 @@ import {
   calculateTotalBid
 } from '../utils/arbitrages/arbitrage-calculator.js'
 import { Request } from 'express'
-import { validToken } from '../auth/index.js'
+import { validWebsocketToken } from '../auth/index.js'
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),
@@ -46,7 +46,7 @@ export default function configure (expressServer: Server | undefined) {
       const url = new URL(req.url, `ws://${req.headers.host}`)
       const at = url.searchParams.get('at')
 
-      if (at && validToken(at)) {
+      if (at && validWebsocketToken(at)) {
         if (url.pathname === '/websocket') {
           wss.handleUpgrade(req, socket, head, websocket => {
             wss.emit('connection', websocket, req)
