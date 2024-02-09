@@ -36,7 +36,7 @@ const exchangeService = new ExchangeService(
 
 // Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
 
-export async function collectArbitragesToDB (): Promise<void> {
+export async function collectArbitragesToDB(): Promise<void> {
   // for (const pair of currencyPairs) {
   //   try {
   //     const prices = await getBrokeragePairPrices(pair.crypto, pair.fiat, 0.1)
@@ -61,7 +61,7 @@ export async function collectArbitragesToDB (): Promise<void> {
   // }
 }
 
-export async function collectArbitrages (
+export async function collectArbitrages(
   crypto: string,
   fiat: string,
   volume: number
@@ -78,9 +78,9 @@ export async function collectArbitrages (
   return []
 }
 
-export async function collectP2POrdersToDB () {
+export async function collectP2POrdersToDB() {
   try {
-    const p2pExchanges = await P2PExchange.find({})
+    const p2pExchanges = await P2PExchange.find({ available: true })
 
     for (let p2pExchange of p2pExchanges) {
       const orderCollector = p2pOrderCollectors.get(p2pExchange.name)
@@ -124,7 +124,7 @@ type PromiseAllElemResultType = {
   prices: ExchangeCollectorReturnType | undefined
 }
 
-export async function collectCryptoExchangesPricesToDB () {
+export async function collectCryptoExchangesPricesToDB() {
   try {
     const exchanges: IExchange[] = await exchangeService.getAvailableExchanges()
     const collectors: Promise<PromiseAllElemResultType>[] = []
@@ -173,7 +173,7 @@ type BrokeragePromiseAllElemResultType = {
   prices: BrokerageCollectorReturnType | undefined
 }
 
-export async function collectCryptoBrokeragesPricesToDB () {
+export async function collectCryptoBrokeragesPricesToDB() {
   try {
     const exchanges = await exchangeService.getAvailableBrokerages()
     const collectors: Promise<BrokeragePromiseAllElemResultType>[] = []
@@ -218,7 +218,7 @@ export async function collectCryptoBrokeragesPricesToDB () {
 
 // Currency exchanges prices (USD-ARS, USD-EUR, ...)
 
-export async function collectCurrencyExchangesPricesToDB () {
+export async function collectCurrencyExchangesPricesToDB() {
   currencyPriceCollectors.forEach((collector, symbol) => {
     const [currencyBase, currencyQuote] = symbol.split('-')
     collector().then(rates => {

@@ -13,13 +13,17 @@ import { IExchangeFees } from '../databases/mongodb/utils/queries.util.js'
 export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null
 
 export default class ExchangeService {
-  constructor (
+  constructor(
     private readonly exchangeRepository: IExchangeRepository,
     private readonly brokerageRepository: IBrokerageRepository,
     private readonly exchangeP2PRepository: IExchangeP2PRepository
-  ) {}
+  ) { }
 
-  async updateP2POrders (
+  async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2POrder[]> {
+    return await this.exchangeP2PRepository.getP2POrders(exchangeName, pair)
+  }
+
+  async updateP2POrders(
     exchangeName: string,
     baseAsset: string,
     fiat: string,
@@ -35,7 +39,7 @@ export default class ExchangeService {
     )
   }
 
-  async updateBrokeragePrices (
+  async updateBrokeragePrices(
     exchangeName: string,
     baseAsset: string,
     quoteAsset: string,
@@ -51,7 +55,7 @@ export default class ExchangeService {
     )
   }
 
-  async updateExchangePrices (
+  async updateExchangePrices(
     exchangeName: string,
     baseAsset: string,
     quoteAsset: string,
@@ -65,11 +69,11 @@ export default class ExchangeService {
     )
   }
 
-  async removeOlderPrices () {
+  async removeOlderPrices() {
     this.exchangeRepository.removeOlderPrices()
   }
 
-  async getAvailablePairs (): Promise<IPair[]> {
+  async getAvailablePairs(): Promise<IPair[]> {
     const exchangesPairs = await this.exchangeRepository.getAllAvailablePairs()
     const brokeragePairs = await this.brokerageRepository.getAllAvailablePairs()
     const allPairs = exchangesPairs.concat(brokeragePairs)
@@ -82,7 +86,7 @@ export default class ExchangeService {
     )
   }
 
-  async getAllExchangesPricesBySymbol (
+  async getAllExchangesPricesBySymbol(
     asset: string,
     fiat: string,
     volume: number = 1.0
@@ -98,15 +102,15 @@ export default class ExchangeService {
     return prices.flat()
   }
 
-  async getAvailableExchanges () {
+  async getAvailableExchanges() {
     return this.exchangeRepository.getAllExchanges()
   }
 
-  async getAvailableBrokerages () {
+  async getAvailableBrokerages() {
     return this.brokerageRepository.getAllExchanges()
   }
 
-  async getAllFees () {
+  async getAllFees() {
     const allFees: ExchangesFeesType = {}
     const feesArray = await Promise.all([
       this.brokerageRepository.getExchangesFees(),
