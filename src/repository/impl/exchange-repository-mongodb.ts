@@ -9,9 +9,8 @@ import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
 
 export default class ExchangeRepositoryMongoDB
   extends ExchangeBaseRepository<IExchange>
-  implements IExchangeRepository
-{
-  async getExchangesFees (): Promise<{ [exchange: string]: IExchangeFees }> {
+  implements IExchangeRepository {
+  async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
     try {
       const exchanges = await Exchange.find({}).exec()
 
@@ -48,14 +47,14 @@ export default class ExchangeRepositoryMongoDB
       return {}
     }
   }
-  async getAllAvailablePairs (): Promise<IPair[]> {
+  async getAllAvailablePairs(): Promise<IPair[]> {
     const availablePairs: IPair[] = []
 
     try {
       const exchanges = await Exchange.find({})
 
-      for (let exchange of exchanges) {
-        for (let availablePair of exchange.pricesByPair) {
+      for (const exchange of exchanges) {
+        for (const availablePair of exchange.pricesByPair) {
           if (
             !availablePairs.some(
               pair =>
@@ -74,7 +73,7 @@ export default class ExchangeRepositoryMongoDB
     }
   }
 
-  async updateExchangePrices (
+  async updateExchangePrices(
     exchangeName: string,
     baseAsset: string,
     quoteAsset: string,
@@ -108,7 +107,7 @@ export default class ExchangeRepositoryMongoDB
     }
   }
 
-  async removeOlderPrices (): Promise<void> {
+  async removeOlderPrices(): Promise<void> {
     try {
       await Exchange.updateMany(
         {},
@@ -125,7 +124,7 @@ export default class ExchangeRepositoryMongoDB
     }
   }
 
-  async getAllPricesByPair (
+  async getAllPricesByPair(
     pair: IPair,
     volume: number
   ): Promise<IExchangePricingDTO[]> {
@@ -191,11 +190,12 @@ export default class ExchangeRepositoryMongoDB
     }
   }
 
-  getExchangeByName (name: string): Promise<IExchange> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getExchangeByName(name: string): Promise<IExchange> {
     throw new Error('Method not implemented.')
   }
 
-  async getAllExchanges (): Promise<IExchange[]> {
+  async getAllExchanges(): Promise<IExchange[]> {
     try {
       return await Exchange.find({ available: true })
     } catch (error) {
@@ -204,8 +204,8 @@ export default class ExchangeRepositoryMongoDB
     }
   }
 
-  private calculateOrderBookAvgPrice (orders: number[][], volume: number) {
-    let avg = [0, volume]
+  private calculateOrderBookAvgPrice(orders: number[][], volume: number) {
+    const avg = [0, volume]
     let i = 0
 
     while (i < orders.length && avg[1] > 0) {

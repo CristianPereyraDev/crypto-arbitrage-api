@@ -68,6 +68,7 @@ const routerSetup = async (app: Express): Promise<Express> => {
   })
 
   const sessionStore = MongoStore.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client: mongoose.connection.getClient() as any
   })
 

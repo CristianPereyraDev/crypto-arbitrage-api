@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { fetchWithTimeout } from '../../../utils/network.utils.js'
 import { ExchangeCollectorReturnType } from './index.js'
 
-export async function getPairPrices (
+export async function getPairPrices(
   asset: string,
   fiat: string
 ): Promise<ExchangeCollectorReturnType | undefined> {

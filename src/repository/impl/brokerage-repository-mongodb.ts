@@ -8,9 +8,8 @@ import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js'
 
 export default class BrokerageRepositoryMongoDB
   extends ExchangeBaseRepository<IBrokerage>
-  implements IBrokerageRepository
-{
-  async getExchangesFees (): Promise<{ [exchange: string]: IExchangeFees }> {
+  implements IBrokerageRepository {
+  async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
     try {
       const exchanges = await Brokerage.find({}).exec()
 
@@ -48,14 +47,14 @@ export default class BrokerageRepositoryMongoDB
     }
   }
 
-  async getAllAvailablePairs (): Promise<IPair[]> {
+  async getAllAvailablePairs(): Promise<IPair[]> {
     const availablePairs: IPair[] = []
 
     try {
       const exchanges = await Brokerage.find({})
 
-      for (let exchange of exchanges) {
-        for (let availablePair of exchange.pricesByPair) {
+      for (const exchange of exchanges) {
+        for (const availablePair of exchange.pricesByPair) {
           if (
             !availablePairs.some(
               pair =>
@@ -74,7 +73,7 @@ export default class BrokerageRepositoryMongoDB
     }
   }
 
-  async updateBrokeragePrices (
+  async updateBrokeragePrices(
     exchangeName: string,
     baseAsset: string,
     quoteAsset: string,
@@ -106,11 +105,11 @@ export default class BrokerageRepositoryMongoDB
     }
   }
 
-  removeOlderPrices (): Promise<void> {
+  removeOlderPrices(): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  async getAllPricesByPair (pair: IPair): Promise<IExchangePricingDTO[]> {
+  async getAllPricesByPair(pair: IPair): Promise<IExchangePricingDTO[]> {
     try {
       const exchanges = await Brokerage.find({
         'pricesByPair.crypto': pair.crypto,
@@ -157,11 +156,12 @@ export default class BrokerageRepositoryMongoDB
     }
   }
 
-  getExchangeByName (name: string): Promise<IBrokerage> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getExchangeByName(name: string): Promise<IBrokerage> {
     throw new Error('Method not implemented.')
   }
 
-  async getAllExchanges (): Promise<IBrokerage[]> {
+  async getAllExchanges(): Promise<IBrokerage[]> {
     try {
       return await Brokerage.find({ available: true })
     } catch (error) {

@@ -1,6 +1,7 @@
 import * as argenbtc from './argenbtc.js'
 import * as binance from './binance.js'
 import * as binancep2p from './p2p/binance.js'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getBitgetPairPrices } from './p2p/bitget.js'
 import * as bitmonedero from './bitmonedero.js'
 import * as cryptomarket from './cryptomarket.js'
@@ -9,6 +10,7 @@ import * as saldo from './saldo.js'
 import * as trubit from './trubit.js'
 import * as bitso from './bitso.js'
 import * as pluscrypto from './pluscrypto.js'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as bybit from './bybit.js'
 import * as fiwind from './fiwind.js'
 import * as tiendacrypto from './tiendacrypto.js'

@@ -21,6 +21,7 @@ const exchangeService = new ExchangeService(
 controller
   .get(
     '/pairs_available',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       const availablePairs = await exchangeService.getAvailablePairs()
       const response: string[] = availablePairs.map(
@@ -35,6 +36,7 @@ controller
   )
   .get(
     '/exchanges',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const exchanges = await Exchange.find({}).exec()
@@ -47,6 +49,7 @@ controller
   )
   .get(
     '/exchanges/:name',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       const { name } = req.params
 
@@ -61,6 +64,7 @@ controller
   )
   .get(
     '/exchanges_available/:crypto-:fiat',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       const { crypto, fiat } = req.params
       try {
@@ -81,6 +85,7 @@ controller
       }
     }
   )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   .get('/fees', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const fees = await exchangeService.getAllFees()
@@ -92,20 +97,22 @@ controller
   })
   .put(
     '/update_fees',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const response = await fetch('https://criptoya.com/api/fees')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const jsonResponse: any = await response.json()
 
         if (response.ok) {
-          for (let exchange in jsonResponse) {
+          for (const exchange in jsonResponse) {
             const dbExchange = await ExchangeBase.findOne({ slug: exchange })
 
             if (dbExchange) {
               dbExchange.networkFees = []
-              for (let crypto in jsonResponse[exchange]) {
-                let networks: INetworkFee[] = []
-                for (let network in jsonResponse[exchange][crypto]) {
+              for (const crypto in jsonResponse[exchange]) {
+                const networks: INetworkFee[] = []
+                for (const network in jsonResponse[exchange][crypto]) {
                   networks.push({
                     network,
                     fee: jsonResponse[exchange][crypto][network]
@@ -139,18 +146,21 @@ controller
       const scraping = await performScraping()
       const response: { [symbol: string]: { [id: string]: string } } = {}
 
-      for (let symbol in scraping) {
+      for (const symbol in scraping) {
         response[symbol] = scraping[symbol]['ids']
       }
 
-      if (scraping !== null)
+      if (scraping !== null) {
         res.status(200).json({ success: true, message: 'ok', data: response })
+        next()
+      }
       else
         res.status(400).json({ success: false, message: 'error', data: null })
     }
   )
   .post(
     '/apiToken',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
       const apiKey = req.header('x-api-key')
       const secret = process.env.WEBSOCKET_SECRET

@@ -5,7 +5,7 @@ import { Server } from 'http'
 const appSetup = async (app: Express): Promise<Server | undefined> => {
   try {
     // Set database connection
-    const mongoClient = await mongooseConnect()
+    await mongooseConnect()
 
     const APP_PORT =
       process.env.PORT !== undefined ? Number(process.env.PORT) : 3000

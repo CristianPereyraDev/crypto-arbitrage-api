@@ -11,10 +11,13 @@ const client = new RestClientV2({
   apiPass: API_PASS
 })
 
-let url = 'https://api.bitget.com/api/v2/p2p/merchantList?online=yes&limit=20'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const url = 'https://api.bitget.com/api/v2/p2p/merchantList?online=yes&limit=20'
 
-export async function getBitgetPairPrices (
+export async function getBitgetPairPrices(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   asset: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fiat: string
 ): Promise<ExchangeCollectorReturnType | undefined> {
   try {

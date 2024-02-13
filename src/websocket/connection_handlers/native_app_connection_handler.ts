@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js';
 import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js';
 import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js';
 import ExchangeService, {
-  ExchangesFeesType,
+  type ExchangesFeesType,
 } from '../../services/exchanges.service.js';
 import {
   CryptoP2PWebSocketConfig,
@@ -17,8 +18,6 @@ import { IExchangePricingDTO } from '../../types/dto/index.js';
 
 import { WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import pug from 'pug';
-import path from 'path';
 
 const exchangeService = new ExchangeService(
   new ExchangeRepositoryMongoDB(),
@@ -42,7 +41,7 @@ export async function wsNativeConnectionHandler(
     .then((value) => (fees = value))
     .catch(() => (fees = null));
 
-  let exchangePricesTimeout = setInterval(() => {
+  const exchangePricesTimeout = setInterval(() => {
     cryptoPairMsgConfig.forEach((value, key) => {
       makeCryptoMessage(
         key.split('-')[0],
@@ -54,7 +53,7 @@ export async function wsNativeConnectionHandler(
     });
   }, 1000 * 6);
 
-  let p2pOrdersTimeout = setInterval(() => {
+  const p2pOrdersTimeout = setInterval(() => {
     cryptoP2PMsgConfig.forEach((msgConfig, p2pExchangeName) => {
       exchangeService
         .getP2POrders(p2pExchangeName, { crypto: 'USDT', fiat: 'ARS' })
@@ -113,10 +112,10 @@ export async function wsNativeConnectionHandler(
   });
 }
 
-async function makeP2PMessage(
-  p2pExchangeName: string,
-  config: CryptoP2PWebSocketConfig
-) {}
+// async function makeP2PMessage(
+//   p2pExchangeName: string,
+//   config: CryptoP2PWebSocketConfig
+// ) { }
 
 async function makeCryptoMessage(
   asset: string,
@@ -130,26 +129,26 @@ async function makeCryptoMessage(
   const pricesWithFees =
     fees && includeFees
       ? prices.map((price) => {
-          const exchangeFees =
-            fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+        const exchangeFees =
+          fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
 
-          if (exchangeFees !== undefined) {
-            return {
-              ...price,
-              totalAsk: calculateTotalAsk({
-                baseAsk: price.ask,
-                fees: exchangeFees,
-                includeDepositFiatFee: false,
-              }),
-              totalBid: calculateTotalBid({
-                baseBid: price.bid,
-                fees: exchangeFees,
-                includeWithdrawalFiatFee: false,
-              }),
-            };
-          }
-          return price;
-        })
+        if (exchangeFees !== undefined) {
+          return {
+            ...price,
+            totalAsk: calculateTotalAsk({
+              baseAsk: price.ask,
+              fees: exchangeFees,
+              includeDepositFiatFee: false,
+            }),
+            totalBid: calculateTotalBid({
+              baseBid: price.bid,
+              fees: exchangeFees,
+              includeWithdrawalFiatFee: false,
+            }),
+          };
+        }
+        return price;
+      })
       : prices;
 
   return JSON.stringify({

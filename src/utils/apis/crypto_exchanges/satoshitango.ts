@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchWithTimeout } from '../../../utils/network.utils.js'
 import { BrokerageCollectorReturnType } from './index.js'
 
@@ -14,7 +15,7 @@ export type SatoshiTangoDataType = {
   }
 }
 
-export async function getPairPrices (
+export async function getPairPrices(
   baseAsset: string,
   quoteAsset: string
 ): Promise<BrokerageCollectorReturnType | undefined> {

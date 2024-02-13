@@ -21,7 +21,7 @@ type CurrencyPairDocumentProps = {
 
 type CurrencyPairModelType = Model<
   IExchangePairPrices,
-  {},
+  Record<string, never>,
   CurrencyPairDocumentProps
 >
 
@@ -38,7 +38,7 @@ type ExchangeDocumentProps = {
   pricesByPair: Types.DocumentArray<IExchangePairPrices>
 }
 
-type ExchangeModelType = Model<IExchange, {}, ExchangeDocumentProps>
+type ExchangeModelType = Model<IExchange, Record<string, never>, ExchangeDocumentProps>
 
 const exchangeSchema = new Schema<IExchange, ExchangeModelType>(
   {

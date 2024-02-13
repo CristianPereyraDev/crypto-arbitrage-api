@@ -11,8 +11,7 @@ import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js';
 
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>
-  implements IExchangeP2PRepository
-{
+  implements IExchangeP2PRepository {
   async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2POrder[]> {
     try {
       const result = await P2PExchange.aggregate([
@@ -71,7 +70,7 @@ export class ExchangeP2PRepositoryMongoDB
     orders: IP2POrder[]
   ): Promise<void> {
     try {
-      let target =
+      const target =
         orderType === 'BUY'
           ? 'ordersByPair.$[i].buyOrders'
           : 'ordersByPair.$[i].sellOrders';
@@ -97,6 +96,7 @@ export class ExchangeP2PRepositoryMongoDB
     throw new Error('Method not implemented.');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getExchangeByName(name: string): Promise<IP2PExchange> {
     throw new Error('Method not implemented.');
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   IP2POrder,
   P2POrderType
@@ -38,7 +39,7 @@ export type BinanceP2POrderType = {
   }
 }
 
-export async function getP2POrders (
+export async function getP2POrders(
   asset: string,
   fiat: string,
   tradeType: P2POrderType

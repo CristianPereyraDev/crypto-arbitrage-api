@@ -16,7 +16,7 @@ type BrokerageDocumentProps = {
   pricesByPair: Types.DocumentArray<IBrokeragePairPrices>
 }
 
-type BrokerageModelType = Model<IBrokerage, {}, BrokerageDocumentProps>
+type BrokerageModelType = Model<IBrokerage, Record<string, never>, BrokerageDocumentProps>
 
 const brokerageSchema = new Schema<IBrokerage, BrokerageModelType>(
   {

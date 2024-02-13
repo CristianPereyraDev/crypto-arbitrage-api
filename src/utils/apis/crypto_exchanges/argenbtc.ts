@@ -1,8 +1,9 @@
 import { fetchWithTimeout } from '../../../utils/network.utils.js'
 import { BrokerageCollectorReturnType } from './index.js'
 
-export async function getPairPrices (
+export async function getPairPrices(
   asset: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fiat: string
 ): Promise<BrokerageCollectorReturnType | undefined> {
   try {

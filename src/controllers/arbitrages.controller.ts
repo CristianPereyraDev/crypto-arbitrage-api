@@ -45,12 +45,12 @@ controller
 
         return aggregate.length > 0
           ? res.status(200).json({
-              arbitrageFound: true,
-              arbitrages: aggregate.map(elem => elem.lastArbitrage)
-            })
+            arbitrageFound: true,
+            arbitrages: aggregate.map(elem => elem.lastArbitrage)
+          })
           : res
-              .status(200)
-              .json({ arbitrageFound: false, message: 'Arbitrage not found.' })
+            .status(200)
+            .json({ arbitrageFound: false, message: 'Arbitrage not found.' })
       } catch (error) {
         next(error)
       }
@@ -59,6 +59,7 @@ controller
   .get(
     '/:crypto/:fiat/:volume/:minProfit',
     async (req: Request, res: Response, next: NextFunction) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { crypto, fiat, volume, minProfit } = req.params
 
       try {

@@ -18,8 +18,8 @@ const exchangeService = new ExchangeService(
     new ExchangeP2PRepositoryMongoDB()
 )
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function wsWebConnectionHandler(websocket: WebSocket, connectionRequest: IncomingMessage) {
-    let exchangePricesTimeout: ReturnType<typeof setInterval>
     let currencyRatesTimeout: ReturnType<typeof setInterval>
     const cryptoPairMsgConfig = new Map<string, CryptoPairWebSocketConfig>()
     let fees: ExchangesFeesType
@@ -29,7 +29,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket, connectionReq
         .then(value => (fees = value))
         .catch(() => (fees = null))
 
-    exchangePricesTimeout = setInterval(() => {
+    const exchangePricesTimeout = setInterval(() => {
         cryptoPairMsgConfig.forEach((value, key) => {
             compileCryptoMessage(
                 key.split('-')[0],

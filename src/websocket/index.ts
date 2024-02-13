@@ -1,24 +1,10 @@
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
-import ExchangeService, {
-  ExchangesFeesType
-} from '../services/exchanges.service.js'
-import path from 'path'
-import pug from 'pug'
-import { IExchangePricingDTO } from '../types/dto/index.js'
-import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js'
-import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js'
-import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js'
 import { Request } from 'express'
 import { validWebsocketToken } from '../auth/index.js'
 import { wsWebConnectionHandler } from './connection_handlers/web_app_connection_handler.js'
 import { wsNativeConnectionHandler } from './connection_handlers/native_app_connection_handler.js'
 
-const exchangeService = new ExchangeService(
-  new ExchangeRepositoryMongoDB(),
-  new BrokerageRepositoryMongoDB(),
-  new ExchangeP2PRepositoryMongoDB()
-)
 
 /**
  *
@@ -35,7 +21,7 @@ export default function configure(expressServer: Server | undefined) {
   })
 
   expressServer.on('upgrade', (req: Request, socket, head) => {
-    if (!!req.url) {
+    if (req.url) {
       const url = new URL(req.url, `ws://${req.headers.host}`)
       const at = url.searchParams.get('at')
 
