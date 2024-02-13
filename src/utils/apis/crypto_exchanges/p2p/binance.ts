@@ -97,11 +97,11 @@ export async function getP2POrders(
 
       return formatedResponse
     } else {
-      console.log('Status code=', response.status)
+      console.error('Status code=', response.status)
       return undefined
     }
   } catch (error) {
-    console.error(error)
+    console.error(`Binance P2P error for pair ${asset}-${fiat}`, error)
     return undefined
   }
 }

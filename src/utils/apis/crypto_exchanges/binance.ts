@@ -13,23 +13,23 @@ const client = new Spot(API_KEY, API_SECRET, {
   timeout: 3000
 })
 
-export async function getSpotAskBidPrices (
+export async function getSpotAskBidPrices(
   asset: string,
-  fiat: string
+  quote: string
 ): Promise<ExchangeCollectorReturnType | undefined> {
   const options: RestMarketTypes.orderBookOptions = {
     limit: 5
   }
 
   try {
-    const orderBook = await client.orderBook(asset + fiat, options)
+    const orderBook = await client.orderBook(asset + quote, options)
 
     return {
       bids: orderBook.bids.map(bid => [parseFloat(bid[0]), parseFloat(bid[1])]),
       asks: orderBook.asks.map(ask => [parseFloat(ask[0]), parseFloat(ask[1])])
     }
   } catch (error) {
-    console.error(error)
+    console.error(`Binance orderBook error for pair ${asset}-${quote}`, error)
     return undefined
   }
 }
