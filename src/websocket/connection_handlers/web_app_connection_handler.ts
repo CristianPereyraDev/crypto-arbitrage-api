@@ -121,7 +121,7 @@ async function compileCryptoMessage(
     const __dirname = new URL('.', import.meta.url).pathname
 
     const template = pug.compileFile(
-        path.resolve(__dirname, '../views/symbol_prices.pug')
+        path.resolve(__dirname, '../../views/symbol_prices.pug')
     )
 
     return template({
@@ -153,7 +153,7 @@ async function compileCurrencyPairMessage(
     const __dirname = new URL('.', import.meta.url).pathname
 
     const template = pug.compileFile(
-        path.resolve(__dirname, '../views/currency_pair_prices.pug')
+        path.resolve(__dirname, '../../views/currency_pair_prices.pug')
     )
 
     return template({
