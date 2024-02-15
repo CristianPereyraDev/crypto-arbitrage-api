@@ -1,6 +1,7 @@
 import { IExchangePricingDTO } from '../types/dto/index.js'
 import {
   IP2POrder,
+  IP2PPairOrders,
   P2POrderType
 } from '../databases/model/exchange_p2p.model.js'
 import { IPair } from '../databases/model/exchange_base.model.js'
@@ -19,7 +20,7 @@ export default class ExchangeService {
     private readonly exchangeP2PRepository: IExchangeP2PRepository
   ) { }
 
-  async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2POrder[]> {
+  async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2PPairOrders | null> {
     return await this.exchangeP2PRepository.getP2POrders(exchangeName, pair)
   }
 

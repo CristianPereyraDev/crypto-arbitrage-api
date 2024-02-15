@@ -1,4 +1,4 @@
-import { IExchangeBase } from './exchange_base.model.js'
+import { IExchangeBase, IPair } from './exchange_base.model.js'
 
 export type P2POrderType = 'BUY' | 'SELL'
 
@@ -27,11 +27,11 @@ export interface IP2POrder {
   link: string
 }
 
+export interface IP2PPairOrders extends IPair {
+  buyOrders: IP2POrder[]
+  sellOrders: IP2POrder[]
+}
+
 export interface IP2PExchange extends IExchangeBase {
-  ordersByPair: {
-    crypto: string
-    fiat: string
-    buyOrders: IP2POrder[]
-    sellOrders: IP2POrder[]
-  }[]
+  ordersByPair: IP2PPairOrders[]
 }

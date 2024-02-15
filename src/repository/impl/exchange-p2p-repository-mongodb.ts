@@ -1,6 +1,7 @@
 import {
   IP2PExchange,
   IP2POrder,
+  IP2PPairOrders,
   P2POrderType,
 } from '../../databases/model/exchange_p2p.model.js';
 import { ExchangeBaseRepository } from '../exchange-base-repository.js';
@@ -12,7 +13,7 @@ import { IExchangeFees } from '../../databases/mongodb/utils/queries.util.js';
 export class ExchangeP2PRepositoryMongoDB
   extends ExchangeBaseRepository<IP2PExchange>
   implements IExchangeP2PRepository {
-  async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2POrder[]> {
+  async getP2POrders(exchangeName: string, pair: IPair): Promise<IP2PPairOrders | null> {
     try {
       const result = await P2PExchange.aggregate([
         {
@@ -50,7 +51,7 @@ export class ExchangeP2PRepositoryMongoDB
       return result[0].ordersByPair;
     } catch (error) {
       console.error(error);
-      return [];
+      return null;
     }
   }
 
