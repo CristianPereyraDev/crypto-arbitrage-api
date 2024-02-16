@@ -48,7 +48,7 @@ export class ExchangeP2PRepositoryMongoDB
         },
       ]);
 
-      return result[0].ordersByPair;
+      return result[0].ordersByPair[0];
     } catch (error) {
       console.error(error);
       return null;

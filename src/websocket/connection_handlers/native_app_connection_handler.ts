@@ -59,15 +59,15 @@ export async function wsNativeConnectionHandler(
       msgConfig.pairs.forEach(pair => {
         exchangeService
           .getP2POrders(p2pExchangeName, pair)
-          .then((value) => {
-            if (value) {
+          .then((orders) => {
+            if (orders) {
               const message: P2PWebSocketMessage = {
                 p2p: {
                   exchange: p2pExchangeName,
-                  crypto: value?.crypto,
-                  fiat: value?.fiat,
-                  buyOrders: value?.buyOrders,
-                  sellOrders: value?.sellOrders
+                  crypto: orders?.crypto,
+                  fiat: orders?.fiat,
+                  buyOrders: orders?.buyOrders,
+                  sellOrders: orders?.sellOrders
                 }
               }
               websocket.send(JSON.stringify(message));
