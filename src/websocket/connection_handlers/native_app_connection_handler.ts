@@ -8,7 +8,7 @@ import ExchangeService, {
 import {
   CryptoP2PWebSocketConfig,
   CryptoPairWebSocketConfig,
-  P2PMessage,
+  P2PWebSocketMessage,
 } from '../types.js';
 import { getCurrencyPairRates } from '../../services/currency.service.js';
 import {
@@ -60,8 +60,18 @@ export async function wsNativeConnectionHandler(
         exchangeService
           .getP2POrders(p2pExchangeName, pair)
           .then((value) => {
-            const message: P2PMessage = { p2p: { exchange: p2pExchangeName, orders: value } }
-            websocket.send(JSON.stringify(message));
+            if (value) {
+              const message: P2PWebSocketMessage = {
+                p2p: {
+                  exchange: p2pExchangeName,
+                  crypto: value?.crypto,
+                  fiat: value?.fiat,
+                  buyOrders: value?.buyOrders,
+                  sellOrders: value?.sellOrders
+                }
+              }
+              websocket.send(JSON.stringify(message));
+            }
           });
       })
     });
