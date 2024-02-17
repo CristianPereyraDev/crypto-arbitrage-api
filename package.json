@@ -18,6 +18,7 @@
   "keywords": [],
   "type": "module",
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "@stylistic/eslint-plugin": "^1.6.1",
     "@tsconfig/node20": "^20.1.2",
     "@types/cors": "^2.8.14",
