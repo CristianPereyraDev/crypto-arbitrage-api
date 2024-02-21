@@ -8,6 +8,7 @@ import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p
 import {
 	IP2POrder,
 	IPaymentMethod,
+	P2PUserType,
 } from "src/databases/model/exchange_p2p.model.js";
 
 const exchangeService = new ExchangeService(
@@ -180,24 +181,6 @@ export type P2PArbitrage = {
 	profit: number;
 };
 
-const SELL_ORDER: IP2POrder = {
-	price: 0,
-	payments: [],
-	volume: 0,
-	orderId: "NULL",
-	orderType: "SELL",
-	merchantId: "NULL",
-	monthOrderCount: 0,
-	monthFinishRate: 1,
-	min: 1,
-	max: 1,
-	positiveRate: 1,
-	link: "",
-	userType: "user",
-	merchantName: "CryptoARbitrage",
-};
-const BUY_ORDER: IP2POrder = { ...SELL_ORDER, orderType: "BUY" };
-
 /**
  *
  * @param buyOrders
@@ -213,80 +196,87 @@ export function calculateP2PArbitrage(
 	volume: number,
 	minProfit: number,
 	payments: IPaymentMethod[],
-): P2PArbitrage {
+	userType: P2PUserType,
+): P2PArbitrage | null {
 	const result: P2PArbitrage = {
-		buyOrder: null,
-		sellOrder: null,
 		profit: 0,
+		sellOrder: null,
+		buyOrder: null,
 	};
-	const buyOrdersFiltered = buyOrders.filter((order) =>
-		order.payments.some((payment) =>
-			payments.some(
-				(preferredPayment) => preferredPayment.slug === payment.slug,
-			),
-		),
+	const buyOrdersFiltered = buyOrders.filter(
+		(order) =>
+			order.payments.some((payment) =>
+				payments.some(
+					(preferredPayment) => preferredPayment.slug === payment.slug,
+				),
+			) && order.userType === userType,
 	);
 	const sellOrdersFiltered = sellOrders.filter((order) =>
-		order.payments.some((payment) =>
-			payments.some(
-				(preferredPayment) => preferredPayment.slug === payment.slug,
-			),
+		order.payments.some(
+			(payment) =>
+				payments.some(
+					(preferredPayment) => preferredPayment.slug === payment.slug,
+				) && order.userType === userType,
 		),
 	);
 
 	if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
+		return null;
+	}
+
+	result.sellOrder = buyOrdersFiltered[0];
+	result.sellOrder.price -= 0.01; // sell a little cheaper
+	result.sellOrder.orderType = "SELL";
+	result.sellOrder.volume = volume;
+	result.sellOrder.payments = payments;
+	result.buyOrder = sellOrdersFiltered[0];
+	result.buyOrder.price += 0.01; // buy a little more expensive
+	result.buyOrder.orderType = "BUY";
+	result.buyOrder.volume = volume;
+	result.buyOrder.payments = payments;
+	let profit = calculateP2PProfit(
+		result.sellOrder.price,
+		result.buyOrder.price,
+	);
+
+	if (profit >= minProfit) {
+		result.profit = profit;
 		return result;
 	}
 
-	result.buyOrder = sellOrdersFiltered[0];
-	result.sellOrder = buyOrdersFiltered[0];
-	let profit = result.sellOrder.price - result.buyOrder.price;
-
 	// Find the best sell order from buy orders.
-	for (const buyOrder of buyOrdersFiltered) {
-		const friendlinessRange = (buyOrder.max - buyOrder.min) / buyOrder.price;
-		if (
-			friendlinessRange / buyOrder.volume > 1.0 &&
-			buyOrder.positiveRate >= 0.95 &&
-			buyOrder.monthOrderCount > 500
-		) {
-			result.sellOrder = {
-				...SELL_ORDER,
-				price: buyOrder.price * 1.01, // sell a little more expensive
-				payments,
-				volume,
-				min: buyOrder.min,
-				max: buyOrder.max,
-			};
+	for (const buyOrder of buyOrdersFiltered.slice(1)) {
+		profit = calculateP2PProfit(buyOrder.price - 0.01, result.buyOrder.price);
+
+		if (profit >= minProfit) {
+			result.sellOrder.price = buyOrder.price - 0.01; // sell a little more expensive
+			result.profit = profit;
+			result.sellOrder.min = buyOrder.min;
+			result.sellOrder.max = buyOrder.max;
+			break;
 		}
 	}
 
 	// Find the best buy order from sell orders.
-	for (const sellOrder of sellOrdersFiltered) {
-		const friendlinessRange = (sellOrder.max - sellOrder.min) / sellOrder.price;
-		if (
-			friendlinessRange / sellOrder.volume > 1.0 &&
-			sellOrder.positiveRate >= 0.95 &&
-			sellOrder.monthOrderCount > 500
-		) {
-			result.sellOrder = {
-				...BUY_ORDER,
-				price: sellOrder.price * 0.99, // buy a little cheaper
-				payments,
-				volume,
-				min: sellOrder.min,
-				max: sellOrder.max,
-			};
-		}
-	}
-
-	if (result.sellOrder && result.buyOrder) {
-		profit = result.sellOrder.price - result.buyOrder.price;
+	for (const sellOrder of sellOrdersFiltered.slice(1)) {
+		profit = calculateP2PProfit(result.sellOrder.price, sellOrder.price + 0.01);
 
 		if (profit >= minProfit) {
-			return result;
+			result.buyOrder.price = sellOrder.price + 0.01; // buy a little cheaper
+			result.profit = profit;
+			result.buyOrder.min = sellOrder.min;
+			result.buyOrder.max = sellOrder.max;
+			break;
 		}
 	}
 
-	return { buyOrder: null, sellOrder: null, profit: 0 };
+	if (result.profit >= minProfit) {
+		return { ...result, profit };
+	}
+
+	return null;
+}
+
+function calculateP2PProfit(sellPrice: number, buyPrice: number) {
+	return ((sellPrice - buyPrice) / buyPrice) * 100;
 }
