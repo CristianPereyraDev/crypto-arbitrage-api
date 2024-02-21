@@ -70,7 +70,10 @@ export async function getP2POrders(
 		);
 
 		if (response.ok) {
-			const jsonResponse: any = await response.json();
+			const jsonResponse = (await response.json()) as {
+				data: BinanceP2POrderType[];
+			};
+
 			const formatedResponse = jsonResponse.data.map(
 				(order: BinanceP2POrderType) => {
 					return {
