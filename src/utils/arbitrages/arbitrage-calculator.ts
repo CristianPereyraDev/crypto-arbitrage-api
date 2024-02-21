@@ -229,11 +229,13 @@ export function calculateP2PArbitrage(
 	result.sellOrder.orderType = "SELL";
 	result.sellOrder.volume = volume;
 	result.sellOrder.payments = payments;
+	result.sellOrder.merchantName = "CryptoARbitrage";
 	result.buyOrder = sellOrdersFiltered[0];
 	result.buyOrder.price += 0.01; // buy a little more expensive
 	result.buyOrder.orderType = "BUY";
 	result.buyOrder.volume = volume;
 	result.buyOrder.payments = payments;
+	result.buyOrder.merchantName = "CryptoARbitrage";
 	let profit = calculateP2PProfit(
 		result.sellOrder.price,
 		result.buyOrder.price,
