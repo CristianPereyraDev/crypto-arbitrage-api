@@ -176,9 +176,45 @@ export function calculateTotalAsk({
 }
 
 export type P2PArbitrage = {
-	buyOrder: IP2POrder | null;
-	sellOrder: IP2POrder | null;
 	profit: number;
+	buyOrder: IP2POrder;
+	sellOrder: IP2POrder;
+};
+
+const BASE_ARBITRAGE: P2PArbitrage = {
+	profit: 0,
+	buyOrder: {
+		orderType: "BUY",
+		orderId: "arbitrage_buy",
+		volume: 1,
+		price: 0,
+		min: 0,
+		max: 0,
+		payments: [],
+		userType: "user",
+		merchantId: "",
+		merchantName: "CryptoARbitrage",
+		monthOrderCount: 0,
+		monthFinishRate: 0,
+		positiveRate: 1,
+		link: "",
+	},
+	sellOrder: {
+		orderType: "SELL",
+		orderId: "arbitrage_sell",
+		volume: 1,
+		price: 0,
+		min: 0,
+		max: 0,
+		payments: [],
+		userType: "user",
+		merchantId: "",
+		merchantName: "CryptoARbitrage",
+		monthOrderCount: 0,
+		monthFinishRate: 0,
+		positiveRate: 1,
+		link: "",
+	},
 };
 
 /**
@@ -198,11 +234,7 @@ export function calculateP2PArbitrage(
 	payments: IPaymentMethod[],
 	userType: P2PUserType,
 ): P2PArbitrage | null {
-	const result: P2PArbitrage = {
-		profit: 0,
-		sellOrder: null,
-		buyOrder: null,
-	};
+	const result: P2PArbitrage = BASE_ARBITRAGE;
 	const buyOrdersFiltered = buyOrders.filter(
 		(order) =>
 			order.payments.some((payment) =>
@@ -224,18 +256,12 @@ export function calculateP2PArbitrage(
 		return null;
 	}
 
-	result.sellOrder = buyOrdersFiltered[0];
-	result.sellOrder.price -= 0.01; // sell a little cheaper
-	result.sellOrder.orderType = "SELL";
+	result.sellOrder.price = buyOrdersFiltered[0].price - 0.01; // sell a little cheaper
 	result.sellOrder.volume = volume;
 	result.sellOrder.payments = payments;
-	result.sellOrder.merchantName = "CryptoARbitrage";
-	result.buyOrder = sellOrdersFiltered[0];
-	result.buyOrder.price += 0.01; // buy a little more expensive
-	result.buyOrder.orderType = "BUY";
+	result.buyOrder.price = sellOrdersFiltered[0].price + 0.01; // buy a little more expensive
 	result.buyOrder.volume = volume;
 	result.buyOrder.payments = payments;
-	result.buyOrder.merchantName = "CryptoARbitrage";
 	let profit = calculateP2PProfit(
 		result.sellOrder.price,
 		result.buyOrder.price,
