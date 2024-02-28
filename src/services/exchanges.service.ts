@@ -13,7 +13,7 @@ import { IExchangeRepository } from "../repository/exchange-repository.js";
 import { IBrokerageRepository } from "../repository/brokerage-repository.js";
 import { IExchangeP2PRepository } from "../repository/exchange-p2p-repository.js";
 import { IExchangeFees } from "../databases/mongodb/utils/queries.util.js";
-import { ExchangeBaseRepository } from "src/repository/exchange-base-repository.js";
+import { ExchangeBaseRepository } from "../repository/exchange-base-repository.js";
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null;
 

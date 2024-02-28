@@ -9,8 +9,8 @@ import {
 	IP2POrder,
 	IPaymentMethod,
 	P2PUserType,
-} from "src/databases/model/exchange_p2p.model.js";
-import { ExchangeBaseRepositoryMongoBD } from "src/repository/impl/exchange-base-repository-mongodb.js";
+} from "../../databases/model/exchange_p2p.model.js";
+import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),

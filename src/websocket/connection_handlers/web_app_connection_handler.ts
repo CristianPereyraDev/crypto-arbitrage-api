@@ -15,7 +15,7 @@ import { IExchangePricingDTO } from "../../types/dto/index.js";
 import { WebSocket } from "ws";
 import pug from "pug";
 import path from "path";
-import { ExchangeBaseRepositoryMongoBD } from "src/repository/impl/exchange-base-repository-mongodb.js";
+import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),

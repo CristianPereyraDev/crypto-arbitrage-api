@@ -1,11 +1,11 @@
 import {
 	IExchangeBase,
 	IPair,
-} from "src/databases/model/exchange_base.model.js";
+} from "../../databases/model/exchange_base.model.js";
 import { ExchangeBaseRepository } from "../exchange-base-repository.js";
-import { IExchangeFees } from "src/databases/mongodb/utils/queries.util.js";
-import { ExchangeBase } from "src/databases/mongodb/schema/exchange_base.schema.js";
-import { DatabaseError } from "src/types/errors/index.js";
+import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
+import { ExchangeBase } from "../../databases/mongodb/schema/exchange_base.schema.js";
+import { DatabaseError } from "../../types/errors/index.js";
 
 export class ExchangeBaseRepositoryMongoBD extends ExchangeBaseRepository<IExchangeBase> {
 	getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {

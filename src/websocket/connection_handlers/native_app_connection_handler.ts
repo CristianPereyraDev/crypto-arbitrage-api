@@ -21,7 +21,7 @@ import { IExchangePricingDTO } from "../../types/dto/index.js";
 
 import { WebSocket } from "ws";
 import { IncomingMessage } from "http";
-import { ExchangeBaseRepositoryMongoBD } from "src/repository/impl/exchange-base-repository-mongodb.js";
+import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),

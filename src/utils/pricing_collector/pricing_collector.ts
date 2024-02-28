@@ -15,7 +15,7 @@ import ExchangeRepositoryMongoDB from "../../repository/impl/exchange-repository
 import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-repository-mongodb.js";
 import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
 import { IExchange } from "../../databases/model/exchange.model.js";
-import { ExchangeBaseRepositoryMongoBD } from "src/repository/impl/exchange-base-repository-mongodb.js";
+import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 
 export const currencyPairs = [
 	{ crypto: "MATIC", fiat: "ARS" },
