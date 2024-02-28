@@ -4,17 +4,22 @@ import {
 	IP2PPairOrders,
 	P2POrderType,
 } from "../databases/model/exchange_p2p.model.js";
-import { IPair } from "../databases/model/exchange_base.model.js";
+import {
+	IExchangeBase,
+	IPair,
+} from "../databases/model/exchange_base.model.js";
 import { ExchangeCollectorReturnType } from "../utils/apis/crypto_exchanges/index.js";
 import { IExchangeRepository } from "../repository/exchange-repository.js";
 import { IBrokerageRepository } from "../repository/brokerage-repository.js";
 import { IExchangeP2PRepository } from "../repository/exchange-p2p-repository.js";
 import { IExchangeFees } from "../databases/mongodb/utils/queries.util.js";
+import { ExchangeBaseRepository } from "src/repository/exchange-base-repository.js";
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null;
 
 export default class ExchangeService {
 	constructor(
+		private readonly exchangeBaseRepository: ExchangeBaseRepository<IExchangeBase>,
 		private readonly exchangeRepository: IExchangeRepository,
 		private readonly brokerageRepository: IBrokerageRepository,
 		private readonly exchangeP2PRepository: IExchangeP2PRepository,
@@ -108,11 +113,32 @@ export default class ExchangeService {
 	}
 
 	async getAvailableExchanges() {
-		return this.exchangeRepository.getAllExchanges();
+		return this.exchangeRepository.getAllExchanges([]);
 	}
 
 	async getAvailableBrokerages() {
-		return this.brokerageRepository.getAllExchanges();
+		return this.brokerageRepository.getAllExchanges([]);
+	}
+
+	async getAvailableP2PExchanges() {
+		return this.exchangeP2PRepository.getAllExchanges([]);
+	}
+
+	async getAllAvailableExchanges() {
+		return this.exchangeBaseRepository.getAllExchanges([
+			"name",
+			"slug",
+			"availablePairs",
+			"logoURL",
+			"networkFees",
+			"depositFiatFee",
+			"withdrawalFiatFee",
+			"makerFee",
+			"takerFee",
+			"buyFee",
+			"sellFee",
+			"exchangeType",
+		]);
 	}
 
 	async getAllFees() {

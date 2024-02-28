@@ -16,6 +16,7 @@ import websocketSetup from "./websocket/index.js";
 import ExchangeRepositoryMongoDB from "./repository/impl/exchange-repository-mongodb.js";
 import BrokerageRepositoryMongoDB from "./repository/impl/brokerage-repository-mongodb.js";
 import { ExchangeP2PRepositoryMongoDB } from "./repository/impl/exchange-p2p-repository-mongodb.js";
+import { ExchangeBaseRepositoryMongoBD } from "./repository/impl/exchange-base-repository-mongodb.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ appSetup(app)
 		);
 
 		const exchangeService = new ExchangeService(
+			new ExchangeBaseRepositoryMongoBD(),
 			new ExchangeRepositoryMongoDB(),
 			new BrokerageRepositoryMongoDB(),
 			new ExchangeP2PRepositoryMongoDB(),

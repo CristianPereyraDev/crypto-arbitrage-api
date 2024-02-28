@@ -10,8 +10,10 @@ import {
 	IPaymentMethod,
 	P2PUserType,
 } from "src/databases/model/exchange_p2p.model.js";
+import { ExchangeBaseRepositoryMongoBD } from "src/repository/impl/exchange-base-repository-mongodb.js";
 
 const exchangeService = new ExchangeService(
+	new ExchangeBaseRepositoryMongoBD(),
 	new ExchangeRepositoryMongoDB(),
 	new BrokerageRepositoryMongoDB(),
 	new ExchangeP2PRepositoryMongoDB(),

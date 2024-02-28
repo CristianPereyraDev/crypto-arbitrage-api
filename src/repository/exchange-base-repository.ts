@@ -1,12 +1,15 @@
-import { IExchangeFees } from '../databases/mongodb/utils/queries.util.js'
-import { IPair } from '../databases/model/exchange_base.model.js'
+import { IExchangeFees } from "../databases/mongodb/utils/queries.util.js";
+import { IPair } from "../databases/model/exchange_base.model.js";
 
 export abstract class ExchangeBaseRepository<T> {
-  abstract getExchangesFees(): Promise<{
-    [exchange: string]: IExchangeFees
-  }>
-  abstract getAllAvailablePairs(): Promise<IPair[]>
-  abstract removeOlderPrices(): Promise<void>
-  abstract getExchangeByName(name: string): Promise<T>
-  abstract getAllExchanges(): Promise<T[]>
+	abstract getAllExchanges(projection: string[]): Promise<T[]>;
+	abstract getAllAvailablePairs(): Promise<IPair[]>;
+	abstract getExchangeByName(name: string): Promise<T | null>;
+	abstract getExchangesFees(): Promise<{
+		[exchange: string]: IExchangeFees;
+	}>;
+}
+
+export interface IPriceableRepository {
+	removeOlderPrices(): Promise<void>;
 }

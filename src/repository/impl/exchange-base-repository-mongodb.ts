@@ -1,0 +1,48 @@
+import {
+	IExchangeBase,
+	IPair,
+} from "src/databases/model/exchange_base.model.js";
+import { ExchangeBaseRepository } from "../exchange-base-repository.js";
+import { IExchangeFees } from "src/databases/mongodb/utils/queries.util.js";
+import { ExchangeBase } from "src/databases/mongodb/schema/exchange_base.schema.js";
+import { DatabaseError } from "src/types/errors/index.js";
+
+export class ExchangeBaseRepositoryMongoBD extends ExchangeBaseRepository<IExchangeBase> {
+	getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
+		throw new Error("Method not implemented.");
+	}
+
+	getAllAvailablePairs(): Promise<IPair[]> {
+		throw new Error("Method not implemented.");
+	}
+
+	async getExchangeByName(name: string): Promise<IExchangeBase | null> {
+		try {
+			const exchange = await ExchangeBase.findOne({ name });
+
+			if (exchange) {
+				return exchange;
+			}
+
+			return null;
+		} catch (error) {
+			throw new DatabaseError("Error on ExchangeBase.findOne() operation.");
+		}
+	}
+
+	async getAllExchanges(projection: string[] = []): Promise<IExchangeBase[]> {
+		try {
+			if (projection.length > 0) {
+				// Find with projection option for exclude unnecessary properties
+				return await ExchangeBase.find(
+					{ available: true },
+					Object.fromEntries(projection.map((p) => [p, 1])),
+				);
+			}
+
+			return await ExchangeBase.find({ available: true });
+		} catch (error) {
+			throw new DatabaseError("Error on ExchangeBase.find() operation.");
+		}
+	}
+}
