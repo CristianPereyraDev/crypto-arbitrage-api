@@ -7,7 +7,9 @@ import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
 import { ExchangeBase } from "../../databases/mongodb/schema/exchange_base.schema.js";
 import { DatabaseError } from "../../types/errors/index.js";
 
-export class ExchangeBaseRepositoryMongoBD extends ExchangeBaseRepository<IExchangeBase> {
+export class ExchangeBaseRepositoryMongoBD
+	implements ExchangeBaseRepository<IExchangeBase>
+{
 	getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
 		throw new Error("Method not implemented.");
 	}

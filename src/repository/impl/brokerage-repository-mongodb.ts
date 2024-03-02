@@ -7,8 +7,7 @@ import { Brokerage } from "../../databases/mongodb/schema/brokerage_schema.js";
 import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
 
 export default class BrokerageRepositoryMongoDB
-	extends ExchangeBaseRepository<IBrokerage>
-	implements IBrokerageRepository
+	implements ExchangeBaseRepository<IBrokerage>, IBrokerageRepository
 {
 	async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
 		try {
