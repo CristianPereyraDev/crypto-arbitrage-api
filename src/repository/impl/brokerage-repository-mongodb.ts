@@ -4,40 +4,20 @@ import { IExchangePricingDTO } from "../../types/dto/index.js";
 import { IBrokerageRepository } from "../brokerage-repository.js";
 import { ExchangeBaseRepository } from "../exchange-base-repository.js";
 import { Brokerage } from "../../databases/mongodb/schema/brokerage_schema.js";
-import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../../types/dto/index.js";
+import { exchangeFeesToDTO } from "../utils/repository.utils.js";
 
 export default class BrokerageRepositoryMongoDB
 	implements ExchangeBaseRepository<IBrokerage>, IBrokerageRepository
 {
-	async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
+	async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
 		try {
 			const exchanges = await Brokerage.find({}).exec();
 
 			const fees = Object.fromEntries(
 				exchanges?.map((exchange) => [
 					exchange.name.toLowerCase().replaceAll(" ", ""),
-					Object.fromEntries([
-						["depositFiatFee", exchange.depositFiatFee],
-						["withdrawalFiatFee", exchange.withdrawalFiatFee],
-						["makerFee", exchange.makerFee],
-						["takerFee", exchange.takerFee],
-						[
-							"networkFees",
-							Object.fromEntries(
-								exchange.networkFees.map((cryptoFee) => [
-									cryptoFee.crypto,
-									Object.fromEntries(
-										cryptoFee.networks.map((network) => [
-											network.network,
-											network.fee,
-										]),
-									),
-								]),
-							),
-						],
-						["buyFee", exchange.buyFee],
-						["sellFee", exchange.sellFee],
-					]) as IExchangeFees,
+					exchangeFeesToDTO(exchange),
 				]),
 			);
 

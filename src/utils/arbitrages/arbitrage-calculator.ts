@@ -1,4 +1,4 @@
-import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../../types/dto/index.js";
 import { type IExchangePairPricing } from "../../types/exchange.js";
 import { IExchangePricingDTO } from "../../types/dto/index.js";
 import ExchangeService from "../../services/exchanges.service.js";
@@ -146,7 +146,7 @@ export function calculateTotalBid({
 	includeWithdrawalFiatFee,
 }: {
 	baseBid: number;
-	fees?: IExchangeFees;
+	fees?: IExchangeFeesDTO;
 	includeWithdrawalFiatFee: boolean;
 }) {
 	if (fees !== undefined) {
@@ -164,7 +164,7 @@ export function calculateTotalAsk({
 	includeDepositFiatFee,
 }: {
 	baseAsk: number;
-	fees?: IExchangeFees;
+	fees?: IExchangeFeesDTO;
 	includeDepositFiatFee: boolean;
 }) {
 	if (fees !== undefined) {

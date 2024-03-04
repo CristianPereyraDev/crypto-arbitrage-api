@@ -1,31 +1,34 @@
 export interface IPair {
-  crypto: string
-  fiat: string
+	crypto: string;
+	fiat: string;
 }
 
 export interface INetworkFee {
-  network: string
-  fee: number
+	network: string;
+	fee: number;
 }
 
 export interface ICryptoFee {
-  crypto: string
-  networks: INetworkFee[]
+	crypto: string;
+	networks: INetworkFee[];
 }
 
-export interface IExchangeBase {
-  name: string
-  slug: string
-  URL: string
-  logoURL: string
-  availablePairs: IPair[]
-  networkFees: ICryptoFee[] // Represents crypto withdrawal fees. Deposits is supposed to be free.
-  depositFiatFee: number
-  withdrawalFiatFee: number
-  makerFee: number
-  takerFee: number
-  buyFee: number
-  sellFee: number
-  exchangeType: string
-  available: boolean
+export interface IExchangeFees {
+	depositFiatFee: number;
+	withdrawalFiatFee: number;
+	makerFee: number;
+	takerFee: number;
+	buyFee: number;
+	sellFee: number;
+	networkFees: ICryptoFee[]; // Represents crypto withdrawal fees. Deposits is supposed to be free.
+}
+
+export interface IExchangeBase extends IExchangeFees {
+	name: string;
+	slug: string;
+	URL: string;
+	logoURL: string;
+	availablePairs: IPair[];
+	exchangeType: string;
+	available: boolean;
 }

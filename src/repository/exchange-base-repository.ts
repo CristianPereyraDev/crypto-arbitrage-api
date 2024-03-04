@@ -1,4 +1,4 @@
-import { IExchangeFees } from "../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../types/dto/index.js";
 import { IPair } from "../databases/model/exchange_base.model.js";
 
 export interface ExchangeBaseRepository<T> {
@@ -6,7 +6,7 @@ export interface ExchangeBaseRepository<T> {
 	getAllAvailablePairs(): Promise<IPair[]>;
 	getExchangeByName(name: string): Promise<T | null>;
 	getExchangesFees(): Promise<{
-		[exchange: string]: IExchangeFees;
+		[exchange: string]: IExchangeFeesDTO;
 	}>;
 }
 

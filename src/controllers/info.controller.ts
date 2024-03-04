@@ -16,6 +16,8 @@ import { ExchangeP2PRepositoryMongoDB } from "../repository/impl/exchange-p2p-re
 import { ExchangeBase } from "../databases/mongodb/schema/exchange_base.schema.js";
 import { ICriptoyaFees } from "../types/apis/criptoya/index.js";
 import { ExchangeBaseRepositoryMongoBD } from "../repository/impl/exchange-base-repository-mongodb.js";
+import { IExchangeBaseDTO } from "src/types/dto/index.js";
+import { exchangeFeesToDTO } from "src/repository/utils/repository.utils.js";
 
 const controller = Router();
 
@@ -58,8 +60,22 @@ controller
 	.get("/exchanges_available", async (req: Request, res: Response) => {
 		try {
 			const exchanges = await exchangeService.getAllAvailableExchanges();
+			const response = exchanges.map((exchange) => {
+				const exchangeDTO: IExchangeBaseDTO = {
+					name: exchange.name,
+					slug: exchange.slug,
+					URL: exchange.URL,
+					logoURL: exchange.logoURL,
+					exchangeType: exchange.exchangeType,
+					available: exchange.available,
+					availablePairs: exchange.availablePairs,
+					fees: exchangeFeesToDTO(exchange),
+				};
 
-			return res.status(200).json(exchanges);
+				return exchangeDTO;
+			});
+
+			return res.status(200).json(response);
 		} catch (error) {
 			return res.status(505).json({ message: error });
 		}

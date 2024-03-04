@@ -47,7 +47,7 @@ export async function wsNativeConnectionHandler(
 			fees = value;
 		})
 		.catch(() => {
-			fees = null;
+			fees = {};
 		});
 
 	const exchangePricesTimeout = setInterval(() => {

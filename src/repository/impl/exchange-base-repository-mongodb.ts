@@ -3,14 +3,14 @@ import {
 	IPair,
 } from "../../databases/model/exchange_base.model.js";
 import { ExchangeBaseRepository } from "../exchange-base-repository.js";
-import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../../types/dto/index.js";
 import { ExchangeBase } from "../../databases/mongodb/schema/exchange_base.schema.js";
 import { DatabaseError } from "../../types/errors/index.js";
 
 export class ExchangeBaseRepositoryMongoBD
 	implements ExchangeBaseRepository<IExchangeBase>
 {
-	getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
+	getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
 		throw new Error("Method not implemented.");
 	}
 
@@ -39,7 +39,7 @@ export class ExchangeBaseRepositoryMongoBD
 				return await ExchangeBase.find(
 					{ available: true },
 					Object.fromEntries(projection.map((p) => [p, 1])),
-				);
+				).lean();
 			}
 
 			return await ExchangeBase.find({ available: true });

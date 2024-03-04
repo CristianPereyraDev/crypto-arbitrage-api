@@ -5,12 +5,12 @@ import { IExchangeRepository } from "../exchange-repository.js";
 import { ExchangeBaseRepository } from "../exchange-base-repository.js";
 import { Exchange } from "../../databases/mongodb/schema/exchange.schema.js";
 import { ExchangeCollectorReturnType } from "../../utils/apis/crypto_exchanges/index.js";
-import { IExchangeFees } from "../../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../../types/dto/index.js";
 
 export default class ExchangeRepositoryMongoDB
 	implements ExchangeBaseRepository<IExchange>, IExchangeRepository
 {
-	async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFees }> {
+	async getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
 		try {
 			const exchanges = await Exchange.find({}).exec();
 
@@ -38,7 +38,7 @@ export default class ExchangeRepositoryMongoDB
 						],
 						["buyFee", exchange.buyFee],
 						["sellFee", exchange.sellFee],
-					]) as IExchangeFees,
+					]) as IExchangeFeesDTO,
 				]),
 			);
 

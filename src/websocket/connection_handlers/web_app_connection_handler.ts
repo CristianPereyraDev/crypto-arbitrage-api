@@ -36,7 +36,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
 			fees = value;
 		})
 		.catch(() => {
-			fees = null;
+			fees = {};
 		});
 
 	const exchangePricesTimeout = setInterval(() => {

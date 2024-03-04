@@ -12,10 +12,10 @@ import { ExchangeCollectorReturnType } from "../utils/apis/crypto_exchanges/inde
 import { IExchangeRepository } from "../repository/exchange-repository.js";
 import { IBrokerageRepository } from "../repository/brokerage-repository.js";
 import { IExchangeP2PRepository } from "../repository/exchange-p2p-repository.js";
-import { IExchangeFees } from "../databases/mongodb/utils/queries.util.js";
+import { IExchangeFeesDTO } from "../types/dto/index.js";
 import { ExchangeBaseRepository } from "../repository/exchange-base-repository.js";
 
-export type ExchangesFeesType = { [exchange: string]: IExchangeFees } | null;
+export type ExchangesFeesType = { [exchange: string]: IExchangeFeesDTO };
 
 export default class ExchangeService {
 	constructor(
