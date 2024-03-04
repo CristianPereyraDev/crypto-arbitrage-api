@@ -16,8 +16,8 @@ import { ExchangeP2PRepositoryMongoDB } from "../repository/impl/exchange-p2p-re
 import { ExchangeBase } from "../databases/mongodb/schema/exchange_base.schema.js";
 import { ICriptoyaFees } from "../types/apis/criptoya/index.js";
 import { ExchangeBaseRepositoryMongoBD } from "../repository/impl/exchange-base-repository-mongodb.js";
-import { IExchangeBaseDTO } from "src/types/dto/index.js";
-import { exchangeFeesToDTO } from "src/repository/utils/repository.utils.js";
+import { IExchangeBaseDTO } from "../types/dto/index.js";
+import { exchangeFeesToDTO } from "../repository/utils/repository.utils.js";
 
 const controller = Router();
 

@@ -6,6 +6,7 @@ import { ExchangeBaseRepository } from "../exchange-base-repository.js";
 import { Exchange } from "../../databases/mongodb/schema/exchange.schema.js";
 import { ExchangeCollectorReturnType } from "../../utils/apis/crypto_exchanges/index.js";
 import { IExchangeFeesDTO } from "../../types/dto/index.js";
+import { exchangeFeesToDTO } from "../utils/repository.utils.js";
 
 export default class ExchangeRepositoryMongoDB
 	implements ExchangeBaseRepository<IExchange>, IExchangeRepository
@@ -17,28 +18,7 @@ export default class ExchangeRepositoryMongoDB
 			const fees = Object.fromEntries(
 				exchanges?.map((exchange) => [
 					exchange.name.toLowerCase().replaceAll(" ", ""),
-					Object.fromEntries([
-						["depositFiatFee", exchange.depositFiatFee],
-						["withdrawalFiatFee", exchange.withdrawalFiatFee],
-						["makerFee", exchange.makerFee],
-						["takerFee", exchange.takerFee],
-						[
-							"networkFees",
-							Object.fromEntries(
-								exchange.networkFees.map((cryptoFee) => [
-									cryptoFee.crypto,
-									Object.fromEntries(
-										cryptoFee.networks.map((network) => [
-											network.network,
-											network.fee,
-										]),
-									),
-								]),
-							),
-						],
-						["buyFee", exchange.buyFee],
-						["sellFee", exchange.sellFee],
-					]) as IExchangeFeesDTO,
+					exchangeFeesToDTO(exchange),
 				]),
 			);
 
