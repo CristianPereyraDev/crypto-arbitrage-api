@@ -22,6 +22,7 @@ import { IExchangePricingDTO } from "../../types/dto/index.js";
 import { WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
+import { IPair } from "src/databases/model/exchange_base.model.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -63,31 +64,34 @@ export async function wsNativeConnectionHandler(
 	}, 1000 * 6);
 
 	const p2pOrdersTimeout = setInterval(() => {
-		cryptoP2PMsgConfig.forEach((msgConfig, p2pExchangeName) => {
-			for (const pair of msgConfig.pairs) {
-				exchangeService.getP2POrders(p2pExchangeName, pair).then((orders) => {
-					if (orders) {
-						const message: P2PWebSocketMessage = {
-							p2p: {
-								arbitrage: calculateP2PArbitrage(
-									orders.buyOrders,
-									orders.sellOrders,
-									msgConfig.volume,
-									msgConfig.minProfit,
-									[{ slug: "MercadoPagoNew", name: "Mercadopago" }],
-									"merchant",
-								),
-								exchange: p2pExchangeName,
-								crypto: orders.crypto,
-								fiat: orders.fiat,
+		cryptoP2PMsgConfig.forEach((msgConfig, p2pConfigKey) => {
+			const exchangeName = p2pConfigKey.split("/")[0];
+			const pair: IPair = {
+				crypto: p2pConfigKey.split("/")[1].split("-")[0],
+				fiat: p2pConfigKey.split("/")[1].split("-")[1],
+			};
+			exchangeService.getP2POrders(exchangeName, pair).then((orders) => {
+				if (orders) {
+					const message: P2PWebSocketMessage = {
+						p2p: {
+							arbitrage: calculateP2PArbitrage({
 								buyOrders: orders.buyOrders,
 								sellOrders: orders.sellOrders,
-							},
-						};
-						websocket.send(JSON.stringify(message));
-					}
-				});
-			}
+								volume: msgConfig.volume,
+								minProfit: msgConfig.minProfit,
+								userType: "merchant",
+							}),
+							exchange: p2pConfigKey,
+							crypto: orders.crypto,
+							fiat: orders.fiat,
+							buyOrders: orders.buyOrders,
+							sellOrders: orders.sellOrders,
+						},
+					};
+
+					websocket.send(JSON.stringify(message));
+				}
+			});
 		});
 	}, 1000 * 6);
 
@@ -114,11 +118,13 @@ export async function wsNativeConnectionHandler(
 				{ volume: parsedMessage.crypto.volume },
 			);
 		} else if (Object.hasOwn(parsedMessage, "p2p")) {
-			cryptoP2PMsgConfig.set(parsedMessage.p2p.exchange, {
-				pairs: [{ crypto: "USDT", fiat: "ARS" }],
-				minProfit: parsedMessage.p2p.minProfit,
-				volume: parsedMessage.p2p.volume,
-			});
+			cryptoP2PMsgConfig.set(
+				`${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
+				{
+					minProfit: parsedMessage.p2p.minProfit,
+					volume: parsedMessage.p2p.volume,
+				},
+			);
 		} else if (Object.hasOwn(parsedMessage, "currency")) {
 			clearInterval(currencyRatesTimeout);
 
