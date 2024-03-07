@@ -81,7 +81,7 @@ export async function wsNativeConnectionHandler(
 								minProfit: msgConfig.minProfit,
 								userType: "merchant",
 							}),
-							exchange: p2pConfigKey,
+							exchange: exchangeName,
 							crypto: orders.crypto,
 							fiat: orders.fiat,
 							buyOrders: orders.buyOrders,
