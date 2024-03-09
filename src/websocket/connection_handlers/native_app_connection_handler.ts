@@ -9,7 +9,7 @@ import ExchangeService, {
 import {
 	CryptoP2PWebSocketConfig,
 	CryptoPairWebSocketConfig,
-	P2PWebSocketMessage,
+	P2POutgoingMessage,
 } from "../types.js";
 import { getCurrencyPairRates } from "../../services/currency.service.js";
 import {
@@ -72,20 +72,25 @@ export async function wsNativeConnectionHandler(
 			};
 			exchangeService.getP2POrders(exchangeName, pair).then((orders) => {
 				if (orders) {
-					const message: P2PWebSocketMessage = {
+					const computedArbitrage = calculateP2PArbitrage({
+						buyOrders: orders.buyOrders,
+						sellOrders: orders.sellOrders,
+						volume: msgConfig.volume,
+						minProfit: msgConfig.minProfit,
+						userType: msgConfig.userType,
+						minSellPercent: msgConfig.minSellPercent,
+						maxSellPercent: msgConfig.maxSellPercent,
+						minBuyPercent: msgConfig.minBuyPercent,
+						maxBuyPercent: msgConfig.maxBuyPercent,
+					});
+					const message: P2POutgoingMessage = {
 						p2p: {
-							arbitrage: calculateP2PArbitrage({
-								buyOrders: orders.buyOrders,
-								sellOrders: orders.sellOrders,
-								volume: msgConfig.volume,
-								minProfit: msgConfig.minProfit,
-								userType: "merchant",
-							}),
+							arbitrage: computedArbitrage.arbitrage,
 							exchange: exchangeName,
-							crypto: orders.crypto,
-							fiat: orders.fiat,
-							buyOrders: orders.buyOrders,
-							sellOrders: orders.sellOrders,
+							crypto: pair.crypto,
+							fiat: pair.fiat,
+							buyOrders: computedArbitrage.buyOrders,
+							sellOrders: computedArbitrage.sellOrders,
 						},
 					};
 
@@ -123,6 +128,11 @@ export async function wsNativeConnectionHandler(
 				{
 					minProfit: parsedMessage.p2p.minProfit,
 					volume: parsedMessage.p2p.volume,
+					userType: parsedMessage.p2p.userType,
+					minSellPercent: parsedMessage.p2p.minSellPercent,
+					maxSellPercent: parsedMessage.p2p.maxSellPercent,
+					minBuyPercent: parsedMessage.p2p.minBuyPercent,
+					maxBuyPercent: parsedMessage.p2p.maxBuyPercent,
 				},
 			);
 		} else if (Object.hasOwn(parsedMessage, "currency")) {

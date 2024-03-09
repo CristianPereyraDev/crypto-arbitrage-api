@@ -1,4 +1,7 @@
-import { IP2POrder } from "../databases/model/exchange_p2p.model.js";
+import {
+	IP2POrder,
+	P2PUserType,
+} from "../databases/model/exchange_p2p.model.js";
 import { P2PArbitrage } from "../utils/arbitrages/arbitrage-calculator.js";
 
 export type CryptoPairWebSocketConfig = {
@@ -8,9 +11,14 @@ export type CryptoPairWebSocketConfig = {
 export type CryptoP2PWebSocketConfig = {
 	minProfit: number;
 	volume: number;
+	minSellPercent: number;
+	maxSellPercent: number;
+	minBuyPercent: number;
+	maxBuyPercent: number;
+	userType: P2PUserType;
 };
 
-export type P2PWebSocketMessage = {
+export type P2POutgoingMessage = {
 	p2p: {
 		exchange: string;
 		crypto: string;
