@@ -19,7 +19,7 @@ import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-ba
 import {
 	P2POrderType,
 	P2PUserType,
-} from "src/databases/model/exchange_p2p.model.js";
+} from "../../databases/model/exchange_p2p.model.js";
 
 export const currencyPairs = [
 	{ crypto: "MATIC", fiat: "ARS" },
