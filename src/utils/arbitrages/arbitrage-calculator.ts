@@ -7,6 +7,7 @@ import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-reposito
 import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
 import {
 	IP2POrder,
+	P2POrderType,
 	P2PUserType,
 } from "../../databases/model/exchange_p2p.model.js";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
@@ -185,14 +186,14 @@ export type P2PArbitrage = {
 const BASE_ARBITRAGE: P2PArbitrage = {
 	profit: 0,
 	suggestedBuyOrder: {
-		orderType: "BUY",
+		orderType: P2POrderType.BUY,
 		orderId: "arbitrage_buy",
 		volume: 1,
 		price: 0,
 		min: 0,
 		max: 0,
 		payments: [],
-		userType: "user",
+		userType: P2PUserType.merchant,
 		merchantId: "",
 		merchantName: "CryptoARbitrage",
 		monthOrderCount: 0,
@@ -201,14 +202,14 @@ const BASE_ARBITRAGE: P2PArbitrage = {
 		link: "",
 	},
 	suggestedSellOrder: {
-		orderType: "SELL",
+		orderType: P2POrderType.SELL,
 		orderId: "arbitrage_sell",
 		volume: 1,
 		price: 0,
 		min: 0,
 		max: 0,
 		payments: [],
-		userType: "user",
+		userType: P2PUserType.merchant,
 		merchantId: "",
 		merchantName: "CryptoARbitrage",
 		monthOrderCount: 0,

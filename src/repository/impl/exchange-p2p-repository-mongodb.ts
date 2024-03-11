@@ -23,6 +23,7 @@ export class ExchangeP2PRepositoryMongoDB
 					$match: {
 						name: exchangeName,
 						available: true,
+						exchangeType: "P2PExchange",
 					},
 				},
 				{

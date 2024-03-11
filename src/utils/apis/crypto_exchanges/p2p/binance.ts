@@ -5,16 +5,39 @@ import {
 } from "../../../../databases/model/exchange_p2p.model.js";
 import { fetchWithTimeout } from "../../../../utils/network.utils.js";
 
-export type APIResponse = {
+/**
+ * Success response from Binance P2P endpoint.
+ */
+export type BinanceP2PResponse = {
 	code: string;
 	message: string | null;
 	messageDetail: string | null;
-	data: BinanceP2POrderType[] | null;
-	total?: number;
+	data: BinanceP2POrder[] | null;
+	total: number;
 	success: boolean;
 };
 
-export type BinanceP2PTradeMethodType = {
+export type BinanceP2PAdvertiser = {
+	userNo: string;
+	nickName: string;
+	proMerchant: string;
+	userType: P2PUserType | null;
+	monthOrderCount: number;
+	monthFinishRate: number;
+	positiveRate: number;
+};
+
+export type BinanceP2PAdvertisement = {
+	advNo: string;
+	tradeType: P2POrderType;
+	price: string;
+	maxSingleTransAmount: string;
+	minSingleTransAmount: string;
+	tradableQuantity: string;
+	tradeMethods: BinanceP2PTradeMethod[];
+};
+
+export type BinanceP2PTradeMethod = {
 	payId: string | null;
 	payMethodId: string;
 	payType: string | null;
@@ -28,28 +51,7 @@ export type BinanceP2PTradeMethodType = {
 	tradeMethodBgColor: string;
 };
 
-export type BinanceP2POrderType = {
-	adv: {
-		advNo: string;
-		tradeType: P2POrderType;
-		price: string;
-		maxSingleTransAmount: string;
-		minSingleTransAmount: string;
-		tradableQuantity: string;
-		tradeMethods: BinanceP2PTradeMethodType[];
-	};
-	advertiser: {
-		userNo: string;
-		nickName: string;
-		proMerchant: string;
-		userType: P2PUserType | null;
-		monthOrderCount: number;
-		monthFinishRate: number;
-		positiveRate: number;
-	};
-};
-
-export type BinanceP2PPostData = {
+export type BinanceP2PPostConfig = {
 	fiat: string;
 	page: number;
 	rows: number;
@@ -58,38 +60,51 @@ export type BinanceP2PPostData = {
 	countries: string[];
 	proMerchantAds: boolean;
 	shieldMerchantAds: boolean;
-	publisherType: P2PUserType;
+	publisherType: P2PUserType | null;
 	payTypes: string[];
 	classifies: string[];
 };
 
-async function fetchP2PData(
-	data: BinanceP2PPostData,
-): Promise<APIResponse | undefined> {
+export type BinanceP2POrder = {
+	adv: BinanceP2PAdvertisement;
+	advertiser: BinanceP2PAdvertiser;
+};
+
+async function fetchP2POrders(
+	config: BinanceP2PPostConfig,
+): Promise<BinanceP2PResponse> {
 	try {
 		const response = await fetchWithTimeout(
 			"https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
+				body: JSON.stringify(config),
 			},
 		);
-		const jsonResponse = (await response.json()) as APIResponse;
+
+		if (!response.ok) {
+			if (response.status === 404) throw new Error("404, Not found");
+			if (response.status === 500)
+				throw new Error("500, internal server error");
+
+			throw new Error(`${response.status} ${response.statusText}`);
+		}
+
+		const jsonResponse = (await response.json()) as BinanceP2PResponse;
 
 		return jsonResponse;
 	} catch (error) {
-		console.log("Error on fetchP2PData:", error);
-		return;
+		throw new Error(`Error on fetchP2POrders: ${error}`);
 	}
 }
 
-function mapP2PResponse(apiResponse: APIResponse): IP2POrder[] {
+function mapP2PResponse(apiResponse: BinanceP2PResponse): IP2POrder[] {
 	if (apiResponse.data === null) {
 		return [];
 	}
 
-	const mappedResponse = apiResponse.data.map((order: BinanceP2POrderType) => {
+	const mappedResponse = apiResponse.data.map((order: BinanceP2POrder) => {
 		return {
 			orderType: order.adv.tradeType,
 			orderId: order.adv.advNo,
@@ -120,42 +135,44 @@ export async function getP2POrders(
 	asset: string,
 	fiat: string,
 	tradeType: P2POrderType,
-	userType: P2PUserType,
-): Promise<IP2POrder[] | undefined> {
-	const data = {
+	publisherType: P2PUserType | null,
+): Promise<IP2POrder[]> {
+	const fetchConfig: BinanceP2PPostConfig = {
 		fiat: fiat,
 		page: 1,
 		rows: 20,
-		tradeType: tradeType,
+		tradeType: tradeType === "BUY" ? P2POrderType.SELL : P2POrderType.BUY,
 		asset: asset,
 		countries: [],
 		proMerchantAds: false,
 		shieldMerchantAds: false,
-		publisherType: userType,
+		publisherType: publisherType,
 		payTypes: [],
 		classifies: ["mass", "profession"],
 	};
+
 	try {
-		const firstOrder = await fetchP2PData({ ...data, rows: 1 });
+		const firstOrder = await fetchP2POrders({
+			...fetchConfig,
+			rows: 1,
+			page: 1,
+		});
 
-		if (firstOrder?.success && firstOrder.total !== undefined) {
-			const pages = Math.ceil(firstOrder.total / data.rows);
+		const pages = Math.min(
+			Math.ceil(firstOrder.total / fetchConfig.rows),
+			Number(process.env.BINANCE_P2P_MAX_CONCURRENT_API_CALLS || "1"),
+		);
 
-			const results = await Promise.all(
-				[...Array(pages).keys()].map((page) =>
-					fetchP2PData({ ...data, page: page + 1 }),
-				),
-			);
+		const results = await Promise.all(
+			[...Array(pages).keys()].map((page) =>
+				fetchP2POrders({ ...fetchConfig, page: page + 1 }),
+			),
+		);
 
-			return results.flatMap((apiResponse) =>
-				apiResponse !== undefined ? mapP2PResponse(apiResponse) : [],
-			);
-		}
-
-		console.error("Error:", firstOrder?.code);
-		return undefined;
+		return results.flatMap((apiResponse) => mapP2PResponse(apiResponse));
 	} catch (error) {
-		console.error(`Binance P2P error for pair ${asset}-${fiat}`, error);
-		return undefined;
+		throw new Error(
+			`binance.getP2POrders error for pair ${asset}-${fiat}, ${error}`,
+		);
 	}
 }

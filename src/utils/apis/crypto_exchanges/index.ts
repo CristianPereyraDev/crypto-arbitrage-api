@@ -78,8 +78,8 @@ export type P2PCollectorFunctionType = (
 	asset: string,
 	fiat: string,
 	tradeType: P2POrderType,
-	userType: P2PUserType,
-) => Promise<IP2POrder[] | undefined>;
+	publisherType: P2PUserType | null,
+) => Promise<IP2POrder[]>;
 
 const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>();
 

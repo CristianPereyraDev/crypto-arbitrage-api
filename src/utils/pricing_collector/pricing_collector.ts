@@ -16,6 +16,10 @@ import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-reposito
 import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
 import { IExchange } from "../../databases/model/exchange.model.js";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
+import {
+	P2POrderType,
+	P2PUserType,
+} from "src/databases/model/exchange_p2p.model.js";
 
 export const currencyPairs = [
 	{ crypto: "MATIC", fiat: "ARS" },
@@ -85,37 +89,40 @@ export async function collectP2POrdersToDB() {
 
 			if (orderCollector !== undefined) {
 				for (const p2pPair of p2pExchange.ordersByPair) {
-					orderCollector(p2pPair.crypto, p2pPair.fiat, "BUY", "merchant").then(
-						(orders) => {
-							if (orders !== undefined) {
-								exchangeService.updateP2POrders(
-									p2pExchange.name,
-									p2pPair.crypto,
-									p2pPair.fiat,
-									"BUY",
-									orders,
-								);
-							}
-						},
+					// Get all buy orders and all sell orders
+					const orders = await Promise.all([
+						orderCollector(
+							p2pPair.crypto,
+							p2pPair.fiat,
+							P2POrderType.BUY,
+							P2PUserType.merchant,
+						),
+						orderCollector(
+							p2pPair.crypto,
+							p2pPair.fiat,
+							P2POrderType.SELL,
+							P2PUserType.merchant,
+						),
+					]);
+					exchangeService.updateP2POrders(
+						p2pExchange.name,
+						p2pPair.crypto,
+						p2pPair.fiat,
+						P2POrderType.BUY,
+						orders[0],
 					);
-					orderCollector(p2pPair.crypto, p2pPair.fiat, "SELL", "merchant").then(
-						(orders) => {
-							if (orders !== undefined) {
-								exchangeService.updateP2POrders(
-									p2pExchange.name,
-									p2pPair.crypto,
-									p2pPair.fiat,
-									"SELL",
-									orders,
-								);
-							}
-						},
+					exchangeService.updateP2POrders(
+						p2pExchange.name,
+						p2pPair.crypto,
+						p2pPair.fiat,
+						P2POrderType.SELL,
+						orders[1],
 					);
 				}
 			}
 		}
 	} catch (error) {
-		console.log("Error en collectP2POrdersToBD", error);
+		console.log("Error in collectP2POrdersToBD", error);
 	}
 }
 

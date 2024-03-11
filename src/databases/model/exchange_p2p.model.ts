@@ -1,8 +1,14 @@
 import { IExchangeBase, IPair } from "./exchange_base.model.js";
 
-export type P2POrderType = "BUY" | "SELL";
+export enum P2POrderType {
+	BUY = "BUY",
+	SELL = "SELL",
+}
 
-export type P2PUserType = "user" | "merchant";
+export enum P2PUserType {
+	user = "user",
+	merchant = "merchant",
+}
 
 export interface IPaymentMethod {
 	slug: string;
