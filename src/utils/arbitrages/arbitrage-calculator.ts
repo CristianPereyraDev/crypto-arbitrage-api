@@ -281,10 +281,11 @@ export function calculateP2PArbitrage(params: CalculateP2PArbitrageParams): {
 		};
 	}
 
-	arbitrage.suggestedSellOrder.price = buyOrdersFiltered[0].price - 0.01; // sell a little cheaper
+	arbitrage.suggestedSellOrder.price = sellOrdersFiltered[0].price - 0.01; // sell a little cheaper
 	arbitrage.suggestedSellOrder.volume = params.volume;
-	arbitrage.suggestedBuyOrder.price = sellOrdersFiltered[0].price + 0.01; // buy a little more expensive
+	arbitrage.suggestedBuyOrder.price = buyOrdersFiltered[0].price + 0.01; // buy a little more expensive
 	arbitrage.suggestedBuyOrder.volume = params.volume;
+
 	let profit = calculateP2PProfit(
 		arbitrage.suggestedSellOrder.price,
 		arbitrage.suggestedBuyOrder.price,
