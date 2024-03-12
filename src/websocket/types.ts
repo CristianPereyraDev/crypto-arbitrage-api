@@ -2,7 +2,7 @@ import {
 	IP2POrder,
 	P2PUserType,
 } from "../databases/model/exchange_p2p.model.js";
-import { P2PArbitrage } from "../utils/arbitrages/arbitrage-calculator.js";
+import { P2PArbitrage } from "../utils/arbitrages/p2p_strategies/types.js";
 
 export type CryptoPairWebSocketConfig = {
 	volume: number;

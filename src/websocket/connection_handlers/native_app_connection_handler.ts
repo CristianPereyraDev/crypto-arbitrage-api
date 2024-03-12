@@ -13,7 +13,7 @@ import {
 } from "../types.js";
 import { getCurrencyPairRates } from "../../services/currency.service.js";
 import {
-	calculateP2PArbitrage,
+	ArbitrageCalculator,
 	calculateTotalAsk,
 	calculateTotalBid,
 } from "../../utils/arbitrages/arbitrage-calculator.js";
@@ -23,6 +23,7 @@ import { WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
+import { BasicStrategy } from "src/utils/arbitrages/p2p_strategies/strategy_basic.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -35,6 +36,7 @@ export async function wsNativeConnectionHandler(
 	websocket: WebSocket,
 	connectionRequest: IncomingMessage,
 ) {
+	const arbitrageCalculator = new ArbitrageCalculator(new BasicStrategy());
 	let currencyRatesTimeout: ReturnType<typeof setInterval>;
 
 	const cryptoPairMsgConfig = new Map<string, CryptoPairWebSocketConfig>();
@@ -72,7 +74,7 @@ export async function wsNativeConnectionHandler(
 			};
 			exchangeService.getP2POrders(exchangeName, pair).then((orders) => {
 				if (orders) {
-					const computedArbitrage = calculateP2PArbitrage({
+					const computedArbitrage = arbitrageCalculator.calculateP2PArbitrage({
 						buyOrders: orders.buyOrders,
 						sellOrders: orders.sellOrders,
 						volume: msgConfig.volume,
