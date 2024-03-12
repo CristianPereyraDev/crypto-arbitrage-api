@@ -24,6 +24,7 @@ import { IncomingMessage } from "http";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
 import { BasicStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_basic.js";
+import { P2PUserType } from "../../databases/model/exchange_p2p.model.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -126,11 +127,17 @@ export async function wsNativeConnectionHandler(
 			cryptoP2PMsgConfig.set(
 				`${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
 				{
-					minProfit: parsedMessage.p2p.minProfit,
-					volume: parsedMessage.p2p.volume,
-					userType: parsedMessage.p2p.userType,
-					sellLimits: parsedMessage.p2p.sellLimits,
-					buyLimits: parsedMessage.p2p.buyLimits,
+					minProfit: parsedMessage.p2p.minProfit ?? 1,
+					volume: parsedMessage.p2p.volume ?? 1,
+					userType: Object.hasOwn(parsedMessage.p2p, "userType")
+						? parsedMessage.p2p.userType
+						: P2PUserType.merchant,
+					sellLimits: Object.hasOwn(parsedMessage.p2p, "sellLimits")
+						? parsedMessage.p2p.sellLimits
+						: [100000, 100000],
+					buyLimits: Object.hasOwn(parsedMessage.p2p, "buyLimits")
+						? parsedMessage.p2p.buyLimits
+						: [100, 100000],
 				},
 			);
 		} else if (Object.hasOwn(parsedMessage, "currency")) {
