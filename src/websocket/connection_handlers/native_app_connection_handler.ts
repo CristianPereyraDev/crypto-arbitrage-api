@@ -78,10 +78,8 @@ export async function wsNativeConnectionHandler(
 						volume: msgConfig.volume,
 						minProfit: msgConfig.minProfit,
 						userType: msgConfig.userType,
-						minSellPercent: msgConfig.minSellPercent,
-						maxSellPercent: msgConfig.maxSellPercent,
-						minBuyPercent: msgConfig.minBuyPercent,
-						maxBuyPercent: msgConfig.maxBuyPercent,
+						sellLimits: msgConfig.sellLimits,
+						buyLimits: msgConfig.buyLimits,
 					});
 					const message: P2POutgoingMessage = {
 						p2p: {
@@ -129,10 +127,8 @@ export async function wsNativeConnectionHandler(
 					minProfit: parsedMessage.p2p.minProfit,
 					volume: parsedMessage.p2p.volume,
 					userType: parsedMessage.p2p.userType,
-					minSellPercent: parsedMessage.p2p.minSellPercent,
-					maxSellPercent: parsedMessage.p2p.maxSellPercent,
-					minBuyPercent: parsedMessage.p2p.minBuyPercent,
-					maxBuyPercent: parsedMessage.p2p.maxBuyPercent,
+					sellLimits: parsedMessage.p2p.sellLimits,
+					buyLimits: parsedMessage.p2p.buyLimits,
 				},
 			);
 		} else if (Object.hasOwn(parsedMessage, "currency")) {

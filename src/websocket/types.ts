@@ -11,10 +11,8 @@ export type CryptoPairWebSocketConfig = {
 export type CryptoP2PWebSocketConfig = {
 	minProfit: number;
 	volume: number;
-	minSellPercent: number;
-	maxSellPercent: number;
-	minBuyPercent: number;
-	maxBuyPercent: number;
+	sellLimits: [number, number];
+	buyLimits: [number, number];
 	userType: P2PUserType;
 };
 

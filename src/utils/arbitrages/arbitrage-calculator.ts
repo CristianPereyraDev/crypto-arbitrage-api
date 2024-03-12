@@ -225,10 +225,8 @@ export type CalculateP2PArbitrageParams = {
 	volume: number;
 	minProfit: number;
 	userType: P2PUserType;
-	minSellPercent: number;
-	maxSellPercent: number;
-	minBuyPercent: number;
-	maxBuyPercent: number;
+	sellLimits: [number, number];
+	buyLimits: [number, number];
 };
 
 /**
@@ -245,31 +243,25 @@ export function calculateP2PArbitrage(params: CalculateP2PArbitrageParams): {
 	const buyOrdersFiltered = params.buyOrders
 		.filter((order) => order.userType === params.userType)
 		.filter((order) => {
-			const orderRangePercents: [number, number] = [
-				order.min / (order.price * order.volume),
-				order.max / (order.price * order.volume),
-			];
+			const orderLimits: [number, number] = [order.min, order.max];
 
 			return (
-				(orderRangePercents[0] >= params.minBuyPercent &&
-					orderRangePercents[0] <= params.maxBuyPercent) ||
-				(orderRangePercents[1] >= params.minBuyPercent &&
-					orderRangePercents[1] <= params.maxBuyPercent)
+				(orderLimits[0] >= params.buyLimits[0] &&
+					orderLimits[0] <= params.buyLimits[1]) ||
+				(orderLimits[1] >= params.buyLimits[0] &&
+					orderLimits[1] <= params.buyLimits[1])
 			);
 		});
 	const sellOrdersFiltered = params.sellOrders
 		.filter((order) => order.userType === params.userType)
 		.filter((order) => {
-			const orderRangePercents: [number, number] = [
-				order.min / (order.price * order.volume),
-				order.max / (order.price * order.volume),
-			];
+			const orderLimits: [number, number] = [order.min, order.max];
 
 			return (
-				(orderRangePercents[0] >= params.minSellPercent &&
-					orderRangePercents[0] <= params.maxSellPercent) ||
-				(orderRangePercents[1] >= params.minSellPercent &&
-					orderRangePercents[1] <= params.maxSellPercent)
+				(orderLimits[0] >= params.sellLimits[0] &&
+					orderLimits[0] <= params.sellLimits[1]) ||
+				(orderLimits[1] >= params.sellLimits[0] &&
+					orderLimits[1] <= params.sellLimits[1])
 			);
 		});
 
@@ -294,17 +286,13 @@ export function calculateP2PArbitrage(params: CalculateP2PArbitrageParams): {
 	if (profit >= params.minProfit) {
 		arbitrage.profit = profit;
 		arbitrage.suggestedSellOrder.min =
-			params.volume *
-			arbitrage.suggestedSellOrder.price *
-			params.minSellPercent;
+			params.volume * arbitrage.suggestedSellOrder.price * params.sellLimits[0];
 		arbitrage.suggestedSellOrder.max =
-			params.volume *
-			arbitrage.suggestedSellOrder.price *
-			params.maxSellPercent;
+			params.volume * arbitrage.suggestedSellOrder.price * params.sellLimits[1];
 		arbitrage.suggestedBuyOrder.min =
-			params.volume * arbitrage.suggestedBuyOrder.price * params.minBuyPercent;
+			params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[0];
 		arbitrage.suggestedBuyOrder.max =
-			params.volume * arbitrage.suggestedBuyOrder.price * params.maxBuyPercent;
+			params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[1];
 
 		return {
 			arbitrage,
@@ -313,30 +301,29 @@ export function calculateP2PArbitrage(params: CalculateP2PArbitrageParams): {
 		};
 	}
 
-	// Find the best sell order from buy orders.
-	for (const buyOrder of buyOrdersFiltered.slice(1)) {
+	// Find the best sell order.
+	for (const sellOrder of sellOrdersFiltered.slice(1)) {
 		profit = calculateP2PProfit(
-			buyOrder.price - 0.01,
+			sellOrder.price - 0.01,
 			arbitrage.suggestedBuyOrder.price,
 		);
 
 		if (profit >= params.minProfit) {
-			arbitrage.suggestedSellOrder.price = buyOrder.price - 0.01; // sell a little more expensive
+			arbitrage.suggestedSellOrder.price = sellOrder.price - 0.01; // sell a little more cheaper
 			arbitrage.profit = profit;
 
 			break;
 		}
 	}
-
-	// Find the best buy order from sell orders.
-	for (const sellOrder of sellOrdersFiltered.slice(1)) {
+	// Find the best buy order
+	for (const buyOrder of buyOrdersFiltered.slice(1)) {
 		profit = calculateP2PProfit(
 			arbitrage.suggestedSellOrder.price,
-			sellOrder.price + 0.01,
+			buyOrder.price + 0.01,
 		);
 
 		if (profit >= params.minProfit) {
-			arbitrage.suggestedBuyOrder.price = sellOrder.price + 0.01; // buy a little cheaper
+			arbitrage.suggestedBuyOrder.price = buyOrder.price + 0.01; // buy a little more expensive
 			arbitrage.profit = profit;
 
 			break;
@@ -345,17 +332,13 @@ export function calculateP2PArbitrage(params: CalculateP2PArbitrageParams): {
 
 	if (arbitrage.profit >= params.minProfit) {
 		arbitrage.suggestedSellOrder.min =
-			params.volume *
-			arbitrage.suggestedSellOrder.price *
-			params.minSellPercent;
+			params.volume * arbitrage.suggestedSellOrder.price * params.sellLimits[0];
 		arbitrage.suggestedSellOrder.max =
-			params.volume *
-			arbitrage.suggestedSellOrder.price *
-			params.maxSellPercent;
+			params.volume * arbitrage.suggestedSellOrder.price * params.sellLimits[1];
 		arbitrage.suggestedBuyOrder.min =
-			params.volume * arbitrage.suggestedBuyOrder.price * params.minBuyPercent;
+			params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[0];
 		arbitrage.suggestedBuyOrder.max =
-			params.volume * arbitrage.suggestedBuyOrder.price * params.maxBuyPercent;
+			params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[1];
 
 		return {
 			arbitrage,
