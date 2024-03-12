@@ -23,7 +23,7 @@ import { WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
-import { BasicStrategy } from "src/utils/arbitrages/p2p_strategies/strategy_basic.js";
+import { BasicStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_basic.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
