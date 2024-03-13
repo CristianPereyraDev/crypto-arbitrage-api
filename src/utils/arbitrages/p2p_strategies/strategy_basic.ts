@@ -103,18 +103,10 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 
 		if (profit >= params.minProfit) {
 			arbitrage.profit = profit;
-			arbitrage.suggestedSellOrder.min =
-				params.volume *
-				arbitrage.suggestedSellOrder.price *
-				params.sellLimits[0];
-			arbitrage.suggestedSellOrder.max =
-				params.volume *
-				arbitrage.suggestedSellOrder.price *
-				params.sellLimits[1];
-			arbitrage.suggestedBuyOrder.min =
-				params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[0];
-			arbitrage.suggestedBuyOrder.max =
-				params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[1];
+			arbitrage.suggestedSellOrder.min = params.sellLimits[0];
+			arbitrage.suggestedSellOrder.max = params.sellLimits[1];
+			arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
+			arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
 
 			return {
 				arbitrage,
@@ -153,18 +145,10 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		}
 
 		if (arbitrage.profit >= params.minProfit) {
-			arbitrage.suggestedSellOrder.min =
-				params.volume *
-				arbitrage.suggestedSellOrder.price *
-				params.sellLimits[0];
-			arbitrage.suggestedSellOrder.max =
-				params.volume *
-				arbitrage.suggestedSellOrder.price *
-				params.sellLimits[1];
-			arbitrage.suggestedBuyOrder.min =
-				params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[0];
-			arbitrage.suggestedBuyOrder.max =
-				params.volume * arbitrage.suggestedBuyOrder.price * params.buyLimits[1];
+			arbitrage.suggestedSellOrder.min = params.sellLimits[0];
+			arbitrage.suggestedSellOrder.max = params.sellLimits[1];
+			arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
+			arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
 
 			return {
 				arbitrage,
