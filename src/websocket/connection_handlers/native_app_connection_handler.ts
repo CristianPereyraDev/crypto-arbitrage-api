@@ -120,7 +120,7 @@ export async function wsNativeConnectionHandler(
 
 		if (Object.hasOwn(parsedMessage, "crypto")) {
 			cryptoPairMsgConfig.set(
-				`${parsedMessage.crypto.asset} - ${parsedMessage.crypto.fiat}`,
+				`${parsedMessage.crypto.asset}-${parsedMessage.crypto.fiat}`,
 				{ volume: parsedMessage.crypto.volume },
 			);
 		} else if (Object.hasOwn(parsedMessage, "p2p")) {
