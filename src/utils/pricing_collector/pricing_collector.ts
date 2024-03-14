@@ -185,19 +185,21 @@ type BrokeragePromiseAllElemResultType = {
 
 export async function collectCryptoBrokeragesPricesToDB() {
 	try {
-		const exchanges = await exchangeService.getAvailableBrokerages();
+		const brokerages = await exchangeService.getAvailableBrokerages();
 		const collectors: Promise<BrokeragePromiseAllElemResultType>[] = [];
 
-		for (const exchange of exchanges) {
-			const priceCollector = brokeragePriceCollectors.get(exchange.name);
+		console.log(`Brokerages: ${brokerages.map((brokerage) => brokerage.name)}`);
+
+		for (const brokerage of brokerages) {
+			const priceCollector = brokeragePriceCollectors.get(brokerage.name);
 			if (priceCollector === undefined) continue;
 
-			for (const pair of exchange.pricesByPair) {
+			for (const pair of brokerage.pricesByPair) {
 				collectors.push(
 					new Promise<BrokeragePromiseAllElemResultType>((resolve, _reject) => {
 						priceCollector(pair.crypto, pair.fiat).then((prices) => {
 							resolve({
-								exchangeName: exchange.name,
+								exchangeName: brokerage.name,
 								baseAsset: pair.crypto,
 								quoteAsset: pair.fiat,
 								prices,

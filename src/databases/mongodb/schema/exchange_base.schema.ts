@@ -35,11 +35,9 @@ const exchangeBaseSchema = new Schema<IExchangeBase>(
 		availablePairs: {
 			type: [pairSchema],
 			validate: {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				validator: (v: any) => {
+				validator: (v: IPair[]) => {
 					const set = new Set(
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						v.map((pair: any) => `${pair.crypto}-${pair.fiat}`),
+						v.map((pair: IPair) => `${pair.crypto}-${pair.fiat}`),
 					);
 
 					return set.size === v.length;
