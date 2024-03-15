@@ -4,7 +4,10 @@ import {
 	ExchangeBaseRepository,
 	IPriceableRepository,
 } from "./exchange-base-repository.js";
-import { IBrokerage } from "../databases/model/brokerage.model.js";
+import {
+	IBrokerage,
+	IBrokeragePairPrices,
+} from "../databases/model/brokerage.model.js";
 
 export interface IBrokerageRepository
 	extends ExchangeBaseRepository<IBrokerage>,
@@ -12,9 +15,6 @@ export interface IBrokerageRepository
 	getAllPricesByPair(pair: IPair): Promise<IExchangePricingDTO[]>;
 	updateBrokeragePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		ask: number,
-		bid: number,
+		prices: IBrokeragePairPrices[],
 	): Promise<void>;
 }

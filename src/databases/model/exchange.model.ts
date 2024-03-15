@@ -1,18 +1,18 @@
-import { IPair, IExchangeBase } from './exchange_base.model.js'
+import { IPair, IExchangeBase } from "./exchange_base.model.js";
 
 /**
- * Ask and bids are arrays of arrays like [[price, qty], [price, qty]]
+ * Asks and bids are arrays of arrays like [[price, qty], [price, qty], ...]
  */
 export interface IAskBid {
-  asks: number[][]
-  bids: number[][]
-  createdAt?: Date
+	asks: number[][];
+	bids: number[][];
+	createdAt?: Date;
 }
 
 export interface IExchangePairPrices extends IPair {
-  asksAndBids: IAskBid[]
+	asksAndBids: IAskBid;
 }
 
 export interface IExchange extends IExchangeBase {
-  pricesByPair: IExchangePairPrices[]
+	pricesByPair: IExchangePairPrices[];
 }

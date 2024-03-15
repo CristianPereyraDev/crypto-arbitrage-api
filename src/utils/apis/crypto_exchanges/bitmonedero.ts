@@ -1,38 +1,57 @@
-import { fetchWithTimeout } from '../../../utils/network.utils.js'
-import { BrokerageCollectorReturnType } from './index.js'
+import { fetchWithTimeout } from "../../../utils/network.utils.js";
+import { IPair } from "../../../databases/model/exchange_base.model.js";
+import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
+
+type BitmonederoAPIResponse = {
+	buy_btc_ars: number;
+	buy_btc_ars_fee: number;
+	sell_btc_ars: number;
+	buy_trxusdt_ars: number;
+	buy_trxusdt_ars_fee: number;
+	sell_trxusdt_ars: number;
+	updated_at_prices: string;
+	withdrawal_fee: number;
+};
 
 export async function getPairPrices(
-  asset: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  fiat: string
-): Promise<BrokerageCollectorReturnType | undefined> {
-  try {
-    const response = await fetchWithTimeout(
-      'https://www.bitmonedero.com/api/btc-ars'
-    )
+	pairs: IPair[],
+): Promise<IBrokeragePairPrices[] | undefined> {
+	try {
+		const response = await fetchWithTimeout(
+			"https://www.bitmonedero.com/api/btc-ars",
+		);
 
-    if (response.ok) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jsonResponse: any = await response.json()
+		if (response.ok) {
+			const jsonResponse = (await response.json()) as BitmonederoAPIResponse;
 
-      switch (asset) {
-        case 'BTC':
-          return {
-            ask: parseFloat(jsonResponse.buy_btc_ars),
-            bid: parseFloat(jsonResponse.sell_btc_ars)
-          }
+			return pairs.map((pair) => {
+				switch (pair.crypto) {
+					case "BTC":
+						return {
+							...pair,
+							ask: jsonResponse.buy_btc_ars,
+							bid: jsonResponse.sell_btc_ars,
+						};
 
-        case 'USDT':
-          return {
-            ask: parseFloat(jsonResponse.buy_trxusdt_ars),
-            bid: parseFloat(jsonResponse.sell_trxusdt_ars)
-          }
-      }
-    }
+					case "USDT":
+						return {
+							...pair,
+							ask: jsonResponse.buy_trxusdt_ars,
+							bid: jsonResponse.sell_trxusdt_ars,
+						};
+					default:
+						return {
+							...pair,
+							ask: 0,
+							bid: 0,
+						};
+				}
+			});
+		}
 
-    return undefined
-  } catch (error) {
-    console.error(error)
-    return undefined
-  }
+		return undefined;
+	} catch (error) {
+		console.error(error);
+		return undefined;
+	}
 }

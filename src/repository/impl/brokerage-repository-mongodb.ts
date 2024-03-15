@@ -1,4 +1,7 @@
-import { IBrokerage } from "../../databases/model/brokerage.model.js";
+import {
+	IBrokerage,
+	IBrokeragePairPrices,
+} from "../../databases/model/brokerage.model.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
 import { IExchangePricingDTO } from "../../types/dto/index.js";
 import { IBrokerageRepository } from "../brokerage-repository.js";
@@ -55,10 +58,7 @@ export default class BrokerageRepositoryMongoDB
 
 	async updateBrokeragePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		ask: number,
-		bid: number,
+		prices: IBrokeragePairPrices[],
 	): Promise<void> {
 		try {
 			await Brokerage.findOneAndUpdate(
@@ -67,17 +67,8 @@ export default class BrokerageRepositoryMongoDB
 				},
 				{
 					$set: {
-						"pricesByPair.$[i].ask": ask,
-						"pricesByPair.$[i].bid": bid,
+						pricesByPair: prices,
 					},
-				},
-				{
-					arrayFilters: [
-						{
-							"i.crypto": baseAsset,
-							"i.fiat": quoteAsset,
-						},
-					],
 				},
 			).exec();
 		} catch (error) {

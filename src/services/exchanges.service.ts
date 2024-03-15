@@ -8,12 +8,13 @@ import {
 	IExchangeBase,
 	IPair,
 } from "../databases/model/exchange_base.model.js";
-import { ExchangeCollectorReturnType } from "../utils/apis/crypto_exchanges/index.js";
 import { IExchangeRepository } from "../repository/exchange-repository.js";
 import { IBrokerageRepository } from "../repository/brokerage-repository.js";
 import { IExchangeP2PRepository } from "../repository/exchange-p2p-repository.js";
 import { IExchangeFeesDTO } from "../types/dto/index.js";
 import { ExchangeBaseRepository } from "../repository/exchange-base-repository.js";
+import { IExchangePairPrices } from "src/databases/model/exchange.model.js";
+import { IBrokeragePairPrices } from "src/databases/model/brokerage.model.js";
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFeesDTO };
 
@@ -50,32 +51,16 @@ export default class ExchangeService {
 
 	async updateBrokeragePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		ask: number,
-		bid: number,
+		prices: IBrokeragePairPrices[],
 	) {
-		this.brokerageRepository.updateBrokeragePrices(
-			exchangeName,
-			baseAsset,
-			quoteAsset,
-			ask,
-			bid,
-		);
+		this.brokerageRepository.updateBrokeragePrices(exchangeName, prices);
 	}
 
 	async updateExchangePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		prices: ExchangeCollectorReturnType,
+		prices: IExchangePairPrices[],
 	) {
-		this.exchangeRepository.updateExchangePrices(
-			exchangeName,
-			baseAsset,
-			quoteAsset,
-			prices,
-		);
+		this.exchangeRepository.updateExchangePrices(exchangeName, prices);
 	}
 
 	async removeOlderPrices() {

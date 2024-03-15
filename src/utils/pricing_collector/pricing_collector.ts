@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ICryptoArbitrageResult } from "../arbitrages/arbitrage-calculator.js";
 import {
-	BrokerageCollectorReturnType,
-	ExchangeCollectorReturnType,
 	p2pOrderCollectors,
 	exchangePriceCollectors,
 	brokeragePriceCollectors,
@@ -14,12 +12,16 @@ import { updateCurrencyPairRate } from "../../services/currency.service.js";
 import ExchangeRepositoryMongoDB from "../../repository/impl/exchange-repository-mongodb.js";
 import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-repository-mongodb.js";
 import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
-import { IExchange } from "../../databases/model/exchange.model.js";
+import {
+	IExchange,
+	IExchangePairPrices,
+} from "../../databases/model/exchange.model.js";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import {
 	P2POrderType,
 	P2PUserType,
 } from "../../databases/model/exchange_p2p.model.js";
+import { IBrokeragePairPrices } from "src/databases/model/brokerage.model.js";
 
 export const currencyPairs = [
 	{ crypto: "MATIC", fiat: "ARS" },
@@ -128,9 +130,7 @@ export async function collectP2POrdersToDB() {
 
 type PromiseAllElemResultType = {
 	exchangeName: string;
-	baseAsset: string;
-	quoteAsset: string;
-	prices: ExchangeCollectorReturnType | undefined;
+	prices: IExchangePairPrices[] | undefined;
 };
 
 export async function collectCryptoExchangesPricesToDB() {
@@ -143,20 +143,16 @@ export async function collectCryptoExchangesPricesToDB() {
 			const priceCollector = exchangePriceCollectors.get(exchange.name);
 			if (priceCollector === undefined) continue;
 
-			for (const pair of exchange.pricesByPair) {
-				collectors.push(
-					new Promise<PromiseAllElemResultType>((resolve, _reject) => {
-						priceCollector(pair.crypto, pair.fiat).then((prices) => {
-							resolve({
-								exchangeName: exchange.name,
-								baseAsset: pair.crypto,
-								quoteAsset: pair.fiat,
-								prices,
-							});
+			collectors.push(
+				new Promise<PromiseAllElemResultType>((resolve, _reject) => {
+					priceCollector(exchange.availablePairs).then((prices) => {
+						resolve({
+							exchangeName: exchange.name,
+							prices,
 						});
-					}),
-				);
-			}
+					});
+				}),
+			);
 		}
 
 		// Call collectors in parallel
@@ -165,8 +161,6 @@ export async function collectCryptoExchangesPricesToDB() {
 			if (priceCollectorResult.prices !== undefined) {
 				exchangeService.updateExchangePrices(
 					priceCollectorResult.exchangeName,
-					priceCollectorResult.baseAsset,
-					priceCollectorResult.quoteAsset,
 					priceCollectorResult.prices,
 				);
 			}
@@ -178,9 +172,7 @@ export async function collectCryptoExchangesPricesToDB() {
 
 type BrokeragePromiseAllElemResultType = {
 	exchangeName: string;
-	baseAsset: string;
-	quoteAsset: string;
-	prices: BrokerageCollectorReturnType | undefined;
+	prices: IBrokeragePairPrices[] | undefined;
 };
 
 export async function collectCryptoBrokeragesPricesToDB() {
@@ -188,26 +180,20 @@ export async function collectCryptoBrokeragesPricesToDB() {
 		const brokerages = await exchangeService.getAvailableBrokerages();
 		const collectors: Promise<BrokeragePromiseAllElemResultType>[] = [];
 
-		console.log(`Brokerages: ${brokerages.map((brokerage) => brokerage.name)}`);
-
 		for (const brokerage of brokerages) {
 			const priceCollector = brokeragePriceCollectors.get(brokerage.name);
 			if (priceCollector === undefined) continue;
 
-			for (const pair of brokerage.pricesByPair) {
-				collectors.push(
-					new Promise<BrokeragePromiseAllElemResultType>((resolve, _reject) => {
-						priceCollector(pair.crypto, pair.fiat).then((prices) => {
-							resolve({
-								exchangeName: brokerage.name,
-								baseAsset: pair.crypto,
-								quoteAsset: pair.fiat,
-								prices,
-							});
+			collectors.push(
+				new Promise<BrokeragePromiseAllElemResultType>((resolve, _reject) => {
+					priceCollector(brokerage.availablePairs).then((prices) => {
+						resolve({
+							exchangeName: brokerage.name,
+							prices,
 						});
-					}),
-				);
-			}
+					});
+				}),
+			);
 		}
 
 		// Call collectors in parallel
@@ -216,10 +202,7 @@ export async function collectCryptoBrokeragesPricesToDB() {
 			if (priceCollectorResult.prices !== undefined) {
 				exchangeService.updateBrokeragePrices(
 					priceCollectorResult.exchangeName,
-					priceCollectorResult.baseAsset,
-					priceCollectorResult.quoteAsset,
-					priceCollectorResult.prices.ask,
-					priceCollectorResult.prices.bid,
+					priceCollectorResult.prices,
 				);
 			}
 		}

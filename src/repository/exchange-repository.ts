@@ -4,8 +4,10 @@ import {
 	ExchangeBaseRepository,
 	IPriceableRepository,
 } from "./exchange-base-repository.js";
-import { IExchange } from "../databases/model/exchange.model.js";
-import { ExchangeCollectorReturnType } from "../utils/apis/crypto_exchanges/index.js";
+import {
+	IExchange,
+	IExchangePairPrices,
+} from "../databases/model/exchange.model.js";
 
 export interface IExchangeRepository
 	extends ExchangeBaseRepository<IExchange>,
@@ -17,8 +19,6 @@ export interface IExchangeRepository
 
 	updateExchangePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		prices: ExchangeCollectorReturnType,
+		prices: IExchangePairPrices[],
 	): Promise<void>;
 }

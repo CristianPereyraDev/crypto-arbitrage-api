@@ -1,10 +1,12 @@
-import { IExchange } from "../../databases/model/exchange.model.js";
+import {
+	IExchange,
+	IExchangePairPrices,
+} from "../../databases/model/exchange.model.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
 import { IExchangePricingDTO } from "../../types/dto/index.js";
 import { IExchangeRepository } from "../exchange-repository.js";
 import { ExchangeBaseRepository } from "../exchange-base-repository.js";
 import { Exchange } from "../../databases/mongodb/schema/exchange.schema.js";
-import { ExchangeCollectorReturnType } from "../../utils/apis/crypto_exchanges/index.js";
 import { IExchangeFeesDTO } from "../../types/dto/index.js";
 import { exchangeFeesToDTO } from "../utils/repository.utils.js";
 
@@ -55,9 +57,7 @@ export default class ExchangeRepositoryMongoDB
 
 	async updateExchangePrices(
 		exchangeName: string,
-		baseAsset: string,
-		quoteAsset: string,
-		prices: ExchangeCollectorReturnType,
+		prices: IExchangePairPrices[],
 	): Promise<void> {
 		try {
 			await Exchange.findOneAndUpdate(
@@ -65,21 +65,18 @@ export default class ExchangeRepositoryMongoDB
 					name: exchangeName,
 				},
 				{
-					$push: {
-						"pricesByPair.$[i].asksAndBids": {
-							asks: prices.asks,
-							bids: prices.bids,
-							createdAt: Date.now(),
-						},
+					$set: {
+						pricesByPair: prices.map((price) => {
+							return {
+								...price,
+								asksAndBids: {
+									asks: price.asksAndBids.asks,
+									bids: price.asksAndBids.bids,
+									createdAt: Date.now(),
+								},
+							};
+						}),
 					},
-				},
-				{
-					arrayFilters: [
-						{
-							"i.crypto": baseAsset,
-							"i.fiat": quoteAsset,
-						},
-					],
 				},
 			).exec();
 		} catch (error) {
@@ -117,25 +114,19 @@ export default class ExchangeRepositoryMongoDB
 
 			const prices = exchanges.map((exchange) => {
 				// Find pair's prices for current exchange and sort
-				const pairPrices = exchange.pricesByPair
-					.find(
-						(priceByPair) =>
-							priceByPair.crypto === pair.crypto &&
-							priceByPair.fiat === pair.fiat,
-					)
-					?.asksAndBids.sort((pricingA, pricingB) =>
-						pricingA.createdAt !== undefined && pricingB.createdAt !== undefined
-							? pricingA.createdAt?.getTime() - pricingB.createdAt?.getTime()
-							: 0,
-					);
+				const pairPrices = exchange.pricesByPair.find(
+					(priceByPair) =>
+						priceByPair.crypto === pair.crypto &&
+						priceByPair.fiat === pair.fiat,
+				);
 
-				if (pairPrices !== undefined && pairPrices.length > 0) {
+				if (pairPrices !== undefined) {
 					const avgAsk = this.calculateOrderBookAvgPrice(
-						pairPrices[0].asks,
+						pairPrices.asksAndBids.asks,
 						volume,
 					);
 					const avgBid = this.calculateOrderBookAvgPrice(
-						pairPrices[0].bids,
+						pairPrices.asksAndBids.bids,
 						volume,
 					);
 
