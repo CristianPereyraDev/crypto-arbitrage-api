@@ -28,20 +28,23 @@ export async function getPairPrices(
 				switch (pair.crypto) {
 					case "BTC":
 						return {
-							...pair,
+							crypto: pair.crypto,
+							fiat: pair.fiat,
 							ask: jsonResponse.buy_btc_ars,
 							bid: jsonResponse.sell_btc_ars,
 						};
 
 					case "USDT":
 						return {
-							...pair,
+							crypto: pair.crypto,
+							fiat: pair.fiat,
 							ask: jsonResponse.buy_trxusdt_ars,
 							bid: jsonResponse.sell_trxusdt_ars,
 						};
 					default:
 						return {
-							...pair,
+							crypto: pair.crypto,
+							fiat: pair.fiat,
 							ask: 0,
 							bid: 0,
 						};
@@ -49,6 +52,7 @@ export async function getPairPrices(
 			});
 		}
 
+		console.error(`${response.status} - ${response.statusText}`);
 		return undefined;
 	} catch (error) {
 		console.error(error);

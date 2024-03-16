@@ -32,13 +32,12 @@ const brokeragePriceCollectors = new Map<
 >();
 
 // Exchange collectors
-exchangePriceCollectors.set("Binance", binance.getSpotAskBidPrices); // Implemented
 // priceCollectors.set('Bitget', getBitgetPairPrices) // Not implemented
-//exchangePriceCollectors.set("CryptoMarket", cryptomarket.getPairPrices); // Implemented
-//exchangePriceCollectors.set("Ripio Trade", ripiotrade.getPairPrices); // Implemented
-//exchangePriceCollectors.set("TruBit", trubit.getPairPrices); // Implemented
-//exchangePriceCollectors.set("Bitso", bitso.getPairPrices); // Implemented
-//bybit.getPairPrices()
+exchangePriceCollectors.set("Binance", binance.getSpotAskBidPrices); // Implemented
+exchangePriceCollectors.set("CryptoMarket", cryptomarket.getPairPrices); // Implemented
+exchangePriceCollectors.set("Ripio Trade", ripiotrade.getPairPrices); // Implemented
+exchangePriceCollectors.set("TruBit", trubit.getPairPrices); // Implemented
+exchangePriceCollectors.set("Bitso", bitso.getPairPrices); // Implemented
 
 // Brokerage collectors
 brokeragePriceCollectors.set("ArgenBTC", argenbtc.getPairPrices); // Implemented
@@ -48,12 +47,12 @@ brokeragePriceCollectors.set("Fiwind", fiwind.getPairPrices); // Implemented
 brokeragePriceCollectors.set("TiendaCrypto", tiendacrypto.getPairPrices); // Implemented
 brokeragePriceCollectors.set("satoshitango", satoshitango.getPairPrices); // Implemented
 brokeragePriceCollectors.set("Saldo", saldo.getPairPrices); // Implemented
-// brokeragePriceCollectors.set("Lemon Cash", (baseAsset, quoteAsset) =>
-// 	cryptoya.getBrokeragePairPrices(baseAsset, quoteAsset, "lemoncash"),
-// ); // Implemented
-// brokeragePriceCollectors.set("belo", (baseAsset, quoteAsset) =>
-// 	cryptoya.getBrokeragePairPrices(baseAsset, quoteAsset, "belo"),
-// ); // Implemented
+brokeragePriceCollectors.set("Lemon Cash", (pairs: IPair[]) =>
+	cryptoya.getBrokeragePairPrices(pairs, "lemoncash"),
+); // Implemented
+brokeragePriceCollectors.set("belo", (pairs: IPair[]) =>
+	cryptoya.getBrokeragePairPrices(pairs, "belo"),
+); // Implemented
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (

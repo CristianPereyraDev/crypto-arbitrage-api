@@ -1,33 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { fetchWithTimeout } from '../../../utils/network.utils.js'
-import { ExchangeCollectorReturnType } from './index.js'
+import { IExchangePairPrices } from "../../../databases/model/exchange.model.js";
+import { fetchWithTimeout } from "../../../utils/network.utils.js";
+import { IPair } from "../../../databases/model/exchange_base.model.js";
+
+type TrueBitOrderbookResponse = {
+	time: number;
+	asks: [[string, string]];
+	bids: [[string, string]];
+};
 
 export async function getPairPrices(
-  baseAsset: string,
-  quoteAsset: string
-): Promise<ExchangeCollectorReturnType | undefined> {
-  try {
-    const apiResponse = await fetchWithTimeout(
-      `https://api.mexo.io/openapi/quote/v1/option/depth?symbol=${baseAsset}${quoteAsset}`
-    )
-
-    if (apiResponse.ok) {
-      const apiResponseJson: any = await apiResponse.json()
-
-      return {
-        asks: apiResponseJson.asks.map((ask: string[]) => [
-          parseFloat(ask[0]),
-          parseFloat(ask[1])
-        ]),
-        bids: apiResponseJson.bids.map((bid: string[]) => [
-          parseFloat(bid[0]),
-          parseFloat(bid[1])
-        ])
-      }
-    } else {
-      return undefined
-    }
-  } catch (error) {
-    console.error(error)
-  }
+	pairs: IPair[],
+): Promise<IExchangePairPrices[] | undefined> {
+	try {
+		return await Promise.all<IExchangePairPrices>(
+			pairs.map(
+				(pair) =>
+					new Promise((resolve) => {
+						fetchWithTimeout(
+							`https://api.mexo.io/openapi/quote/v1/option/depth?symbol=${pair.crypto}${pair.fiat}`,
+						)
+							.then((apiResponse) => {
+								apiResponse.json().then((apiResponseJson) => {
+									const data = apiResponseJson as TrueBitOrderbookResponse;
+									resolve({
+										crypto: pair.crypto,
+										fiat: pair.fiat,
+										asksAndBids: {
+											asks: data.asks.map((ask) => [
+												parseFloat(ask[0]),
+												parseFloat(ask[1]),
+											]),
+											bids: data.bids.map((bid) => [
+												parseFloat(bid[0]),
+												parseFloat(bid[1]),
+											]),
+										},
+									});
+								});
+							})
+							.catch(() =>
+								resolve({
+									crypto: pair.crypto,
+									fiat: pair.fiat,
+									asksAndBids: { asks: [], bids: [] },
+								}),
+							);
+					}),
+			),
+		);
+	} catch (error) {
+		console.error(error);
+	}
 }

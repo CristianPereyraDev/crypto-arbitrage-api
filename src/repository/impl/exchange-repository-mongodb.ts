@@ -68,7 +68,8 @@ export default class ExchangeRepositoryMongoDB
 					$set: {
 						pricesByPair: prices.map((price) => {
 							return {
-								...price,
+								crypto: price.crypto,
+								fiat: price.fiat,
 								asksAndBids: {
 									asks: price.asksAndBids.asks,
 									bids: price.asksAndBids.bids,

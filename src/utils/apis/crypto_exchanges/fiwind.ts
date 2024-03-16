@@ -19,23 +19,24 @@ export async function getPairPrices(
 		);
 
 		if (response.ok) {
-			const jsonResponse = (await response.json()) as FiwindAPIResponse;
+			const apiResponse = (await response.json()) as FiwindAPIResponse;
 
 			return pairs.map((pair) => {
-				const pairData = jsonResponse.find(
+				const pairData = apiResponse.find(
 					(pairData) =>
-						pairData.s ===
-						pair.crypto.toUpperCase() + pair.crypto.toUpperCase(),
+						pairData.s === pair.crypto.toUpperCase() + pair.fiat.toUpperCase(),
 				);
 
 				return {
-					...pair,
+					crypto: pair.crypto,
+					fiat: pair.fiat,
 					ask: pairData?.buy || 0,
 					bid: pairData?.sell || 0,
 				};
 			});
 		}
 
+		console.error(`${response.status} - ${response.statusText}`);
 		return undefined;
 	} catch (error) {
 		console.error(error);

@@ -68,6 +68,7 @@ export async function getPairPrices(
 			});
 		}
 
+		console.error(`${response.status} - ${response.statusText}`);
 		return undefined;
 	} catch (error) {
 		console.error(error);

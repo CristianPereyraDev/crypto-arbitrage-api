@@ -20,24 +20,39 @@ export async function getPairPrices(
 		);
 
 		if (response.ok) {
-			const jsonResponse =
+			const apiResponse =
 				(await response.json()) as TiendaCryptoAPIResponseType;
 
 			return pairs.map((pair) => {
-				const pairData =
-					jsonResponse[
-						`${pair.crypto.toUpperCase()}_${pair.fiat.toUpperCase()}`
-					];
+				if (
+					Object.hasOwn(
+						apiResponse,
+						`${pair.crypto.toUpperCase()}_${pair.fiat.toUpperCase()}`,
+					)
+				) {
+					const pairData =
+						apiResponse[
+							`${pair.crypto.toUpperCase()}_${pair.fiat.toUpperCase()}`
+						];
 
-				if (pairData !== undefined) {
 					return {
+						crypto: pair.crypto,
+						fiat: pair.fiat,
 						ask: parseFloat(pairData.buy),
 						bid: parseFloat(pairData.sell),
 					};
 				}
+
+				return {
+					crypto: pair.crypto,
+					fiat: pair.fiat,
+					ask: 0,
+					bid: 0,
+				};
 			});
 		}
 
+		console.error(`${response.status} - ${response.statusText}`);
 		return undefined;
 	} catch (error) {
 		console.error(error);
