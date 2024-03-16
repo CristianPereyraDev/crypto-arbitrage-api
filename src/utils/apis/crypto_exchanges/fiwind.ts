@@ -1,6 +1,6 @@
-import { IPair } from "src/databases/model/exchange_base.model.js";
+import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
-import { IBrokeragePairPrices } from "src/databases/model/brokerage.model.js";
+import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
 
 export type FiwindAPIResponse = {
 	s: string;

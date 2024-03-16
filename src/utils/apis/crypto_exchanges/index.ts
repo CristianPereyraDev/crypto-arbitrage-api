@@ -32,27 +32,27 @@ const brokeragePriceCollectors = new Map<
 >();
 
 // Exchange collectors
-// priceCollectors.set('Bitget', getBitgetPairPrices) // Not implemented
-exchangePriceCollectors.set("Binance", binance.getSpotAskBidPrices); // Implemented
-exchangePriceCollectors.set("CryptoMarket", cryptomarket.getPairPrices); // Implemented
-exchangePriceCollectors.set("Ripio Trade", ripiotrade.getPairPrices); // Implemented
-exchangePriceCollectors.set("TruBit", trubit.getPairPrices); // Implemented
-exchangePriceCollectors.set("Bitso", bitso.getPairPrices); // Implemented
+// priceCollectors.set('Bitget', getBitgetPairPrices)
+exchangePriceCollectors.set("Binance", binance.getSpotAskBidPrices);
+exchangePriceCollectors.set("CryptoMarket", cryptomarket.getPairPrices);
+exchangePriceCollectors.set("Ripio Trade", ripiotrade.getPairPrices);
+exchangePriceCollectors.set("TruBit", trubit.getPairPrices);
+exchangePriceCollectors.set("Bitso", bitso.getPairPrices);
 
 // Brokerage collectors
-brokeragePriceCollectors.set("ArgenBTC", argenbtc.getPairPrices); // Implemented
-brokeragePriceCollectors.set("Plus Crypto", pluscrypto.getPairPrices); // Implemented
-brokeragePriceCollectors.set("Bitmonedero", bitmonedero.getPairPrices); // Implemented
-brokeragePriceCollectors.set("Fiwind", fiwind.getPairPrices); // Implemented
-brokeragePriceCollectors.set("TiendaCrypto", tiendacrypto.getPairPrices); // Implemented
-brokeragePriceCollectors.set("satoshitango", satoshitango.getPairPrices); // Implemented
-brokeragePriceCollectors.set("Saldo", saldo.getPairPrices); // Implemented
+brokeragePriceCollectors.set("ArgenBTC", argenbtc.getPairPrices);
+brokeragePriceCollectors.set("Plus Crypto", pluscrypto.getPairPrices);
+brokeragePriceCollectors.set("Bitmonedero", bitmonedero.getPairPrices);
+brokeragePriceCollectors.set("Fiwind", fiwind.getPairPrices);
+brokeragePriceCollectors.set("TiendaCrypto", tiendacrypto.getPairPrices);
+brokeragePriceCollectors.set("satoshitango", satoshitango.getPairPrices);
+brokeragePriceCollectors.set("Saldo", saldo.getPairPrices);
 brokeragePriceCollectors.set("Lemon Cash", (pairs: IPair[]) =>
 	cryptoya.getBrokeragePairPrices(pairs, "lemoncash"),
-); // Implemented
+);
 brokeragePriceCollectors.set("belo", (pairs: IPair[]) =>
 	cryptoya.getBrokeragePairPrices(pairs, "belo"),
-); // Implemented
+);
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (

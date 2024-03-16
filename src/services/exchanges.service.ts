@@ -13,8 +13,8 @@ import { IBrokerageRepository } from "../repository/brokerage-repository.js";
 import { IExchangeP2PRepository } from "../repository/exchange-p2p-repository.js";
 import { IExchangeFeesDTO } from "../types/dto/index.js";
 import { ExchangeBaseRepository } from "../repository/exchange-base-repository.js";
-import { IExchangePairPrices } from "src/databases/model/exchange.model.js";
-import { IBrokeragePairPrices } from "src/databases/model/brokerage.model.js";
+import { IExchangePairPrices } from "../databases/model/exchange.model.js";
+import { IBrokeragePairPrices } from "../databases/model/brokerage.model.js";
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFeesDTO };
 

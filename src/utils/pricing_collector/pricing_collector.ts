@@ -21,7 +21,7 @@ import {
 	P2POrderType,
 	P2PUserType,
 } from "../../databases/model/exchange_p2p.model.js";
-import { IBrokeragePairPrices } from "src/databases/model/brokerage.model.js";
+import { IBrokeragePairPrices } from "../../databases/model/brokerage.model.js";
 
 export const currencyPairs = [
 	{ crypto: "MATIC", fiat: "ARS" },
