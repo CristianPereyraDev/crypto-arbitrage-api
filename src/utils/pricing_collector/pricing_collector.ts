@@ -144,13 +144,15 @@ export async function collectCryptoExchangesPricesToDB() {
 			if (priceCollector === undefined) continue;
 
 			collectors.push(
-				new Promise<PromiseAllElemResultType>((resolve, _reject) => {
-					priceCollector(exchange.availablePairs).then((prices) => {
-						resolve({
-							exchangeName: exchange.name,
-							prices,
-						});
-					});
+				new Promise<PromiseAllElemResultType>((resolve, reject) => {
+					priceCollector(exchange.availablePairs)
+						.then((prices) => {
+							resolve({
+								exchangeName: exchange.name,
+								prices,
+							});
+						})
+						.catch((reason) => reject(reason));
 				}),
 			);
 		}
@@ -190,13 +192,15 @@ export async function collectCryptoBrokeragesPricesToDB() {
 			if (priceCollector === undefined) continue;
 
 			collectors.push(
-				new Promise<BrokeragePromiseAllElemResultType>((resolve, _reject) => {
-					priceCollector(brokerage.availablePairs).then((prices) => {
-						resolve({
-							exchangeName: brokerage.name,
-							prices,
-						});
-					});
+				new Promise<BrokeragePromiseAllElemResultType>((resolve, reject) => {
+					priceCollector(brokerage.availablePairs)
+						.then((prices) => {
+							resolve({
+								exchangeName: brokerage.name,
+								prices,
+							});
+						})
+						.catch((reason) => reject(reason));
 				}),
 			);
 		}
