@@ -1,12 +1,12 @@
 import { IPair } from "../../../databases/model/exchange_base.model.js";
-import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { IExchangePairPrices } from "../../../databases/model/exchange.model.js";
+import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { OrderBookLevel } from "cryptomarket/lib/models.js";
-import cryptomarket from "cryptomarket";
+import { Client } from "cryptomarket/lib/index.js";
 
-const apiKey = "EC_o9girNu0ORH5-hvfZjtkKvVrYO6Vw";
-const apiSecret = "Fy3jHw3dt6sYiYmUz8qhC-ExehbcPNtq";
-const client = new cryptomarket.Client(apiKey, apiSecret);
+const apiKey = process.env.CRYPTOMARKET_API_KEY ?? "";
+const apiSecret = process.env.CRYPTOMARKET_API_SECRET ?? "";
+const client = new Client(apiKey, apiSecret);
 
 export type CryptoMarketAPIOrderBookResponse = {
 	timestamp: string;
