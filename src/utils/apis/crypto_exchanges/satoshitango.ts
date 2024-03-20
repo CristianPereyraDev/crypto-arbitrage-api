@@ -1,6 +1,7 @@
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
+import { APIError } from "../../../types/errors/index.js";
 
 type SatoshiTangoData = {
 	[baseAsset: string]: {
@@ -19,28 +20,35 @@ type SatoshiTangoAPIResponse = {
 	data: { ticker: SatoshiTangoData; code: string };
 };
 
+const apiBaseURL = "https://api.satoshitango.com/v3/ticker";
+
 async function fetchTicker(quote: string): Promise<SatoshiTangoData> {
 	try {
-		const response = await fetchWithTimeout(
-			`https://api.satoshitango.com/v3/ticker/${quote}`,
-		);
+		const endpoint = `${apiBaseURL}/${quote}`;
+		const response = await fetchWithTimeout(endpoint);
 
-		if (response.ok) {
-			const jsonResponse = (await response.json()) as SatoshiTangoAPIResponse;
-			const data: SatoshiTangoData = jsonResponse.data.ticker;
-
-			return data;
+		if (!response.ok) {
+			throw new APIError(
+				endpoint,
+				"SatoshiTango",
+				`${response.status}: ${response.statusText}`,
+			);
 		}
 
-		throw new Error(`${response.status}: ${response.statusText}`);
+		const jsonResponse = (await response.json()) as SatoshiTangoAPIResponse;
+		const data: SatoshiTangoData = jsonResponse.data.ticker;
+
+		return data;
 	} catch (error) {
-		throw new Error(`SatoshiTango fetch error: ${quote} -> ${error}`);
+		throw new Error(
+			`There was a problem with the Fetch operation to SatoshiTango API: ${error}`,
+		);
 	}
 }
 
 export async function getPairPrices(
 	pairs: IPair[],
-): Promise<IBrokeragePairPrices[] | undefined> {
+): Promise<IBrokeragePairPrices[]> {
 	try {
 		// {"ARS": ["USDT", "BTC", ...], "USD": ["USDT", "BTC", ...]}
 		const quoteToAssetsMap = new Map<string, string[]>();
@@ -54,59 +62,43 @@ export async function getPairPrices(
 
 		const promisesArray = Array.from(quoteToAssetsMap.entries()).map(
 			(quoteAssets) =>
-				new Promise<IBrokeragePairPrices[]>((resolve) => {
+				new Promise<IBrokeragePairPrices[]>((resolve, reject) => {
 					fetchTicker(quoteAssets[0])
 						.then((apiResponse) => {
 							const assets = quoteAssets[1];
-							resolve(
-								assets.map((asset) => {
-									if (Object.hasOwn(apiResponse, asset)) {
-										return {
-											crypto: asset,
-											fiat: quoteAssets[0],
-											ask: apiResponse[asset].ask,
-											bid: apiResponse[asset].bid,
-										};
-									}
-
+							const value = assets.map((asset) => {
+								if (Object.hasOwn(apiResponse, asset)) {
 									return {
 										crypto: asset,
 										fiat: quoteAssets[0],
-										ask: 0,
-										bid: 0,
+										ask: apiResponse[asset].ask,
+										bid: apiResponse[asset].bid,
 									};
-								}),
-							);
+								}
+
+								throw new APIError(
+									apiBaseURL + quoteAssets[0],
+									"SatoshiTango",
+									`Prices for pair "${asset}-${quoteAssets[0]}" not exist`,
+								);
+							});
+
+							resolve(value);
 						})
-						.catch((reason) => {
-							console.error(reason);
-
-							resolve(
-								quoteAssets[1].map((asset) => {
-									return {
-										crypto: asset,
-										fiat: quoteAssets[0],
-										ask: 0,
-										bid: 0,
-									};
-								}),
-							);
-						});
+						.catch((reason) => reject(reason));
 				}),
 		);
 
-		const result = await Promise.allSettled(promisesArray);
+		const result = await Promise.all(promisesArray);
 
-		return result.flatMap((promiseResult) => {
-			if (promiseResult.status === "fulfilled") {
-				return promiseResult.value;
-			}
-
-			console.error(promiseResult.reason);
-			return [];
-		});
+		return result.flat();
 	} catch (error) {
-		console.error(error);
-		return undefined;
+		if (!(error instanceof APIError)) {
+			throw new Error(
+				`There was a problem with the Fetch operation to TiendaCrypto API: ${error}`,
+			);
+		}
+
+		throw error;
 	}
 }

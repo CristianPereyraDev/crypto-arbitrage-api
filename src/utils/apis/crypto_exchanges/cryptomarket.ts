@@ -2,7 +2,12 @@ import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { IExchangePairPrices } from "../../../databases/model/exchange.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { OrderBookLevel } from "cryptomarket/lib/models.js";
-import { Client } from "cryptomarket/lib/index.js";
+import {
+	Client,
+	CryptomarketAPIException,
+	CryptomarketSDKException,
+} from "cryptomarket/lib/index.js";
+import { APIError } from "../../../types/errors/index.js";
 
 const apiKey = process.env.CRYPTOMARKET_API_KEY ?? "";
 const apiSecret = process.env.CRYPTOMARKET_API_SECRET ?? "";
@@ -86,38 +91,56 @@ export async function calculatePricesFromOrderBook(
 
 export async function getPairPrices(
 	pairs: IPair[],
-): Promise<IExchangePairPrices[] | undefined> {
+): Promise<IExchangePairPrices[]> {
 	try {
 		const btcarsTicker = await client.getTicker("BTCARS");
 		return await Promise.all(
 			pairs.map(
 				(pair) =>
-					new Promise<IExchangePairPrices>((resolve) => {
+					new Promise<IExchangePairPrices>((resolve, reject) => {
 						if (pair.crypto === "BTC") {
-							client.getOrderBook(pair.crypto + pair.fiat).then((orderBook) => {
-								resolve({
-									crypto: pair.crypto,
-									fiat: pair.fiat,
-									asksAndBids: { asks: orderBook.ask, bids: orderBook.bid },
-								});
-							});
+							client
+								.getOrderBook(pair.crypto + pair.fiat)
+								.then((orderBook) => {
+									resolve({
+										crypto: pair.crypto,
+										fiat: pair.fiat,
+										asksAndBids: { asks: orderBook.ask, bids: orderBook.bid },
+									});
+								})
+								.catch((reason) => reject(reason));
 						} else {
-							client.getTicker(`BTC${pair.crypto}`).then((ticker) => {
-								resolve({
-									crypto: pair.crypto,
-									fiat: pair.fiat,
-									asksAndBids: {
-										asks: [[Number(btcarsTicker.ask) / Number(ticker.ask), 1]],
-										bids: [[Number(btcarsTicker.bid) / Number(ticker.bid), 1]],
-									},
-								});
-							});
+							client
+								.getTicker(`BTC${pair.crypto}`)
+								.then((ticker) => {
+									resolve({
+										crypto: pair.crypto,
+										fiat: pair.fiat,
+										asksAndBids: {
+											asks: [
+												[Number(btcarsTicker.ask) / Number(ticker.ask), 1],
+											],
+											bids: [
+												[Number(btcarsTicker.bid) / Number(ticker.bid), 1],
+											],
+										},
+									});
+								})
+								.catch((reason) => reject(reason));
 						}
 					}),
 			),
 		);
 	} catch (error) {
-		console.error(error);
-		return undefined;
+		if (
+			!(
+				error instanceof CryptomarketSDKException ||
+				error instanceof CryptomarketAPIException
+			)
+		) {
+			throw new APIError(client.apiUrl, "CryptoMarket API", "unknown");
+		}
+
+		throw error;
 	}
 }

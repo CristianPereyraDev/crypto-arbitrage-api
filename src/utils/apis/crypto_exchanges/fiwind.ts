@@ -1,6 +1,7 @@
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
+import { APIError } from "../../../types/errors/index.js";
 
 export type FiwindAPIResponse = {
 	s: string;
@@ -12,34 +13,49 @@ export type FiwindAPIResponse = {
 
 export async function getPairPrices(
 	pairs: IPair[],
-): Promise<IBrokeragePairPrices[] | undefined> {
+): Promise<IBrokeragePairPrices[]> {
 	try {
-		const response = await fetchWithTimeout(
-			"https://api.fiwind.io/v1.0/prices/list",
-		);
+		const endpoint = "https://api.fiwind.io/v1.0/prices/list";
+		const response = await fetchWithTimeout(endpoint);
 
-		if (response.ok) {
-			const apiResponse = (await response.json()) as FiwindAPIResponse;
+		if (!response.ok) {
+			throw new APIError(
+				endpoint,
+				"Fiwind",
+				`${response.status} - ${response.statusText}`,
+			);
+		}
 
-			return pairs.map((pair) => {
-				const pairData = apiResponse.find(
-					(pairData) =>
-						pairData.s === pair.crypto.toUpperCase() + pair.fiat.toUpperCase(),
-				);
+		const apiResponse = (await response.json()) as FiwindAPIResponse;
 
+		return pairs.map((pair) => {
+			const pairData = apiResponse.find(
+				(pairData) =>
+					pairData.s === pair.crypto.toUpperCase() + pair.fiat.toUpperCase(),
+			);
+
+			if (pairData) {
 				return {
 					crypto: pair.crypto,
 					fiat: pair.fiat,
-					ask: pairData?.buy || 0,
-					bid: pairData?.sell || 0,
+					ask: pairData.buy,
+					bid: pairData.sell,
 				};
-			});
+			}
+
+			throw new APIError(
+				endpoint,
+				"Fiwind",
+				`Prices for pair "${pair.crypto}-${pair.fiat}" not exist`,
+			);
+		});
+	} catch (error) {
+		if (!(error instanceof APIError)) {
+			throw new Error(
+				`There was a problem with the Fetch operation to Fiwind API: ${error}`,
+			);
 		}
 
-		console.error(`${response.status} - ${response.statusText}`);
-		return undefined;
-	} catch (error) {
-		console.error(error);
-		return undefined;
+		throw error;
 	}
 }

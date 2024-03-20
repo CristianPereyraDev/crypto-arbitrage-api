@@ -24,11 +24,11 @@ import { IPair } from "../../../databases/model/exchange_base.model.js";
 
 const exchangePriceCollectors = new Map<
 	string,
-	(pairs: IPair[]) => Promise<IExchangePairPrices[] | undefined>
+	(pairs: IPair[]) => Promise<IExchangePairPrices[]>
 >();
 const brokeragePriceCollectors = new Map<
 	string,
-	(pairs: IPair[]) => Promise<IBrokeragePairPrices[] | undefined>
+	(pairs: IPair[]) => Promise<IBrokeragePairPrices[]>
 >();
 
 // Exchange collectors

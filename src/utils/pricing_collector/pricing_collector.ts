@@ -156,17 +156,22 @@ export async function collectCryptoExchangesPricesToDB() {
 		}
 
 		// Call collectors in parallel
-		const priceCollectorResults = await Promise.all(collectors);
+		const priceCollectorResults = await Promise.allSettled(collectors);
 		for (const priceCollectorResult of priceCollectorResults) {
-			if (priceCollectorResult.prices !== undefined) {
+			if (
+				priceCollectorResult.status === "fulfilled" &&
+				priceCollectorResult.value.prices
+			) {
 				exchangeService.updateExchangePrices(
-					priceCollectorResult.exchangeName,
-					priceCollectorResult.prices,
+					priceCollectorResult.value.exchangeName,
+					priceCollectorResult.value.prices,
 				);
+			} else if (priceCollectorResult.status === "rejected") {
+				console.error(priceCollectorResult.reason);
 			}
 		}
 	} catch (error) {
-		console.log("Error en collectExchangesPricesToBD", error);
+		console.error("There was an error in collectExchangesPricesToBD:", error);
 	}
 }
 
@@ -197,17 +202,22 @@ export async function collectCryptoBrokeragesPricesToDB() {
 		}
 
 		// Call collectors in parallel
-		const priceCollectorResults = await Promise.all(collectors);
+		const priceCollectorResults = await Promise.allSettled(collectors);
 		for (const priceCollectorResult of priceCollectorResults) {
-			if (priceCollectorResult.prices !== undefined) {
+			if (
+				priceCollectorResult.status === "fulfilled" &&
+				priceCollectorResult.value.prices !== undefined
+			) {
 				exchangeService.updateBrokeragePrices(
-					priceCollectorResult.exchangeName,
-					priceCollectorResult.prices,
+					priceCollectorResult.value.exchangeName,
+					priceCollectorResult.value.prices,
 				);
+			} else if (priceCollectorResult.status === "rejected") {
+				console.error(priceCollectorResult.reason);
 			}
 		}
 	} catch (error) {
-		console.log("Error en collectExchangesPricesToBD", error);
+		console.error("There was an error in collectExchangesPricesToBD:", error);
 	}
 }
 

@@ -1,10 +1,11 @@
+import { APIError } from "../../../types/errors/index.js";
 import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 
 export async function getPairPrices(
 	pairs: IPair[],
-): Promise<IBrokeragePairPrices[] | undefined> {
+): Promise<IBrokeragePairPrices[]> {
 	try {
 		const response = await fetchWithTimeout("https://argenbtc.com/cotizacion", {
 			method: "POST",
@@ -40,10 +41,18 @@ export async function getPairPrices(
 			});
 		}
 
-		console.error(`${response.status} - ${response.statusText}`);
-		return undefined;
+		throw new APIError(
+			"https://argenbtc.com/cotizacion",
+			"ArgenBTC",
+			`${response.status} - ${response.statusText}`,
+		);
 	} catch (error) {
-		console.error(error);
-		return undefined;
+		if (!(error instanceof APIError)) {
+			throw new Error(
+				`An error has ocurred when attempt get prices from ArgenBTC API: ${error}`,
+			);
+		}
+
+		throw error;
 	}
 }

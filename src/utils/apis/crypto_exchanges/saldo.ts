@@ -1,6 +1,7 @@
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { IBrokeragePairPrices } from "../../../databases/model/brokerage.model.js";
+import { APIError } from "../../../types/errors/index.js";
 
 type SaldoAPIResponse = {
 	[asset: string]: {
@@ -14,51 +15,62 @@ type SaldoAPIResponse = {
 
 export async function getPairPrices(
 	pairs: IPair[],
-): Promise<IBrokeragePairPrices[] | undefined> {
+): Promise<IBrokeragePairPrices[]> {
 	try {
-		const response = await fetchWithTimeout(
-			"https://api.saldo.com.ar/json/rates/banco",
-		);
+		const endpoint = "https://api.saldo.com.ar/json/rates/banco";
+		const response = await fetchWithTimeout(endpoint);
 
-		if (response.ok) {
-			const jsonResponse = (await response.json()) as SaldoAPIResponse;
-
-			return pairs.map((pair) => {
-				switch (pair.crypto) {
-					case "BTC":
-						return {
-							crypto: pair.crypto,
-							fiat: pair.fiat,
-							bid: jsonResponse.bitcoin.ask,
-							ask: jsonResponse.bitcoin.bid,
-						};
-
-					case "USDT":
-						return {
-							crypto: pair.crypto,
-							fiat: pair.fiat,
-							bid: jsonResponse.usdt.ask,
-							ask: jsonResponse.usdt.bid,
-						};
-
-					case "DAI":
-						return {
-							crypto: pair.crypto,
-							fiat: pair.fiat,
-							bid: jsonResponse.dai.ask,
-							ask: jsonResponse.dai.bid,
-						};
-
-					default:
-						return { crypto: pair.crypto, fiat: pair.fiat, bid: 0, ask: 0 };
-				}
-			});
+		if (!response.ok) {
+			throw new APIError(
+				endpoint,
+				"Saldo",
+				`${response.status} - ${response.statusText}`,
+			);
 		}
 
-		console.error(`${response.status} - ${response.statusText}`);
-		return undefined;
+		const jsonResponse = (await response.json()) as SaldoAPIResponse;
+
+		return pairs.map((pair) => {
+			switch (pair.crypto) {
+				case "BTC":
+					return {
+						crypto: pair.crypto,
+						fiat: pair.fiat,
+						bid: jsonResponse.bitcoin.ask,
+						ask: jsonResponse.bitcoin.bid,
+					};
+
+				case "USDT":
+					return {
+						crypto: pair.crypto,
+						fiat: pair.fiat,
+						bid: jsonResponse.usdt.ask,
+						ask: jsonResponse.usdt.bid,
+					};
+
+				case "DAI":
+					return {
+						crypto: pair.crypto,
+						fiat: pair.fiat,
+						bid: jsonResponse.dai.ask,
+						ask: jsonResponse.dai.bid,
+					};
+
+				default:
+					throw new APIError(
+						endpoint,
+						"TiendaCrypto",
+						`Prices for pair "${pair.crypto}-${pair.fiat}" not exist`,
+					);
+			}
+		});
 	} catch (error) {
-		console.error(error);
-		return undefined;
+		if (!(error instanceof APIError)) {
+			throw new Error(
+				`There was a problem with the Fetch operation to Saldo API: ${error}`,
+			);
+		}
+
+		throw error;
 	}
 }
