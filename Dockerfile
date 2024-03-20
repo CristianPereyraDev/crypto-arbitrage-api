@@ -7,9 +7,9 @@ RUN npm run build
 FROM node:latest AS final
 WORKDIR /app
 COPY --from=builder ./app/dist ./dist
-COPY --from=builder ./app/src/graphql/*.graphql /app/dist/graphql
-RUN mkdir -p app/dist/views
-COPY --from=builder ./app/src/views/ /app/dist/views/
+COPY --from=builder ./app/src/graphql/*.graphql /app/dist/src/graphql
+RUN mkdir -p app/dist/src/views
+COPY --from=builder ./app/src/views/ /app/dist/src/views/
 COPY package*.json .
 RUN npm install --production
 CMD ["npm","start"]
