@@ -1,4 +1,3 @@
-import * as argenbtc from "./argenbtc.js";
 import * as binance from "./binance.js";
 import * as binancep2p from "./p2p/binance.js";
 import * as bitmonedero from "./bitmonedero.js";
@@ -40,13 +39,15 @@ exchangePriceCollectors.set("TruBit", trubit.getPairPrices);
 exchangePriceCollectors.set("Bitso", bitso.getPairPrices);
 
 // Brokerage collectors
-brokeragePriceCollectors.set("ArgenBTC", argenbtc.getPairPrices);
 brokeragePriceCollectors.set("Plus Crypto", pluscrypto.getPairPrices);
 brokeragePriceCollectors.set("Bitmonedero", bitmonedero.getPairPrices);
 brokeragePriceCollectors.set("Fiwind", fiwind.getPairPrices);
 brokeragePriceCollectors.set("TiendaCrypto", tiendacrypto.getPairPrices);
 brokeragePriceCollectors.set("satoshitango", satoshitango.getPairPrices);
 brokeragePriceCollectors.set("Saldo", saldo.getPairPrices);
+brokeragePriceCollectors.set("ArgenBTC", (pairs: IPair[]) =>
+	cryptoya.getBrokeragePairPrices(pairs, "argenbtc"),
+);
 brokeragePriceCollectors.set("Lemon Cash", (pairs: IPair[]) =>
 	cryptoya.getBrokeragePairPrices(pairs, "lemoncash"),
 );
