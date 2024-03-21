@@ -34,10 +34,18 @@ export async function getSpotAskBidPrices(
 				(pair) =>
 					new Promise<orderBookResponse & { pair: IPair }>(
 						(resolve, reject) => {
-							client.orderBook(pair.crypto + pair.fiat, options).then(
-								(orderBook) => resolve({ ...orderBook, pair }),
-								(reason) => reject({ reason, pair }),
-							);
+							client
+								.orderBook(pair.crypto + pair.fiat, options)
+								.then((orderBook) => resolve({ ...orderBook, pair }))
+								.catch((reason) =>
+									reject(
+										new APIError(
+											client.baseURL,
+											"Binance",
+											`There was an error with the pair ${pair.crypto}-${pair.fiat}: ${reason}`,
+										),
+									),
+								);
 						},
 					),
 			),
@@ -60,6 +68,8 @@ export async function getSpotAskBidPrices(
 					},
 				};
 			}
+
+			console.error(result.reason);
 
 			return {
 				crypto: result.reason.pair.crypto,
