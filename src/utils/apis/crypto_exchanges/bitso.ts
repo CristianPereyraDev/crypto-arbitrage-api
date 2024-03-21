@@ -1,4 +1,4 @@
-import { APIError } from "src/types/errors/index.js";
+import { APIError } from "../../../types/errors/index.js";
 import { IExchangePairPrices } from "../../../databases/model/exchange.model.js";
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
