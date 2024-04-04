@@ -31,7 +31,6 @@ const brokeragePriceCollectors = new Map<
 >();
 
 // Exchange collectors
-// priceCollectors.set('Bitget', getBitgetPairPrices)
 exchangePriceCollectors.set("Binance", binance.getSpotAskBidPrices);
 exchangePriceCollectors.set("CryptoMarket", cryptomarket.getPairPrices);
 exchangePriceCollectors.set("Ripio Trade", ripiotrade.getPairPrices);
