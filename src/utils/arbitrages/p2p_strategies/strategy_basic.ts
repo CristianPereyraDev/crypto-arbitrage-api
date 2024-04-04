@@ -151,8 +151,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 
 		return {
 			arbitrage: null,
-			sellOrders: params.sellOrders,
-			buyOrders: params.buyOrders,
+			sellOrders: sellOrdersFiltered,
+			buyOrders: buyOrdersFiltered,
 		};
 	}
 }
