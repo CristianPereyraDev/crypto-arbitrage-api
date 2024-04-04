@@ -77,6 +77,12 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			});
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
+			console.log(
+				"buyOrdersFiltered",
+				buyOrdersFiltered.length,
+				"sellOrdersFiltered",
+				sellOrdersFiltered.length,
+			);
 			return {
 				arbitrage: null,
 				sellOrders: params.sellOrders,
