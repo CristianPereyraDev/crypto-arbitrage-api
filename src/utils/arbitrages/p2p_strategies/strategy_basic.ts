@@ -57,11 +57,6 @@ function calculateP2PProfit(sellPrice: number, buyPrice: number) {
 
 export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(params: CalculateP2PArbitrageParams) {
-		console.log(
-			"BasicStrategy",
-			`buyOrders.length:${params.buyOrders.length}`,
-			`sellOrders.length:${params.sellOrders.length}`,
-		);
 		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
 
 		// Filter orders
