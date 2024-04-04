@@ -64,6 +64,12 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		const buyOrdersFiltered = params.buyOrders
 			.filter((order) => order.userType === params.userType)
 			.filter((order) => {
+				console.log(order.min, params.buyLimits[0], order.max);
+				console.log(
+					typeof order.min,
+					typeof params.buyLimits[0],
+					typeof order.max,
+				);
 				return (
 					params.buyLimits[0] >= order.min && params.buyLimits[0] <= order.max
 				);
