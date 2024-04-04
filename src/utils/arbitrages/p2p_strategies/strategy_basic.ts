@@ -57,19 +57,17 @@ function calculateP2PProfit(sellPrice: number, buyPrice: number) {
 
 export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(params: CalculateP2PArbitrageParams) {
-		console.log("BasicStrategy", params.buyLimits, params.sellLimits);
+		console.log(
+			"BasicStrategy",
+			`buyOrders.length:${params.buyOrders.length}`,
+			`sellOrders.length:${params.sellOrders.length}`,
+		);
 		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
 
 		// Filter orders
 		const buyOrdersFiltered = params.buyOrders
 			.filter((order) => order.userType === params.userType)
 			.filter((order) => {
-				console.log(order.min, params.buyLimits[0], order.max);
-				console.log(
-					typeof order.min,
-					typeof params.buyLimits[0],
-					typeof order.max,
-				);
 				return (
 					params.buyLimits[0] >= order.min && params.buyLimits[0] <= order.max
 				);
@@ -83,12 +81,6 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			});
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
-			console.log(
-				"buyOrdersFiltered",
-				buyOrdersFiltered.length,
-				"sellOrdersFiltered",
-				sellOrdersFiltered.length,
-			);
 			return {
 				arbitrage: null,
 				sellOrders: params.sellOrders,
