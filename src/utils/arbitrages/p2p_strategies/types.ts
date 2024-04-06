@@ -7,6 +7,8 @@ export type P2PArbitrage = {
 	profit: number;
 	suggestedBuyOrder: IP2POrder;
 	suggestedSellOrder: IP2POrder;
+	buyOrderPosition: number;
+	sellOrderPosition: number;
 };
 
 export type CalculateP2PArbitrageParams = {

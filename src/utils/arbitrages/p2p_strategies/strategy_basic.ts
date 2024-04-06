@@ -1,9 +1,11 @@
 import {
+	IP2POrder,
 	P2POrderType,
 	P2PUserType,
 } from "../../../databases/model/exchange_p2p.model.js";
 import {
 	CalculateP2PArbitrageParams,
+	CalculateP2PArbitrageResult,
 	IP2PArbitrageStrategy,
 	P2PArbitrage,
 } from "./types.js";
@@ -42,6 +44,8 @@ const BASE_ARBITRAGE: P2PArbitrage = {
 		positiveRate: 1,
 		link: "",
 	},
+	buyOrderPosition: 0,
+	sellOrderPosition: 0,
 };
 
 /**
@@ -56,24 +60,39 @@ function calculateP2PProfit(sellPrice: number, buyPrice: number) {
 }
 
 export class BasicStrategy implements IP2PArbitrageStrategy {
-	calculateP2PArbitrage(params: CalculateP2PArbitrageParams) {
-		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
-
-		// Filter orders
-		const buyOrdersFiltered = params.buyOrders
-			.filter((order) => order.userType === params.userType)
-			.filter((order) => {
+	calculateP2PArbitrage(
+		params: CalculateP2PArbitrageParams,
+	): CalculateP2PArbitrageResult {
+		const buyConditions = [
+			(order: IP2POrder) => order.userType === params.userType,
+			(order: IP2POrder) => {
 				return (
 					params.buyLimits[0] >= order.min && params.buyLimits[0] <= order.max
 				);
-			});
-		const sellOrdersFiltered = params.sellOrders
-			.filter((order) => order.userType === params.userType)
-			.filter((order) => {
+			},
+		];
+		const sellConditions = [
+			(order: IP2POrder) => order.userType === params.userType,
+			(order: IP2POrder) => {
 				return (
 					params.sellLimits[0] >= order.min && params.sellLimits[0] <= order.max
 				);
-			});
+			},
+		];
+		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
+
+		const buyOrdersFiltered: [number, IP2POrder][] = [];
+		for (const buyOrderEntry of params.buyOrders.entries()) {
+			if (buyConditions.every((condition) => condition(buyOrderEntry[1]))) {
+				buyOrdersFiltered.push(buyOrderEntry);
+			}
+		}
+		const sellOrdersFiltered: [number, IP2POrder][] = [];
+		for (const sellOrderEntry of params.sellOrders.entries()) {
+			if (sellConditions.every((condition) => condition(sellOrderEntry[1]))) {
+				sellOrdersFiltered.push(sellOrderEntry);
+			}
+		}
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return {
@@ -83,9 +102,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			};
 		}
 
-		arbitrage.suggestedSellOrder.price = sellOrdersFiltered[0].price - 0.01; // sell a little cheaper
+		arbitrage.suggestedSellOrder.price = sellOrdersFiltered[0][1].price - 0.01; // sell a little cheaper
 		arbitrage.suggestedSellOrder.volume = params.volume;
-		arbitrage.suggestedBuyOrder.price = buyOrdersFiltered[0].price + 0.01; // buy a little more expensive
+		arbitrage.suggestedBuyOrder.price = buyOrdersFiltered[0][1].price + 0.01; // buy a little more expensive
 		arbitrage.suggestedBuyOrder.volume = params.volume;
 
 		let profit = calculateP2PProfit(
@@ -99,16 +118,21 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			arbitrage.suggestedSellOrder.max = params.sellLimits[1];
 			arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
 			arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
+			arbitrage.sellOrderPosition = sellOrdersFiltered[0][0];
+			arbitrage.buyOrderPosition = buyOrdersFiltered[0][0];
 
 			return {
 				arbitrage,
-				sellOrders: sellOrdersFiltered,
-				buyOrders: buyOrdersFiltered,
+				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
+				buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
 			};
 		}
 
 		// Find the best sell order.
-		for (const sellOrder of sellOrdersFiltered.slice(1)) {
+		for (const [index, sellOrder] of sellOrdersFiltered) {
+			if (index === 0) {
+				continue;
+			}
 			profit = calculateP2PProfit(
 				sellOrder.price - 0.01,
 				arbitrage.suggestedBuyOrder.price,
@@ -117,12 +141,16 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			if (profit >= params.minProfit) {
 				arbitrage.suggestedSellOrder.price = sellOrder.price - 0.01; // sell a little more cheaper
 				arbitrage.profit = profit;
+				arbitrage.sellOrderPosition = index;
 
 				break;
 			}
 		}
 		// Find the best buy order
-		for (const buyOrder of buyOrdersFiltered.slice(1)) {
+		for (const [index, buyOrder] of buyOrdersFiltered) {
+			if (index === 0) {
+				continue;
+			}
 			profit = calculateP2PProfit(
 				arbitrage.suggestedSellOrder.price,
 				buyOrder.price + 0.01,
@@ -131,6 +159,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			if (profit >= params.minProfit) {
 				arbitrage.suggestedBuyOrder.price = buyOrder.price + 0.01; // buy a little more expensive
 				arbitrage.profit = profit;
+				arbitrage.buyOrderPosition = index;
 
 				break;
 			}
@@ -144,15 +173,15 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 
 			return {
 				arbitrage,
-				sellOrders: sellOrdersFiltered,
-				buyOrders: buyOrdersFiltered,
+				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
+				buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
 			};
 		}
 
 		return {
 			arbitrage: null,
-			sellOrders: sellOrdersFiltered,
-			buyOrders: buyOrdersFiltered,
+			sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
+			buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
 		};
 	}
 }

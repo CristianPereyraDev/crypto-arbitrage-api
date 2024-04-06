@@ -22,7 +22,9 @@ export type P2POutgoingMessage = {
 		crypto: string;
 		fiat: string;
 		buyOrders: IP2POrder[];
+		totalBuyOrders: number;
 		sellOrders: IP2POrder[];
+		totalSellOrders: number;
 		arbitrage: P2PArbitrage | null;
 	};
 };

@@ -90,6 +90,8 @@ export async function wsNativeConnectionHandler(
 							exchange: exchangeName,
 							crypto: pair.crypto,
 							fiat: pair.fiat,
+							totalBuyOrders: orders.buyOrders.length,
+							totalSellOrders: orders.sellOrders.length,
 							buyOrders: computedArbitrage.buyOrders,
 							sellOrders: computedArbitrage.sellOrders,
 						},
