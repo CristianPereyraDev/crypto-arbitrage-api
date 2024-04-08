@@ -97,80 +97,51 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return {
 				arbitrage: null,
-				sellOrders: params.sellOrders,
-				buyOrders: params.buyOrders,
-			};
-		}
-
-		arbitrage.suggestedSellOrder.price = sellOrdersFiltered[0][1].price - 0.01; // sell a little cheaper
-		arbitrage.suggestedSellOrder.volume = params.volume;
-		arbitrage.suggestedBuyOrder.price = buyOrdersFiltered[0][1].price + 0.01; // buy a little more expensive
-		arbitrage.suggestedBuyOrder.volume = params.volume;
-
-		let profit = calculateP2PProfit(
-			arbitrage.suggestedSellOrder.price,
-			arbitrage.suggestedBuyOrder.price,
-		);
-
-		if (profit >= params.minProfit) {
-			arbitrage.profit = profit;
-			arbitrage.suggestedSellOrder.min = params.sellLimits[0];
-			arbitrage.suggestedSellOrder.max = params.sellLimits[1];
-			arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
-			arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
-			arbitrage.sellOrderPosition = sellOrdersFiltered[0][0];
-			arbitrage.buyOrderPosition = buyOrdersFiltered[0][0];
-
-			return {
-				arbitrage,
 				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
 				buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
 			};
 		}
 
-		// Find the best sell order.
-		for (const [index, sellOrder] of sellOrdersFiltered) {
-			if (index === 0) {
-				continue;
-			}
+		let arbitrageFound = false;
+		let buyOrderIndex = 0;
+		let sellOrderIndex = 0;
+		let profit = 0;
+		while (
+			sellOrderIndex < sellOrdersFiltered.length &&
+			buyOrderIndex < buyOrdersFiltered.length &&
+			!arbitrageFound
+		) {
 			profit = calculateP2PProfit(
-				sellOrder.price - 0.01,
-				arbitrage.suggestedBuyOrder.price,
+				sellOrdersFiltered[sellOrderIndex][1].price - 0.01,
+				buyOrdersFiltered[buyOrderIndex][1].price + 0.01,
 			);
-
 			if (profit >= params.minProfit) {
-				arbitrage.suggestedSellOrder.price = sellOrder.price - 0.01; // sell a little more cheaper
+				arbitrageFound = true;
+				arbitrage.suggestedSellOrder.min = params.sellLimits[0];
+				arbitrage.suggestedSellOrder.max = params.sellLimits[1];
+				arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
+				arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
+				arbitrage.suggestedSellOrder.price =
+					sellOrdersFiltered[sellOrderIndex][1].price - 0.01;
+				arbitrage.suggestedBuyOrder.price =
+					buyOrdersFiltered[buyOrderIndex][1].price + 0.01;
 				arbitrage.profit = profit;
-				arbitrage.sellOrderPosition = index;
-
-				break;
+				arbitrage.sellOrderPosition = Math.max(
+					0,
+					sellOrdersFiltered[sellOrderIndex][0] - 1,
+				);
+				arbitrage.buyOrderPosition = Math.max(
+					0,
+					buyOrdersFiltered[buyOrderIndex][0] - 1,
+				);
+			} else if (buyOrderIndex <= sellOrderIndex) {
+				buyOrderIndex++;
+			} else {
+				sellOrderIndex++;
 			}
 		}
-		// Find the best buy order
-		for (const [index, buyOrder] of buyOrdersFiltered) {
-			if (index === 0) {
-				continue;
-			}
-			profit = calculateP2PProfit(
-				arbitrage.suggestedSellOrder.price,
-				buyOrder.price + 0.01,
-			);
 
-			if (profit >= params.minProfit) {
-				arbitrage.suggestedBuyOrder.price = buyOrder.price + 0.01; // buy a little more expensive
-				arbitrage.profit = profit;
-				arbitrage.buyOrderPosition = index;
-
-				break;
-			}
-		}
-
-		if (arbitrage.profit >= params.minProfit) {
-			arbitrage.suggestedSellOrder.min = params.sellLimits[0];
-			arbitrage.suggestedSellOrder.max = params.sellLimits[1];
-			arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
-			arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
-
+		if (arbitrageFound) {
 			return {
 				arbitrage,
 				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
