@@ -117,12 +117,14 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			);
 			if (profit >= params.minProfit) {
 				arbitrageFound = true;
+				arbitrage.suggestedSellOrder.volume = params.volume;
 				arbitrage.suggestedSellOrder.min = params.sellLimits[0];
 				arbitrage.suggestedSellOrder.max = params.sellLimits[1];
-				arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
-				arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
 				arbitrage.suggestedSellOrder.price =
 					sellOrdersFiltered[sellOrderIndex][1].price - 0.01;
+				arbitrage.suggestedBuyOrder.volume = params.volume;
+				arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
+				arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
 				arbitrage.suggestedBuyOrder.price =
 					buyOrdersFiltered[buyOrderIndex][1].price + 0.01;
 				arbitrage.profit = profit;
