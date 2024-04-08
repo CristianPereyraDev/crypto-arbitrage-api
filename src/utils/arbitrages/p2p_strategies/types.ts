@@ -21,7 +21,7 @@ export type CalculateP2PArbitrageParams = {
 	buyLimits: [number, number];
 };
 
-export type CalculateP2PArbitrageResult = {
+export type P2PArbitrageResult = {
 	arbitrage: P2PArbitrage | null;
 	sellOrders: IP2POrder[];
 	buyOrders: IP2POrder[];
@@ -30,5 +30,5 @@ export type CalculateP2PArbitrageResult = {
 export interface IP2PArbitrageStrategy {
 	calculateP2PArbitrage: (
 		params: CalculateP2PArbitrageParams,
-	) => CalculateP2PArbitrageResult;
+	) => P2PArbitrageResult;
 }

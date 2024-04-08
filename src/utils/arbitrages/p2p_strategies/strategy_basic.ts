@@ -5,7 +5,7 @@ import {
 } from "../../../databases/model/exchange_p2p.model.js";
 import {
 	CalculateP2PArbitrageParams,
-	CalculateP2PArbitrageResult,
+	P2PArbitrageResult,
 	IP2PArbitrageStrategy,
 	P2PArbitrage,
 } from "./types.js";
@@ -62,7 +62,7 @@ function calculateP2PProfit(sellPrice: number, buyPrice: number) {
 export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
-	): CalculateP2PArbitrageResult {
+	): P2PArbitrageResult {
 		const buyConditions = [
 			(order: IP2POrder) => order.userType === params.userType,
 			(order: IP2POrder) => {
@@ -97,8 +97,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return {
 				arbitrage: null,
-				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
-				buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
+				sellOrders: [],
+				buyOrders: [],
 			};
 		}
 
@@ -128,14 +128,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				arbitrage.suggestedBuyOrder.price =
 					buyOrdersFiltered[buyOrderIndex][1].price + 0.01;
 				arbitrage.profit = profit;
-				arbitrage.sellOrderPosition = Math.max(
-					0,
-					sellOrdersFiltered[sellOrderIndex][0] - 1,
-				);
-				arbitrage.buyOrderPosition = Math.max(
-					0,
-					buyOrdersFiltered[buyOrderIndex][0] - 1,
-				);
+				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex - 1);
+				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex - 1);
 			} else if (buyOrderIndex <= sellOrderIndex) {
 				buyOrderIndex++;
 			} else {
@@ -146,15 +140,19 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		if (arbitrageFound) {
 			return {
 				arbitrage,
-				sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
-				buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
+				sellOrders: sellOrdersFiltered
+					.map((entry) => entry[1])
+					.slice(0, Math.max(arbitrage.sellOrderPosition + 1, 20)),
+				buyOrders: buyOrdersFiltered
+					.map((entry) => entry[1])
+					.slice(0, Math.max(arbitrage.buyOrderPosition + 1, 20)),
 			};
 		}
 
 		return {
 			arbitrage: null,
-			sellOrders: sellOrdersFiltered.map((entry) => entry[1]),
-			buyOrders: buyOrdersFiltered.map((entry) => entry[1]),
+			sellOrders: sellOrdersFiltered.map((entry) => entry[1]).slice(0, 20),
+			buyOrders: buyOrdersFiltered.map((entry) => entry[1]).slice(0, 20),
 		};
 	}
 }

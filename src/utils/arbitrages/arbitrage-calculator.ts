@@ -8,7 +8,7 @@ import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import {
 	CalculateP2PArbitrageParams,
-	CalculateP2PArbitrageResult,
+	P2PArbitrageResult,
 	IP2PArbitrageStrategy,
 } from "./p2p_strategies/types.js";
 
@@ -186,7 +186,7 @@ export class ArbitrageCalculator {
 
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
-	): CalculateP2PArbitrageResult {
+	): P2PArbitrageResult {
 		return this.p2pArbitrageStrategy.calculateP2PArbitrage(params);
 	}
 }

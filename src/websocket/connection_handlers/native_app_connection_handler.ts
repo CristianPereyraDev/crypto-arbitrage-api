@@ -25,6 +25,7 @@ import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-ba
 import { IPair } from "../../databases/model/exchange_base.model.js";
 import { BasicStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_basic.js";
 import { P2PUserType } from "../../databases/model/exchange_p2p.model.js";
+import { P2PArbitrageResult } from "src/utils/arbitrages/p2p_strategies/types.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -75,15 +76,16 @@ export async function wsNativeConnectionHandler(
 			};
 			exchangeService.getP2POrders(exchangeName, pair).then((orders) => {
 				if (orders) {
-					const computedArbitrage = arbitrageCalculator.calculateP2PArbitrage({
-						buyOrders: orders.buyOrders,
-						sellOrders: orders.sellOrders,
-						volume: msgConfig.volume,
-						minProfit: msgConfig.minProfit,
-						userType: msgConfig.userType,
-						sellLimits: msgConfig.sellLimits,
-						buyLimits: msgConfig.buyLimits,
-					});
+					const computedArbitrage: P2PArbitrageResult =
+						arbitrageCalculator.calculateP2PArbitrage({
+							buyOrders: orders.buyOrders,
+							sellOrders: orders.sellOrders,
+							volume: msgConfig.volume,
+							minProfit: msgConfig.minProfit,
+							userType: msgConfig.userType,
+							sellLimits: msgConfig.sellLimits,
+							buyLimits: msgConfig.buyLimits,
+						});
 					const message: P2POutgoingMessage = {
 						p2p: {
 							arbitrage: computedArbitrage.arbitrage,
