@@ -63,6 +63,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
 	): P2PArbitrageResult {
+		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
 		const buyConditions = [
 			(order: IP2POrder) => order.userType === params.userType,
 			(order: IP2POrder) => {
@@ -79,20 +80,12 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				);
 			},
 		];
-		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
-
-		const buyOrdersFiltered: [number, IP2POrder][] = [];
-		for (const buyOrderEntry of params.buyOrders.entries()) {
-			if (buyConditions.every((condition) => condition(buyOrderEntry[1]))) {
-				buyOrdersFiltered.push(buyOrderEntry);
-			}
-		}
-		const sellOrdersFiltered: [number, IP2POrder][] = [];
-		for (const sellOrderEntry of params.sellOrders.entries()) {
-			if (sellConditions.every((condition) => condition(sellOrderEntry[1]))) {
-				sellOrdersFiltered.push(sellOrderEntry);
-			}
-		}
+		const buyOrdersFiltered = params.buyOrders.filter((order) =>
+			buyConditions.every((c) => c(order)),
+		);
+		const sellOrdersFiltered = params.sellOrders.filter((order) =>
+			sellConditions.every((c) => c(order)),
+		);
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return {
@@ -106,14 +99,15 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		let buyOrderIndex = 0;
 		let sellOrderIndex = 0;
 		let profit = 0;
+
 		while (
 			sellOrderIndex < sellOrdersFiltered.length &&
 			buyOrderIndex < buyOrdersFiltered.length &&
 			!arbitrageFound
 		) {
 			profit = calculateP2PProfit(
-				sellOrdersFiltered[sellOrderIndex][1].price - 0.01,
-				buyOrdersFiltered[buyOrderIndex][1].price + 0.01,
+				sellOrdersFiltered[sellOrderIndex].price - 0.01,
+				buyOrdersFiltered[buyOrderIndex].price + 0.01,
 			);
 			if (profit >= params.minProfit) {
 				arbitrageFound = true;
@@ -121,15 +115,15 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				arbitrage.suggestedSellOrder.min = params.sellLimits[0];
 				arbitrage.suggestedSellOrder.max = params.sellLimits[1];
 				arbitrage.suggestedSellOrder.price =
-					sellOrdersFiltered[sellOrderIndex][1].price - 0.01;
+					sellOrdersFiltered[sellOrderIndex].price - 0.01;
 				arbitrage.suggestedBuyOrder.volume = params.volume;
 				arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
 				arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
 				arbitrage.suggestedBuyOrder.price =
-					buyOrdersFiltered[buyOrderIndex][1].price + 0.01;
+					buyOrdersFiltered[buyOrderIndex].price + 0.01;
 				arbitrage.profit = profit;
-				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex - 1);
-				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex - 1);
+				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex);
+				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex);
 			} else if (buyOrderIndex <= sellOrderIndex) {
 				buyOrderIndex++;
 			} else {
@@ -140,19 +134,21 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		if (arbitrageFound) {
 			return {
 				arbitrage,
-				sellOrders: sellOrdersFiltered
-					.map((entry) => entry[1])
-					.slice(0, Math.max(arbitrage.sellOrderPosition + 1, 20)),
-				buyOrders: buyOrdersFiltered
-					.map((entry) => entry[1])
-					.slice(0, Math.max(arbitrage.buyOrderPosition + 1, 20)),
+				sellOrders: sellOrdersFiltered.slice(
+					0,
+					Math.max(arbitrage.sellOrderPosition + 1, 20),
+				),
+				buyOrders: buyOrdersFiltered.slice(
+					0,
+					Math.max(arbitrage.buyOrderPosition + 1, 20),
+				),
 			};
 		}
 
 		return {
 			arbitrage: null,
-			sellOrders: sellOrdersFiltered.map((entry) => entry[1]).slice(0, 20),
-			buyOrders: buyOrdersFiltered.map((entry) => entry[1]).slice(0, 20),
+			sellOrders: sellOrdersFiltered.slice(0, 20),
+			buyOrders: buyOrdersFiltered.slice(0, 20),
 		};
 	}
 }
