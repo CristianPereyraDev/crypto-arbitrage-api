@@ -21,7 +21,7 @@ export async function getPairPrices(
 		pairs.map(
 			(pair) =>
 				new Promise<IExchangePairPrices>((resolve, reject) => {
-					const endpoint = `https://sandbox.bitso.com/api/v3/order_book/?book=${pair.crypto.toLowerCase()}_${pair.fiat.toLowerCase()}`;
+					const endpoint = `https://bitso.com/api/v3/order_book/?book=${pair.crypto.toLowerCase()}_${pair.fiat.toLowerCase()}`;
 
 					fetchWithTimeout(endpoint)
 						.then((response) => {
