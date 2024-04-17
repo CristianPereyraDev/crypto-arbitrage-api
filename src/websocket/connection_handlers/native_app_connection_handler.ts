@@ -85,6 +85,9 @@ export async function wsNativeConnectionHandler(
 							userType: msgConfig.userType,
 							sellLimits: msgConfig.sellLimits,
 							buyLimits: msgConfig.buyLimits,
+							nickName: msgConfig.nickName,
+							maxBuyOrderPosition: msgConfig.maxBuyOrderPosition,
+							maxSellOrderPosition: msgConfig.maxSellOrderPosition,
 						});
 					const message: P2POutgoingMessage = {
 						p2p: {
@@ -142,6 +145,9 @@ export async function wsNativeConnectionHandler(
 					buyLimits: Object.hasOwn(parsedMessage.p2p, "buyLimits")
 						? parsedMessage.p2p.buyLimits
 						: [100, 100000],
+					nickName: parsedMessage.p2p.nickName,
+					maxBuyOrderPosition: parsedMessage.p2p.maxBuyOrderPosition ?? 500,
+					maxSellOrderPosition: parsedMessage.p2p.maxSellOrderPosition ?? 500,
 				},
 			);
 		} else if (Object.hasOwn(parsedMessage, "currency")) {

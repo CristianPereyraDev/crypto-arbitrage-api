@@ -10,40 +10,44 @@ import {
 	P2PArbitrage,
 } from "./types.js";
 
-const BASE_ARBITRAGE: P2PArbitrage = {
+const DEFAULT_SUGGESTED_BUY_ORDER: IP2POrder = {
+	orderType: P2POrderType.BUY,
+	orderId: "arbitrage_buy",
+	volume: 1,
+	price: 0,
+	min: 0,
+	max: 0,
+	payments: [],
+	userType: P2PUserType.merchant,
+	merchantId: "",
+	merchantName: "CryptoARbitrage",
+	monthOrderCount: 0,
+	monthFinishRate: 0,
+	positiveRate: 1,
+	link: "",
+};
+
+const DEFAULT_SUGGESTED_SELL_ORDER: IP2POrder = {
+	orderType: P2POrderType.SELL,
+	orderId: "arbitrage_sell",
+	volume: 1,
+	price: 0,
+	min: 0,
+	max: 0,
+	payments: [],
+	userType: P2PUserType.merchant,
+	merchantId: "",
+	merchantName: "CryptoARbitrage",
+	monthOrderCount: 0,
+	monthFinishRate: 0,
+	positiveRate: 1,
+	link: "",
+};
+
+const DEFAULT_ARBITRAGE: P2PArbitrage = {
 	profit: 0,
-	suggestedBuyOrder: {
-		orderType: P2POrderType.BUY,
-		orderId: "arbitrage_buy",
-		volume: 1,
-		price: 0,
-		min: 0,
-		max: 0,
-		payments: [],
-		userType: P2PUserType.merchant,
-		merchantId: "",
-		merchantName: "CryptoARbitrage",
-		monthOrderCount: 0,
-		monthFinishRate: 0,
-		positiveRate: 1,
-		link: "",
-	},
-	suggestedSellOrder: {
-		orderType: P2POrderType.SELL,
-		orderId: "arbitrage_sell",
-		volume: 1,
-		price: 0,
-		min: 0,
-		max: 0,
-		payments: [],
-		userType: P2PUserType.merchant,
-		merchantId: "",
-		merchantName: "CryptoARbitrage",
-		monthOrderCount: 0,
-		monthFinishRate: 0,
-		positiveRate: 1,
-		link: "",
-	},
+	suggestedBuyOrder: null,
+	suggestedSellOrder: null,
 	buyOrderPosition: 0,
 	sellOrderPosition: 0,
 };
@@ -63,7 +67,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
 	): P2PArbitrageResult {
-		const arbitrage: P2PArbitrage = BASE_ARBITRAGE;
+		const { nickName, maxSellOrderPosition, maxBuyOrderPosition } = params;
+
+		const arbitrage: P2PArbitrage = DEFAULT_ARBITRAGE;
 		const buyConditions = [
 			(order: IP2POrder) => order.userType === params.userType,
 			(order: IP2POrder) => {
@@ -88,46 +94,107 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		);
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
+			return { arbitrage: null, sellOrders: [], buyOrders: [] };
+		}
+
+		//
+		const locatedBuyOrderIndex = buyOrdersFiltered.findIndex(
+			(buyOrder) => buyOrder.merchantName === nickName,
+		);
+		const locatedSellOrderIndex = sellOrdersFiltered.findIndex(
+			(sellOrder) => sellOrder.merchantName === nickName,
+		);
+
+		// If exist both orders in the filtered lists, calculate the arbitrage with them.
+		if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {
 			return {
-				arbitrage: null,
+				arbitrage: {
+					profit: calculateP2PProfit(
+						sellOrdersFiltered[locatedSellOrderIndex].price,
+						buyOrdersFiltered[locatedBuyOrderIndex].price,
+					),
+					sellOrderPosition: locatedSellOrderIndex + 1,
+					buyOrderPosition: locatedBuyOrderIndex + 1,
+					suggestedSellOrder: sellOrdersFiltered[locatedSellOrderIndex],
+					suggestedBuyOrder: buyOrdersFiltered[locatedBuyOrderIndex],
+				},
 				sellOrders: [],
 				buyOrders: [],
 			};
 		}
 
 		let arbitrageFound = false;
-		let buyOrderIndex = 0;
-		let sellOrderIndex = 0;
+		let buyOrderIndex = Math.max(locatedBuyOrderIndex, 0);
+		let sellOrderIndex = Math.max(locatedSellOrderIndex, 0);
+		let currentBuyOrder = buyOrdersFiltered[buyOrderIndex];
+		let currentSellOrder = sellOrdersFiltered[sellOrderIndex];
 		let profit = 0;
+		let buyOrderHasReachedMaxPos = locatedBuyOrderIndex >= 0;
+		let sellOrderHasReachedMaxPos = locatedSellOrderIndex >= 0;
+		let isBuyOrderTurn = true;
 
 		while (
-			sellOrderIndex < sellOrdersFiltered.length &&
-			buyOrderIndex < buyOrdersFiltered.length &&
+			(!buyOrderHasReachedMaxPos || !sellOrderHasReachedMaxPos) &&
 			!arbitrageFound
 		) {
-			profit = calculateP2PProfit(
-				sellOrdersFiltered[sellOrderIndex].price - 0.01,
-				buyOrdersFiltered[buyOrderIndex].price + 0.01,
-			);
+			const sellPrice =
+				locatedSellOrderIndex >= 0
+					? currentSellOrder.price
+					: currentSellOrder.price - 0.01;
+			const buyPrice =
+				locatedBuyOrderIndex >= 0
+					? currentBuyOrder.price
+					: currentBuyOrder.price + 0.01;
+			profit = calculateP2PProfit(sellPrice, buyPrice);
 			if (profit >= params.minProfit) {
 				arbitrageFound = true;
-				arbitrage.suggestedSellOrder.volume = params.volume;
-				arbitrage.suggestedSellOrder.min = params.sellLimits[0];
-				arbitrage.suggestedSellOrder.max = params.sellLimits[1];
-				arbitrage.suggestedSellOrder.price =
-					sellOrdersFiltered[sellOrderIndex].price - 0.01;
-				arbitrage.suggestedBuyOrder.volume = params.volume;
-				arbitrage.suggestedBuyOrder.min = params.buyLimits[0];
-				arbitrage.suggestedBuyOrder.max = params.buyLimits[1];
-				arbitrage.suggestedBuyOrder.price =
-					buyOrdersFiltered[buyOrderIndex].price + 0.01;
+				if (locatedSellOrderIndex >= 0) {
+					arbitrage.suggestedSellOrder = currentSellOrder;
+				} else {
+					arbitrage.suggestedSellOrder = {
+						...DEFAULT_SUGGESTED_SELL_ORDER,
+						volume: params.volume,
+						min: params.sellLimits[0],
+						max: params.sellLimits[1],
+						price: sellPrice,
+					};
+				}
+				if (locatedBuyOrderIndex >= 0) {
+					arbitrage.suggestedBuyOrder = currentBuyOrder;
+				} else {
+					arbitrage.suggestedBuyOrder = {
+						...DEFAULT_SUGGESTED_BUY_ORDER,
+						volume: params.volume,
+						min: params.buyLimits[0],
+						max: params.buyLimits[1],
+						price: buyPrice,
+					};
+				}
 				arbitrage.profit = profit;
 				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex);
 				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex);
-			} else if (buyOrderIndex <= sellOrderIndex) {
-				buyOrderIndex++;
+			} else if (!buyOrderHasReachedMaxPos && isBuyOrderTurn) {
+				isBuyOrderTurn = false;
+				if (
+					buyOrderIndex < maxBuyOrderPosition - 1 &&
+					buyOrderIndex + 1 < buyOrdersFiltered.length
+				) {
+					buyOrderIndex++;
+					currentBuyOrder = buyOrdersFiltered[buyOrderIndex];
+				} else {
+					buyOrderHasReachedMaxPos = true;
+				}
 			} else {
-				sellOrderIndex++;
+				isBuyOrderTurn = true;
+				if (
+					sellOrderIndex < maxSellOrderPosition - 1 &&
+					sellOrderIndex + 1 < sellOrdersFiltered.length
+				) {
+					sellOrderIndex++;
+					currentSellOrder = sellOrdersFiltered[sellOrderIndex];
+				} else {
+					sellOrderHasReachedMaxPos = true;
+				}
 			}
 		}
 

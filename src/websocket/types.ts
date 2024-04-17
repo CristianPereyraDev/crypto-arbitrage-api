@@ -14,6 +14,9 @@ export type CryptoP2PWebSocketConfig = {
 	sellLimits: [number, number];
 	buyLimits: [number, number];
 	userType: P2PUserType;
+	nickName: string;
+	maxBuyOrderPosition: number;
+	maxSellOrderPosition: number;
 };
 
 export type P2POutgoingMessage = {

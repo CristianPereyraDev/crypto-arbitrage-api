@@ -5,8 +5,8 @@ import {
 
 export type P2PArbitrage = {
 	profit: number;
-	suggestedBuyOrder: IP2POrder;
-	suggestedSellOrder: IP2POrder;
+	suggestedBuyOrder: IP2POrder | null;
+	suggestedSellOrder: IP2POrder | null;
 	buyOrderPosition: number;
 	sellOrderPosition: number;
 };
@@ -19,6 +19,9 @@ export type CalculateP2PArbitrageParams = {
 	userType: P2PUserType;
 	sellLimits: [number, number];
 	buyLimits: [number, number];
+	nickName?: string;
+	maxSellOrderPosition: number;
+	maxBuyOrderPosition: number;
 };
 
 export type P2PArbitrageResult = {
