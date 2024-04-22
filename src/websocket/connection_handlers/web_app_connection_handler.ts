@@ -5,7 +5,7 @@ import ExchangeService, {
 	ExchangesFeesType,
 } from "../../services/exchanges.service.js";
 import { CryptoPairWebSocketConfig } from "../types.js";
-import { getCurrencyPairRates } from "../../services/currency.service.js";
+import CurrencyService from "../../services/currency.service.js";
 import {
 	calculateTotalAsk,
 	calculateTotalBid,
@@ -23,6 +23,7 @@ const exchangeService = new ExchangeService(
 	new BrokerageRepositoryMongoDB(),
 	new ExchangeP2PRepositoryMongoDB(),
 );
+const currencyService = new CurrencyService();
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function wsWebConnectionHandler(websocket: WebSocket) {
@@ -158,7 +159,10 @@ async function compileCurrencyPairMessage(
 	currencyBase: string,
 	currencyQuote: string,
 ) {
-	const rates = await getCurrencyPairRates(currencyBase, currencyQuote);
+	const rates = await currencyService.getCurrencyPairRates(
+		currencyBase,
+		currencyQuote,
+	);
 
 	const __dirname = new URL(".", import.meta.url).pathname;
 

@@ -8,7 +8,7 @@ import {
 import ExchangeService from "../../services/exchanges.service.js";
 import { P2PExchange } from "../../databases/mongodb/schema/exchange_p2p.schema.js";
 import { currencyPriceCollectors } from "../apis/currency_exchanges/index.js";
-import { updateCurrencyPairRate } from "../../services/currency.service.js";
+import CurrencyService from "../../services/currency.service.js";
 import ExchangeRepositoryMongoDB from "../../repository/impl/exchange-repository-mongodb.js";
 import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-repository-mongodb.js";
 import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
@@ -226,13 +226,17 @@ export async function collectCryptoBrokeragesPricesToDB() {
 }
 
 // Currency exchanges prices (USD-ARS, USD-EUR, ...)
-
+const currencyService = new CurrencyService();
 export async function collectCurrencyExchangesPricesToDB() {
 	currencyPriceCollectors.forEach((collector, symbol) => {
 		const [currencyBase, currencyQuote] = symbol.split("-");
 		collector().then((rates) => {
 			if (rates !== undefined) {
-				updateCurrencyPairRate(currencyBase, currencyQuote, rates);
+				currencyService.updateCurrencyPairRate(
+					currencyBase,
+					currencyQuote,
+					rates,
+				);
 			}
 		});
 	});

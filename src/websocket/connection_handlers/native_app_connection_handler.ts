@@ -11,7 +11,7 @@ import {
 	CryptoPairWebSocketConfig,
 	P2POutgoingMessage,
 } from "../types.js";
-import { getCurrencyPairRates } from "../../services/currency.service.js";
+import CurrencyService from "../../services/currency.service.js";
 import {
 	ArbitrageCalculator,
 	calculateTotalAsk,
@@ -25,7 +25,7 @@ import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-ba
 import { IPair } from "../../databases/model/exchange_base.model.js";
 import { BasicStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_basic.js";
 import { P2PUserType } from "../../databases/model/exchange_p2p.model.js";
-import { P2PArbitrageResult } from "src/utils/arbitrages/p2p_strategies/types.js";
+import { P2PArbitrageResult } from "../../utils/arbitrages/p2p_strategies/types.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -33,6 +33,8 @@ const exchangeService = new ExchangeService(
 	new BrokerageRepositoryMongoDB(),
 	new ExchangeP2PRepositoryMongoDB(),
 );
+
+const currencyService = new CurrencyService();
 
 export async function wsNativeConnectionHandler(
 	websocket: WebSocket,
@@ -223,7 +225,10 @@ async function makeCurrencyPairMessage(
 	currencyBase: string,
 	currencyQuote: string,
 ) {
-	const rates = await getCurrencyPairRates(currencyBase, currencyQuote);
+	const rates = await currencyService.getCurrencyPairRates(
+		currencyBase,
+		currencyQuote,
+	);
 
 	return JSON.stringify({
 		currencyBase,
