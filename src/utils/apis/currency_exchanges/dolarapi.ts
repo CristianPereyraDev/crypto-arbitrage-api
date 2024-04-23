@@ -29,10 +29,6 @@ export async function getDollarRates(): Promise<
 						dolar.nombre === "Contado con liquidación" ? "CCL" : dolar.nombre,
 					buy: dolar.compra,
 					sell: dolar.venta,
-					opening: 0,
-					closing: 0,
-					historical: 0,
-					variation: 0,
 					updatedAt: new Date(dolar.fechaActualizacion),
 				};
 			});

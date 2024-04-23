@@ -13,7 +13,39 @@ currenciesController.get(
 			const rates = await currencyService.getCurrencyPairRates(base, quote);
 
 			return res.status(200).json({
-				rates,
+				rates: rates.map((rate) => {
+					return {
+						exchangeSlug: rate.exchangeSlug,
+						exchangeName: rate.exchangeName,
+						buy: rate.buy,
+						sell: rate.sell,
+						opening: rate.opening,
+						closing: rate.closing,
+						startActivityHour: `${rate.startActivityHour.hours.toLocaleString(
+							"es-AR",
+							{
+								minimumIntegerDigits: 2,
+								maximumFractionDigits: 0,
+							},
+						)}:${rate.startActivityHour.minutes.toLocaleString("es-AR", {
+							minimumIntegerDigits: 2,
+							maximumFractionDigits: 0,
+						})}`,
+						endActivityHour: `${rate.endActivityHour.hours.toLocaleString(
+							"es-AR",
+							{
+								minimumIntegerDigits: 2,
+								maximumFractionDigits: 0,
+							},
+						)}:${rate.endActivityHour.minutes.toLocaleString("es-AR", {
+							minimumIntegerDigits: 2,
+							maximumFractionDigits: 0,
+						})}`,
+
+						historical: rate.historical,
+						updatedAt: rate.updatedAt,
+					};
+				}),
 			});
 		} catch (error) {
 			if (error instanceof Error) {

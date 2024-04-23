@@ -11,6 +11,7 @@ import {
 	collectP2POrdersToDB,
 } from "./utils/pricing_collector/pricing_collector.js";
 import websocketSetup from "./websocket/index.js";
+import { CronJob } from "cron";
 
 dotenv.config();
 
@@ -37,14 +38,18 @@ appSetup(app)
 		);
 
 		// Currency rates collector
-		setInterval(
+		const currencyJob = new CronJob(
+			"*/5 * * * *",
 			() => {
 				collectCurrencyExchangesPricesToDB().catch((reason) =>
 					console.log(reason),
 				);
 			},
-			Number(process.env.CURRENCY_COLLECTOR_INTERVAL ?? 1000 * 60),
+			null,
+			false,
+			"America/Argentina/Buenos_Aires",
 		);
+		currencyJob.start();
 	})
 	.catch((reason) => {
 		console.log(reason);

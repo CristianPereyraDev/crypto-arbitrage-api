@@ -14,16 +14,35 @@ export default class CurrencyService {
 			});
 
 			if (currencyPairDoc) {
+				const now = new Date();
+
 				for (const currentRate of currencyPairDoc.rates) {
 					const newRate = newRates.find(
 						(rate) => rate.exchangeSlug === currentRate.exchangeSlug,
 					);
+					const startActivity = new Date();
+					startActivity.setHours(
+						currentRate.startActivityHour.hours,
+						currentRate.startActivityHour.minutes,
+					);
+					const endActivity = new Date();
+					endActivity.setHours(
+						currentRate.endActivityHour.hours,
+						currentRate.endActivityHour.minutes,
+					);
+
 					if (newRate) {
 						currentRate.buy = newRate.buy;
 						currentRate.sell = newRate.sell;
+
+						if (now.getTime() === startActivity.getTime()) {
+							currentRate.opening = newRate.sell;
+						}
+						if (now.getTime() === endActivity.getTime()) {
+							currentRate.closing = newRate.sell;
+						}
+
 						currentRate.updatedAt = newRate.updatedAt;
-						currentRate.variation =
-							((newRate.sell - currentRate.sell) / currentRate.sell) * 100;
 					}
 				}
 

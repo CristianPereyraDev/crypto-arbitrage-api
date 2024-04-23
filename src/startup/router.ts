@@ -15,6 +15,8 @@ import { Exchange } from "../databases/mongodb/schema/exchange.schema.js";
 import { P2PExchange } from "../databases/mongodb/schema/exchange_p2p.schema.js";
 import { Brokerage } from "../databases/mongodb/schema/brokerage_schema.js";
 import currenciesController from "../controllers/currencies.controller.js";
+import { CurrencyPair } from "../databases/mongodb/schema/currency_pair.schema.js";
+import { MongoClient } from "mongodb";
 
 AdminJS.registerAdapter({
 	Resource: AdminJSMongoose.Resource,
@@ -58,11 +60,14 @@ const routerSetup = async (app: Express): Promise<Express> => {
 					},
 				},
 			},
+			{
+				resource: CurrencyPair,
+			},
 		],
 	});
 
 	const sessionStore = MongoStore.create({
-		client: mongoose.connection.getClient() as any,
+		client: mongoose.connection.getClient() as unknown as MongoClient,
 	});
 
 	const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
