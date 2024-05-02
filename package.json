@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "API for cryptocurrency arbitrage.",
   "main": "index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "NODE_PATH=./dist node dist/src/app.js",
     "build": "tsc -p .",
@@ -37,7 +40,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@adminjs/express": "^6.0.1",
+    "@adminjs/express": "^6.1.0",
     "@adminjs/mongoose": "^4.0.0",
     "@apollo/server": "^4.9.5",
     "@apollo/subgraph": "^2.6.2",
@@ -46,7 +49,7 @@
     "@types/express-session": "^1.17.10",
     "@types/module-alias": "^2.0.4",
     "@types/ws": "^8.5.10",
-    "adminjs": "^7.3.0",
+    "adminjs": "^7.8.1",
     "bitget-api": "^2.0.1",
     "bybit-api": "^3.8.0",
     "cheerio": "^1.0.0-rc.12",

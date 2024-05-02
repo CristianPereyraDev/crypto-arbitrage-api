@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import { CronJob } from "cron";
 
 import appSetup from "./startup/init.js";
 import routerSetup from "./startup/router.js";
@@ -11,7 +12,6 @@ import {
 	collectP2POrdersToDB,
 } from "./utils/pricing_collector/pricing_collector.js";
 import websocketSetup from "./websocket/index.js";
-import { CronJob } from "cron";
 
 dotenv.config();
 
