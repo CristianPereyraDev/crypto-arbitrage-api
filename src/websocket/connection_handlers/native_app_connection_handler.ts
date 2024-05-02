@@ -175,11 +175,6 @@ export async function wsNativeConnectionHandler(
 	});
 }
 
-// async function makeP2PMessage(
-//   p2pExchangeName: string,
-//   config: CryptoP2PWebSocketConfig
-// ) { }
-
 async function makeCryptoMessage(
 	asset: string,
 	fiat: string,

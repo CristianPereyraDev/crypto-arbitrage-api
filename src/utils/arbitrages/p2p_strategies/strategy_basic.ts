@@ -67,37 +67,48 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
 	): P2PArbitrageResult {
-		const { nickName, maxSellOrderPosition, maxBuyOrderPosition } = params;
+		const {
+			sellOrders,
+			buyOrders,
+			userType,
+			nickName,
+			volume,
+			minProfit,
+			maxSellOrderPosition,
+			maxBuyOrderPosition,
+			buyLimits,
+			sellLimits,
+		} = params;
 
 		const arbitrage: P2PArbitrage = DEFAULT_ARBITRAGE;
+		const orderListMaxSize =
+			Number(process.env.P2P_ARBITRAGE_RESPONSE_ORDER_LIST_SIZE) + 1;
 		const buyConditions = [
-			(order: IP2POrder) => order.userType === params.userType,
+			(order: IP2POrder) => order.userType === userType,
 			(order: IP2POrder) => {
-				return (
-					params.buyLimits[0] >= order.min && params.buyLimits[0] <= order.max
-				);
+				return buyLimits[0] >= order.min && buyLimits[0] <= order.max;
 			},
 		];
 		const sellConditions = [
-			(order: IP2POrder) => order.userType === params.userType,
+			(order: IP2POrder) => order.userType === userType,
 			(order: IP2POrder) => {
-				return (
-					params.sellLimits[0] >= order.min && params.sellLimits[0] <= order.max
-				);
+				return sellLimits[0] >= order.min && sellLimits[0] <= order.max;
 			},
 		];
-		const buyOrdersFiltered = params.buyOrders.filter((order) =>
-			buyConditions.every((c) => c(order)),
+		const buyOrdersFiltered = buyOrders.filter(
+			(order) =>
+				buyConditions.every((c) => c(order)) || order.merchantName === nickName,
 		);
-		const sellOrdersFiltered = params.sellOrders.filter((order) =>
-			sellConditions.every((c) => c(order)),
+		const sellOrdersFiltered = sellOrders.filter(
+			(order) =>
+				sellConditions.every((c) => c(order)) ||
+				order.merchantName === nickName,
 		);
 
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return { arbitrage: null, sellOrders: [], buyOrders: [] };
 		}
 
-		//
 		const locatedBuyOrderIndex = buyOrdersFiltered.findIndex(
 			(buyOrder) => buyOrder.merchantName === nickName,
 		);
@@ -105,7 +116,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			(sellOrder) => sellOrder.merchantName === nickName,
 		);
 
-		// If exist both orders in the filtered lists, calculate the arbitrage with them.
+		// If both orders already exist in the filtered lists, calculate the arbitrage between them.
 		if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {
 			return {
 				arbitrage: {
@@ -118,19 +129,25 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 					suggestedSellOrder: sellOrdersFiltered[locatedSellOrderIndex],
 					suggestedBuyOrder: buyOrdersFiltered[locatedBuyOrderIndex],
 				},
-				sellOrders: [],
-				buyOrders: [],
+				sellOrders: sellOrdersFiltered.slice(
+					0,
+					Math.max(locatedSellOrderIndex + 1, orderListMaxSize),
+				),
+				buyOrders: buyOrdersFiltered.slice(
+					0,
+					Math.max(locatedBuyOrderIndex + 1, orderListMaxSize),
+				),
 			};
 		}
 
 		let arbitrageFound = false;
-		let buyOrderIndex = Math.max(locatedBuyOrderIndex, 0);
-		let sellOrderIndex = Math.max(locatedSellOrderIndex, 0);
+		let buyOrderHasReachedMaxPos = locatedBuyOrderIndex >= 0;
+		let sellOrderHasReachedMaxPos = locatedSellOrderIndex >= 0;
+		let buyOrderIndex = Math.max(0, locatedBuyOrderIndex);
+		let sellOrderIndex = Math.max(0, locatedSellOrderIndex);
 		let currentBuyOrder = buyOrdersFiltered[buyOrderIndex];
 		let currentSellOrder = sellOrdersFiltered[sellOrderIndex];
 		let profit = 0;
-		let buyOrderHasReachedMaxPos = locatedBuyOrderIndex >= 0;
-		let sellOrderHasReachedMaxPos = locatedSellOrderIndex >= 0;
 		let isBuyOrderTurn = true;
 
 		while (
@@ -145,17 +162,19 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				locatedBuyOrderIndex >= 0
 					? currentBuyOrder.price
 					: currentBuyOrder.price + 0.01;
+
 			profit = calculateP2PProfit(sellPrice, buyPrice);
-			if (profit >= params.minProfit) {
+
+			if (profit >= minProfit) {
 				arbitrageFound = true;
 				if (locatedSellOrderIndex >= 0) {
 					arbitrage.suggestedSellOrder = currentSellOrder;
 				} else {
 					arbitrage.suggestedSellOrder = {
 						...DEFAULT_SUGGESTED_SELL_ORDER,
-						volume: params.volume,
-						min: params.sellLimits[0],
-						max: params.sellLimits[1],
+						volume: volume,
+						min: sellLimits[0],
+						max: sellLimits[1],
 						price: sellPrice,
 					};
 				}
@@ -164,9 +183,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				} else {
 					arbitrage.suggestedBuyOrder = {
 						...DEFAULT_SUGGESTED_BUY_ORDER,
-						volume: params.volume,
-						min: params.buyLimits[0],
-						max: params.buyLimits[1],
+						volume: volume,
+						min: buyLimits[0],
+						max: buyLimits[1],
 						price: buyPrice,
 					};
 				}
@@ -176,7 +195,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			} else if (!buyOrderHasReachedMaxPos && isBuyOrderTurn) {
 				isBuyOrderTurn = false;
 				if (
-					buyOrderIndex < maxBuyOrderPosition - 1 &&
+					buyOrderIndex < maxBuyOrderPosition &&
 					buyOrderIndex + 1 < buyOrdersFiltered.length
 				) {
 					buyOrderIndex++;
@@ -187,7 +206,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			} else {
 				isBuyOrderTurn = true;
 				if (
-					sellOrderIndex < maxSellOrderPosition - 1 &&
+					sellOrderIndex < maxSellOrderPosition &&
 					sellOrderIndex + 1 < sellOrdersFiltered.length
 				) {
 					sellOrderIndex++;
@@ -203,19 +222,19 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				arbitrage,
 				sellOrders: sellOrdersFiltered.slice(
 					0,
-					Math.max(arbitrage.sellOrderPosition + 1, 20),
+					Math.max(arbitrage.sellOrderPosition + 1, orderListMaxSize),
 				),
 				buyOrders: buyOrdersFiltered.slice(
 					0,
-					Math.max(arbitrage.buyOrderPosition + 1, 20),
+					Math.max(arbitrage.buyOrderPosition + 1, orderListMaxSize),
 				),
 			};
 		}
 
 		return {
 			arbitrage: null,
-			sellOrders: sellOrdersFiltered.slice(0, 20),
-			buyOrders: buyOrdersFiltered.slice(0, 20),
+			sellOrders: sellOrdersFiltered.slice(0, orderListMaxSize),
+			buyOrders: buyOrdersFiltered.slice(0, orderListMaxSize),
 		};
 	}
 }
