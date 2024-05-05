@@ -63,6 +63,17 @@ function calculateP2PProfit(sellPrice: number, buyPrice: number) {
 	return ((sellPrice - buyPrice) / buyPrice) * 100;
 }
 
+function findAllUserOrders(
+	orders: IP2POrder[],
+	nickName?: string,
+): IP2POrder[] {
+	return orders.filter((order) => order.merchantName === nickName);
+}
+
+function isRagesOverlapping(rangeA: number[], rangeB: number[]): boolean {
+	return !(rangeA[0] > rangeB[1] || rangeA[1] < rangeB[0]);
+}
+
 export class BasicStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
@@ -76,24 +87,31 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 			minProfit,
 			maxSellOrderPosition,
 			maxBuyOrderPosition,
-			buyLimits,
-			sellLimits,
 		} = params;
 
 		const arbitrage: P2PArbitrage = DEFAULT_ARBITRAGE;
 		const orderListMaxSize =
 			Number(process.env.P2P_ARBITRAGE_RESPONSE_ORDER_LIST_SIZE) + 1;
+		const allUserBuyOrders = findAllUserOrders(buyOrders, nickName);
+		const allUserSellOrders = findAllUserOrders(sellOrders, nickName);
+		const buyLimits =
+			allUserBuyOrders.length > 0
+				? [allUserBuyOrders[0].min, allUserBuyOrders[0].max]
+				: params.buyLimits;
+		const sellLimits =
+			allUserSellOrders.length > 0
+				? [allUserSellOrders[0].min, allUserSellOrders[0].max]
+				: params.sellLimits;
+
 		const buyConditions = [
 			(order: IP2POrder) => order.userType === userType,
-			(order: IP2POrder) => {
-				return buyLimits[0] >= order.min && buyLimits[0] <= order.max;
-			},
+			(order: IP2POrder) =>
+				isRagesOverlapping(buyLimits, [order.min, order.max]),
 		];
 		const sellConditions = [
 			(order: IP2POrder) => order.userType === userType,
-			(order: IP2POrder) => {
-				return sellLimits[0] >= order.min && sellLimits[0] <= order.max;
-			},
+			(order: IP2POrder) =>
+				isRagesOverlapping(sellLimits, [order.min, order.max]),
 		];
 		const buyOrdersFiltered = buyOrders.filter(
 			(order) =>
@@ -105,6 +123,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				order.merchantName === nickName,
 		);
 
+		console.log("sellOrdersFiltered:", sellOrdersFiltered.length);
+		console.log("buyOrdersFiltered:", buyOrdersFiltered.length);
+
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return { arbitrage: null, sellOrders: [], buyOrders: [] };
 		}
@@ -115,6 +136,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		const locatedSellOrderIndex = sellOrdersFiltered.findIndex(
 			(sellOrder) => sellOrder.merchantName === nickName,
 		);
+
+		console.log("locatedBuyOrderIndex: ", locatedBuyOrderIndex, nickName);
+		console.log("locatedSellOrderIndex: ", locatedSellOrderIndex, nickName);
 
 		// If both orders already exist in the filtered lists, calculate the arbitrage between them.
 		if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {
@@ -190,8 +214,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 					};
 				}
 				arbitrage.profit = profit;
-				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex);
-				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex);
+				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex + 1);
+				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex + 1);
 			} else if (!buyOrderHasReachedMaxPos && isBuyOrderTurn) {
 				isBuyOrderTurn = false;
 				if (
