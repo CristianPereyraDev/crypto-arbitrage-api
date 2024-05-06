@@ -29,8 +29,8 @@ describe("P2P arbitrage basic strategy", () => {
 		volume: 1000,
 		minProfit: 0.5,
 		userType: P2PUserType.merchant,
-		sellLimits: [100000, 1000000],
-		buyLimits: [100000, 1000000],
+		sellLimits: [10000, 100000000],
+		buyLimits: [10000, 100000000],
 		maxBuyOrderPosition: 10,
 		maxSellOrderPosition: 30,
 	};
@@ -61,7 +61,7 @@ describe("P2P arbitrage basic strategy", () => {
 		});
 
 		expect(arbitrage.arbitrage?.buyOrderPosition).toBe(10);
-		expect(arbitrage.arbitrage?.sellOrderPosition).toBe(23);
+		expect(arbitrage.arbitrage?.sellOrderPosition).toBe(24);
 		expect(arbitrage.arbitrage?.profit).toBeCloseTo(
 			(1091.99 / 1086.55 - 1) * 100,
 		);
@@ -76,5 +76,29 @@ describe("P2P arbitrage basic strategy", () => {
 		expect(result.arbitrage?.sellOrderPosition).toBe(2);
 		expect(result.arbitrage?.buyOrderPosition).toBe(16);
 		expect(result.arbitrage?.profit).toBeCloseTo(0.15);
+	});
+
+	test("Arbitrage for no user", () => {
+		const result = basicStrategy.calculateP2PArbitrage({
+			...defaultParams,
+			nickName: undefined,
+			minProfit: 0.17,
+		});
+
+		expect(result.arbitrage?.sellOrderPosition).toBe(9);
+		expect(result.arbitrage?.buyOrderPosition).toBe(10);
+		expect(result.arbitrage?.profit).toBeCloseTo(0.175);
+	});
+
+	test("Arbitrage for minProfit = 1 and max positions = 10 should be null", () => {
+		const result = basicStrategy.calculateP2PArbitrage({
+			...defaultParams,
+			nickName: undefined,
+			minProfit: 1,
+			maxBuyOrderPosition: 10,
+			maxSellOrderPosition: 10,
+		});
+
+		expect(result.arbitrage).toBeNull();
 	});
 });
