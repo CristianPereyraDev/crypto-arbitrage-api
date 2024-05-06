@@ -123,9 +123,6 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				order.merchantName === nickName,
 		);
 
-		console.log("sellOrdersFiltered:", sellOrdersFiltered.length);
-		console.log("buyOrdersFiltered:", buyOrdersFiltered.length);
-
 		if (buyOrdersFiltered.length === 0 || sellOrdersFiltered.length === 0) {
 			return { arbitrage: null, sellOrders: [], buyOrders: [] };
 		}
@@ -136,9 +133,6 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		const locatedSellOrderIndex = sellOrdersFiltered.findIndex(
 			(sellOrder) => sellOrder.merchantName === nickName,
 		);
-
-		console.log("locatedBuyOrderIndex: ", locatedBuyOrderIndex, nickName);
-		console.log("locatedSellOrderIndex: ", locatedSellOrderIndex, nickName);
 
 		// If both orders already exist in the filtered lists, calculate the arbitrage between them.
 		if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {

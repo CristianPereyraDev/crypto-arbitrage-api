@@ -61,6 +61,10 @@ describe("P2P arbitrage basic strategy", () => {
 		});
 
 		expect(arbitrage.arbitrage?.buyOrderPosition).toBe(10);
+		expect(arbitrage.arbitrage?.sellOrderPosition).toBe(23);
+		expect(arbitrage.arbitrage?.profit).toBeCloseTo(
+			(1091.99 / 1086.55 - 1) * 100,
+		);
 	});
 
 	test("Arbitrage for user Rubito79", () => {
@@ -71,6 +75,6 @@ describe("P2P arbitrage basic strategy", () => {
 
 		expect(result.arbitrage?.sellOrderPosition).toBe(2);
 		expect(result.arbitrage?.buyOrderPosition).toBe(16);
-		expect(result.arbitrage?.profit.toFixed(2)).toBe("0.15");
+		expect(result.arbitrage?.profit).toBeCloseTo(0.15);
 	});
 });
