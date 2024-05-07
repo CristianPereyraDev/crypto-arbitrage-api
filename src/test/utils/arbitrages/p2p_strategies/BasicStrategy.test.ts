@@ -101,4 +101,47 @@ describe("P2P arbitrage basic strategy", () => {
 
 		expect(result.arbitrage).toBeNull();
 	});
+
+	test("Arbitrage with max positions undefined and user kirkklax", () => {
+		const result = basicStrategy.calculateP2PArbitrage({
+			...defaultParams,
+			nickName: "kirkklax",
+			minProfit: 1,
+			maxBuyOrderPosition: undefined,
+			maxSellOrderPosition: undefined,
+		});
+
+		expect(result.arbitrage?.profit).toBeGreaterThanOrEqual(1);
+		expect(result.arbitrage?.suggestedSellOrder?.merchantName).toBe("kirkklax");
+	});
+
+	test("Arbitrage with max positions undefined and user FraYu", () => {
+		const result = basicStrategy.calculateP2PArbitrage({
+			...defaultParams,
+			nickName: "FraYu",
+			minProfit: 1,
+			maxBuyOrderPosition: undefined,
+			maxSellOrderPosition: undefined,
+		});
+
+		expect(result.arbitrage?.profit).toBeGreaterThanOrEqual(1);
+		expect(result.arbitrage?.suggestedSellOrder?.merchantName).toBe("FraYu");
+		expect(result.arbitrage?.suggestedBuyOrder?.merchantName).toBe("FraYu");
+	});
+
+	test("Arbitrage with max positions undefined and user lakshmy07", () => {
+		const result = basicStrategy.calculateP2PArbitrage({
+			...defaultParams,
+			nickName: "lakshmy07",
+			minProfit: 1,
+			maxBuyOrderPosition: undefined,
+			maxSellOrderPosition: undefined,
+		});
+
+		expect(result.arbitrage?.profit).toBeGreaterThanOrEqual(1);
+		expect(
+			result.arbitrage?.suggestedSellOrder?.merchantName === "lakshmy07",
+		).toBeFalsy();
+		expect(result.arbitrage?.suggestedBuyOrder?.merchantName).toBe("lakshmy07");
+	});
 });

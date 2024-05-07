@@ -210,10 +210,15 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				arbitrage.profit = profit;
 				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex + 1);
 				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex + 1);
-			} else if (!buyOrderHasReachedMaxPos && isBuyOrderTurn) {
+			} else if (
+				!buyOrderHasReachedMaxPos &&
+				(isBuyOrderTurn || sellOrderHasReachedMaxPos)
+			) {
 				isBuyOrderTurn = false;
+				const isBuyOrderPositionInRange =
+					!maxBuyOrderPosition || buyOrderIndex < maxBuyOrderPosition;
 				if (
-					buyOrderIndex < maxBuyOrderPosition &&
+					isBuyOrderPositionInRange &&
 					buyOrderIndex + 1 < buyOrdersFiltered.length
 				) {
 					buyOrderIndex++;
@@ -223,8 +228,10 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				}
 			} else {
 				isBuyOrderTurn = true;
+				const isSellOrderPositionInRange =
+					!maxSellOrderPosition || sellOrderIndex < maxSellOrderPosition;
 				if (
-					sellOrderIndex < maxSellOrderPosition &&
+					isSellOrderPositionInRange &&
 					sellOrderIndex + 1 < sellOrdersFiltered.length
 				) {
 					sellOrderIndex++;

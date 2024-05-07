@@ -20,8 +20,8 @@ export type CalculateP2PArbitrageParams = {
 	sellLimits: [number, number];
 	buyLimits: [number, number];
 	nickName?: string;
-	maxSellOrderPosition: number;
-	maxBuyOrderPosition: number;
+	maxSellOrderPosition?: number;
+	maxBuyOrderPosition?: number;
 };
 
 export type P2PArbitrageResult = {
