@@ -185,6 +185,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 
 			if (profit >= minProfit) {
 				arbitrageFound = true;
+
 				if (locatedSellOrderIndex >= 0) {
 					arbitrage.suggestedSellOrder = currentSellOrder;
 				} else {
@@ -207,6 +208,7 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 						price: buyPrice,
 					};
 				}
+
 				arbitrage.profit = profit;
 				arbitrage.sellOrderPosition = Math.max(0, sellOrderIndex + 1);
 				arbitrage.buyOrderPosition = Math.max(0, buyOrderIndex + 1);
@@ -243,6 +245,21 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		}
 
 		if (arbitrageFound) {
+			if (locatedSellOrderIndex < 0 && arbitrage.suggestedSellOrder) {
+				sellOrdersFiltered.splice(
+					Math.max(0, arbitrage.sellOrderPosition - 1),
+					0,
+					arbitrage.suggestedSellOrder,
+				);
+			}
+			if (locatedBuyOrderIndex < 0 && arbitrage.suggestedBuyOrder) {
+				buyOrdersFiltered.splice(
+					Math.max(0, arbitrage.buyOrderPosition - 1),
+					0,
+					arbitrage.suggestedBuyOrder,
+				);
+			}
+
 			return {
 				arbitrage,
 				sellOrders: sellOrdersFiltered.slice(
