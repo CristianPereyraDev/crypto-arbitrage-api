@@ -90,8 +90,9 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		} = params;
 
 		const arbitrage: P2PArbitrage = DEFAULT_ARBITRAGE;
-		const orderListMaxSize =
-			Number(process.env.P2P_ARBITRAGE_RESPONSE_ORDER_LIST_SIZE) + 1;
+		const orderListMaxSize = Number(
+			process.env.P2P_ARBITRAGE_RESPONSE_ORDER_LIST_SIZE ?? 20,
+		);
 		const allUserBuyOrders = findAllUserOrders(buyOrders, nickName);
 		const allUserSellOrders = findAllUserOrders(sellOrders, nickName);
 		const buyLimits =
@@ -264,11 +265,11 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 				arbitrage,
 				sellOrders: sellOrdersFiltered.slice(
 					0,
-					Math.max(arbitrage.sellOrderPosition + 1, orderListMaxSize),
+					Math.max(arbitrage.sellOrderPosition, orderListMaxSize),
 				),
 				buyOrders: buyOrdersFiltered.slice(
 					0,
-					Math.max(arbitrage.buyOrderPosition + 1, orderListMaxSize),
+					Math.max(arbitrage.buyOrderPosition, orderListMaxSize),
 				),
 			};
 		}

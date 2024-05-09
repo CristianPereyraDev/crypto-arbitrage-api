@@ -78,7 +78,7 @@ describe("P2P arbitrage basic strategy", () => {
 		expect(result.arbitrage?.profit).toBeCloseTo(0.15);
 	});
 
-	test("Arbitrage for no user", () => {
+	test.only("Arbitrage for no user", () => {
 		const result = basicStrategy.calculateP2PArbitrage({
 			...defaultParams,
 			nickName: undefined,
@@ -88,6 +88,12 @@ describe("P2P arbitrage basic strategy", () => {
 		expect(result.arbitrage?.sellOrderPosition).toBe(9);
 		expect(result.arbitrage?.buyOrderPosition).toBe(10);
 		expect(result.arbitrage?.profit).toBeCloseTo(0.175);
+		expect(result.sellOrders.length).toBe(20);
+		expect(result.sellOrders[8].merchantName).toBe("CryptoARbitrage");
+		expect(result.sellOrders[8].orderType).toBe("SELL");
+		expect(result.buyOrders.length).toBe(20);
+		expect(result.buyOrders[9].merchantName).toBe("CryptoARbitrage");
+		expect(result.buyOrders[9].orderType).toBe("BUY");
 	});
 
 	test("Arbitrage for minProfit = 1 and max positions = 10 should be null", () => {
