@@ -1,3 +1,4 @@
+import { APIError } from "../../../types/errors/index.js";
 import { fetchWithTimeout } from "../../../utils/network.utils.js";
 import { CurrencyCollectorFunctionReturnType } from "./index.js";
 
@@ -38,5 +39,43 @@ export async function getDollarRates(): Promise<
 	} catch (error) {
 		console.error(error);
 		return undefined;
+	}
+}
+
+export async function getEuroRates(): Promise<
+	CurrencyCollectorFunctionReturnType | undefined
+> {
+	try {
+		const response = await fetchWithTimeout(
+			"https://dolarapi.com/v1/cotizaciones/eur",
+		);
+
+		if (!response.ok) {
+			throw new APIError(
+				"https://dolarapi.com/v1/cotizaciones/eur",
+				"DolarAPI",
+				response.statusText,
+			);
+		}
+
+		const apiResponseJson = (await response.json()) as DolarApiResponseType;
+
+		return apiResponseJson.map((euro) => {
+			return {
+				exchangeSlug: euro.casa,
+				exchangeName: euro.nombre,
+				buy: euro.compra,
+				sell: euro.venta,
+				updatedAt: new Date(euro.fechaActualizacion),
+			};
+		});
+	} catch (error) {
+		if (!(error instanceof APIError)) {
+			throw new Error(
+				"Euro rates can't be fetched from https://dolarapi.com/v1/cotizaciones/eur",
+			);
+		}
+
+		throw error;
 	}
 }

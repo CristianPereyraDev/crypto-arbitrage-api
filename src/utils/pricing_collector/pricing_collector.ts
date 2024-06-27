@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ICryptoArbitrageResult } from "../arbitrages/arbitrage-calculator.js";
 import {
 	p2pOrderCollectors,
@@ -23,47 +22,15 @@ import {
 } from "../../databases/model/exchange_p2p.model.js";
 import { IBrokeragePairPrices } from "../../databases/model/brokerage.model.js";
 
-export const currencyPairs = [
-	{ crypto: "MATIC", fiat: "ARS" },
-	{ crypto: "BTC", fiat: "ARS" },
-	{ crypto: "ETH", fiat: "ARS" },
-	{ crypto: "USDT", fiat: "ARS" },
-	{ crypto: "MANA", fiat: "ARS" },
-];
-
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
 	new ExchangeRepositoryMongoDB(),
 	new BrokerageRepositoryMongoDB(),
 	new ExchangeP2PRepositoryMongoDB(),
 );
+const currencyService = new CurrencyService();
 
 // Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
-
-export async function collectArbitragesToDB(): Promise<void> {
-	// for (const pair of currencyPairs) {
-	//   try {
-	//     const prices = await getBrokeragePairPrices(pair.crypto, pair.fiat, 0.1)
-	//     const arbitrageResult = await calculateArbitragesFromPairData(prices)
-	//     for (let arbitrage of arbitrageResult) {
-	//       let doc = new CryptoArbitrageModel({
-	//         cryptocurrency: pair.crypto,
-	//         fiat: pair.fiat,
-	//         askExchange: arbitrage.askExchange,
-	//         askPrice: arbitrage.askPrice,
-	//         bidExchange: arbitrage.bidExchange,
-	//         bidPrice: arbitrage.bidPrice,
-	//         profit: arbitrage.profit,
-	//         time: arbitrage.time
-	//       })
-	//       await doc.save()
-	//     }
-	//   } catch (error) {
-	//     console.log(error)
-	//     continue
-	//   }
-	// }
-}
 
 export async function collectArbitrages(
 	crypto: string,
@@ -226,7 +193,7 @@ export async function collectCryptoBrokeragesPricesToDB() {
 }
 
 // Currency exchanges prices (USD-ARS, USD-EUR, ...)
-const currencyService = new CurrencyService();
+
 export async function collectCurrencyExchangesPricesToDB() {
 	currencyPriceCollectors.forEach((collector, symbol) => {
 		const [currencyBase, currencyQuote] = symbol.split("-");
