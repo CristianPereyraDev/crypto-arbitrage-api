@@ -197,14 +197,16 @@ export async function collectCryptoBrokeragesPricesToDB() {
 export async function collectCurrencyExchangesPricesToDB() {
 	currencyPriceCollectors.forEach((collector, symbol) => {
 		const [currencyBase, currencyQuote] = symbol.split("-");
-		collector().then((rates) => {
-			if (rates !== undefined) {
-				currencyService.updateCurrencyPairRate(
-					currencyBase,
-					currencyQuote,
-					rates,
-				);
-			}
-		});
+		collector()
+			.then((rates) => {
+				if (rates !== undefined) {
+					currencyService.updateCurrencyPairRate(
+						currencyBase,
+						currencyQuote,
+						rates,
+					);
+				}
+			})
+			.catch((reason) => console.error(reason));
 	});
 }

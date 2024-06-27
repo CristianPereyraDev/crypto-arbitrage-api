@@ -5,7 +5,7 @@ import {
 } from "../../model/currency_pair.model.js";
 
 const currencyRateSchema = new Schema<ICurrencyRateActivity>({
-	exchangeSlug: { type: String, unique: true, required: true },
+	exchangeSlug: { type: String, required: true },
 	exchangeName: { type: String, required: true },
 	buy: { type: Number },
 	sell: { type: Number },

@@ -9,7 +9,7 @@ type DolarApiResponseType = {
 	compra: number;
 	venta: number;
 	fechaActualizacion: string;
-}[];
+};
 
 export async function getDollarRates(): Promise<
 	CurrencyCollectorFunctionReturnType | undefined
@@ -21,7 +21,7 @@ export async function getDollarRates(): Promise<
 
 		if (apiResponse.ok) {
 			const apiResponseJson =
-				(await apiResponse.json()) as DolarApiResponseType;
+				(await apiResponse.json()) as DolarApiResponseType[];
 
 			return apiResponseJson.map((dolar) => {
 				return {
@@ -60,15 +60,15 @@ export async function getEuroRates(): Promise<
 
 		const apiResponseJson = (await response.json()) as DolarApiResponseType;
 
-		return apiResponseJson.map((euro) => {
-			return {
-				exchangeSlug: euro.casa,
-				exchangeName: euro.nombre,
-				buy: euro.compra,
-				sell: euro.venta,
-				updatedAt: new Date(euro.fechaActualizacion),
-			};
-		});
+		return [
+			{
+				exchangeSlug: apiResponseJson.casa,
+				exchangeName: apiResponseJson.nombre,
+				buy: apiResponseJson.compra,
+				sell: apiResponseJson.venta,
+				updatedAt: new Date(apiResponseJson.fechaActualizacion),
+			},
+		];
 	} catch (error) {
 		if (!(error instanceof APIError)) {
 			throw new Error(

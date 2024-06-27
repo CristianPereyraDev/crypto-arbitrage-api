@@ -12,7 +12,7 @@ const currencyPriceCollectors = new Map<
 	CurrencyCollectorFunctionType
 >();
 
-currencyPriceCollectors.set("USD-ARS", dolarapi.getDollarRates);
+//currencyPriceCollectors.set("USD-ARS", dolarapi.getDollarRates);
 currencyPriceCollectors.set("EUR-ARS", dolarapi.getEuroRates);
 
 export { currencyPriceCollectors };
