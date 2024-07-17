@@ -176,21 +176,26 @@ export default class ExchangeRepositoryMongoDB
 		}
 	}
 
-	private calculateOrderBookAvgPrice(orders: number[][], volume: number) {
-		const avg = [0, volume];
+	calculateOrderBookAvgPrice(orders: number[][], volume: number) {
+		if (orders.length <= 0) {
+			return 0;
+		}
+
+		let totalQuantity = 0;
+		let sum = 0;
 		let i = 0;
 
-		while (i < orders.length && avg[1] > 0) {
-			if (avg[1] > orders[i][1]) {
-				avg[0] += orders[i][0] * orders[i][1];
-				avg[1] -= orders[i][1];
+		while (i < orders.length && totalQuantity < volume) {
+			if (orders[i][1] <= volume - totalQuantity) {
+				sum += orders[i][0] * orders[i][1];
+				totalQuantity += orders[i][1];
 			} else {
-				avg[0] += orders[i][0] * avg[1];
-				avg[1] = 0;
+				sum += orders[i][0] * (volume - totalQuantity);
+				totalQuantity = volume;
 			}
 			i++;
 		}
 
-		return avg[0] / volume;
+		return sum / totalQuantity;
 	}
 }

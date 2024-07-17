@@ -25,10 +25,9 @@ const exchangeService = new ExchangeService(
 );
 const currencyService = new CurrencyService();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function wsWebConnectionHandler(websocket: WebSocket) {
+	const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
 	let currencyRatesTimeout: ReturnType<typeof setInterval>;
-	const cryptoPairMsgConfig = new Map<string, CryptoPairWebSocketConfig>();
 	let fees: ExchangesFeesType;
 	let includeFees = false;
 	exchangeService
@@ -41,7 +40,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
 		});
 
 	const exchangePricesTimeout = setInterval(() => {
-		cryptoPairMsgConfig.forEach((value, key) => {
+		cryptoPairConfig.forEach((value, key) => {
 			compileCryptoMessage(
 				key.split("-")[0],
 				key.split("-")[1],
@@ -68,7 +67,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
 		const parsedMessage = JSON.parse(message.toString());
 
 		if (Object.hasOwn(parsedMessage, "crypto")) {
-			cryptoPairMsgConfig.set(
+			cryptoPairConfig.set(
 				`${parsedMessage.crypto.asset}-${parsedMessage.crypto.fiat}`,
 				{ volume: parsedMessage.crypto.volume },
 			);

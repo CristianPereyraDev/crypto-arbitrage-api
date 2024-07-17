@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { RestMarketTypes, Spot } from "@binance/connector-typescript";
+
 import { IPair } from "../../../databases/model/exchange_base.model.js";
 import { IExchangePairPrices } from "../../../databases/model/exchange.model.js";
 import { APIError } from "../../../types/errors/index.js";
@@ -25,7 +26,7 @@ export async function getSpotAskBidPrices(
 	pairs: IPair[],
 ): Promise<IExchangePairPrices[]> {
 	const options: RestMarketTypes.orderBookOptions = {
-		limit: 5,
+		limit: Number(process.env.ORDER_BOOK_LIMIT) ?? 10,
 	};
 
 	try {

@@ -5,18 +5,17 @@ import * as AdminJSMongoose from "@adminjs/mongoose";
 
 import MongoStore from "connect-mongo";
 import mongoose from "mongoose";
+import { MongoClient } from "mongodb";
 
-import arbitragesRouter from "../controllers/arbitrages.controller.js";
 import infoRouter from "../controllers/info.controller.js";
+import arbitragesRouter from "../controllers/arbitrages.controller.js";
+import currenciesController from "../controllers/currencies.controller.js";
 
 import { ExchangeBase } from "../databases/mongodb/schema/exchange_base.schema.js";
-
 import { Exchange } from "../databases/mongodb/schema/exchange.schema.js";
 import { P2PExchange } from "../databases/mongodb/schema/exchange_p2p.schema.js";
 import { Brokerage } from "../databases/mongodb/schema/brokerage_schema.js";
-import currenciesController from "../controllers/currencies.controller.js";
 import { CurrencyPair } from "../databases/mongodb/schema/currency_pair.schema.js";
-import { MongoClient } from "mongodb";
 
 AdminJS.registerAdapter({
 	Resource: AdminJSMongoose.Resource,
