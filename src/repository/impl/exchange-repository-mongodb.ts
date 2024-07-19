@@ -122,6 +122,10 @@ export default class ExchangeRepositoryMongoDB
 				);
 
 				if (pairPrices !== undefined) {
+					console.log(
+						`${pair.crypto}${pair.fiat}:`,
+						pairPrices.asksAndBids.asks,
+					);
 					const avgAsk = this.calculateOrderBookAvgPrice(
 						pairPrices.asksAndBids.asks,
 						volume,

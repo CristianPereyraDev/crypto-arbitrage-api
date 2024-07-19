@@ -1,83 +1,19 @@
+import { IP2POrder } from "../../../databases/model/exchange_p2p.model.js";
 import {
-	IP2POrder,
-	P2POrderType,
-	P2PUserType,
-} from "../../../databases/model/exchange_p2p.model.js";
+	DEFAULT_ARBITRAGE,
+	DEFAULT_SUGGESTED_BUY_ORDER,
+	DEFAULT_SUGGESTED_SELL_ORDER,
+	calculateP2PProfit,
+	getUserOrders,
+} from "./strategy_basic.js";
 import {
 	CalculateP2PArbitrageParams,
-	P2PArbitrageResult,
 	IP2PArbitrageStrategy,
 	P2PArbitrage,
+	P2PArbitrageResult,
 } from "./types.js";
 
-export const DEFAULT_SUGGESTED_BUY_ORDER: IP2POrder = {
-	orderType: P2POrderType.BUY,
-	orderId: "arbitrage_buy",
-	volume: 1,
-	price: 0,
-	min: 0,
-	max: 0,
-	payments: [],
-	userType: P2PUserType.merchant,
-	merchantId: "",
-	merchantName: "CryptoARbitrage",
-	monthOrderCount: 0,
-	monthFinishRate: 0,
-	positiveRate: 1,
-	link: "",
-};
-
-export const DEFAULT_SUGGESTED_SELL_ORDER: IP2POrder = {
-	orderType: P2POrderType.SELL,
-	orderId: "arbitrage_sell",
-	volume: 1,
-	price: 0,
-	min: 0,
-	max: 0,
-	payments: [],
-	userType: P2PUserType.merchant,
-	merchantId: "",
-	merchantName: "CryptoARbitrage",
-	monthOrderCount: 0,
-	monthFinishRate: 0,
-	positiveRate: 1,
-	link: "",
-};
-
-export const DEFAULT_ARBITRAGE: P2PArbitrage = {
-	profit: 0,
-	suggestedBuyOrder: null,
-	suggestedSellOrder: null,
-	buyOrderPosition: 0,
-	sellOrderPosition: 0,
-};
-
-/**
- *
- * @param sellPrice number that represents the amount of fiat units needed to sell an asset
- * @param buyPrice number that represents the amount of fiat units needed to buy an asset
- * @returns number that represents the profit in percentage. For example, for an volume(v) = 500USDT,
- * 1% means an profit = 0.01USDT * 500 = 5USDT
- */
-export function calculateP2PProfit(sellPrice: number, buyPrice: number) {
-	return ((sellPrice - buyPrice) / buyPrice) * 100;
-}
-
-export function getUserOrders(
-	orders: IP2POrder[],
-	nickName?: string,
-): IP2POrder[] {
-	return orders.filter((order) => order.merchantName === nickName);
-}
-
-export function isRangesOverlapping(
-	rangeA: number[],
-	rangeB: number[],
-): boolean {
-	return !(rangeA[0] > rangeB[1] || rangeA[1] < rangeB[0]);
-}
-
-export class BasicStrategy implements IP2PArbitrageStrategy {
+export class MatiStrategy implements IP2PArbitrageStrategy {
 	calculateP2PArbitrage(
 		params: CalculateP2PArbitrageParams,
 	): P2PArbitrageResult {
@@ -112,12 +48,12 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
 		const buyConditions = [
 			(order: IP2POrder) => order.userType === userType,
 			(order: IP2POrder) =>
-				isRangesOverlapping(buyLimits, [order.min, order.max]),
+				buyLimits[0] >= order.min && buyLimits[0] <= order.max,
 		];
 		const sellConditions = [
 			(order: IP2POrder) => order.userType === userType,
 			(order: IP2POrder) =>
-				isRangesOverlapping(sellLimits, [order.min, order.max]),
+				sellLimits[0] >= order.min && sellLimits[0] <= order.max,
 		];
 
 		const buyOrdersFiltered = buyOrders.filter(

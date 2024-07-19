@@ -23,9 +23,9 @@ import { WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
 import { IPair } from "../../databases/model/exchange_base.model.js";
-import { BasicStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_basic.js";
 import { P2PUserType } from "../../databases/model/exchange_p2p.model.js";
 import { P2PArbitrageResult } from "../../utils/arbitrages/p2p_strategies/types.js";
+import { MatiStrategy } from "../../utils/arbitrages/p2p_strategies/strategy_mati.js";
 
 const exchangeService = new ExchangeService(
 	new ExchangeBaseRepositoryMongoBD(),
@@ -40,7 +40,7 @@ export async function wsNativeConnectionHandler(
 	websocket: WebSocket,
 	connectionRequest: IncomingMessage,
 ) {
-	const arbitrageCalculator = new ArbitrageCalculator(new BasicStrategy());
+	const arbitrageCalculator = new ArbitrageCalculator(new MatiStrategy());
 	let currencyRatesTimeout: ReturnType<typeof setInterval>;
 
 	const cryptoPairMsgConfig = new Map<string, CryptoPairWebSocketConfig>();
