@@ -26,7 +26,7 @@ export async function getSpotAskBidPrices(
 	pairs: IPair[],
 ): Promise<IExchangePairPrices[]> {
 	const options: RestMarketTypes.orderBookOptions = {
-		limit: Number(process.env.ORDER_BOOK_LIMIT) ?? 10,
+		limit: Number(process.env.ORDER_BOOK_LIMIT ?? 10),
 	};
 
 	try {
