@@ -1,31 +1,35 @@
-import { Model, Schema, Types } from 'mongoose'
-import { ExchangeBase } from './exchange_base.schema.js'
+import { Model, Schema, Types } from 'mongoose';
+import { ExchangeBase } from './exchange_base.schema.js';
 import {
   IBrokerage,
-  IBrokeragePairPrices
-} from '../../model/brokerage.model.js'
+  IBrokeragePairPrices,
+} from '../../../data/model/brokerage.model.js';
 
 const cryptoAssetPairSchema = new Schema<IBrokeragePairPrices>({
   crypto: { type: String, required: true },
   fiat: { type: String, required: true },
   ask: { type: Number, default: 0.0 },
-  bid: { type: Number, default: 0.0 }
-})
+  bid: { type: Number, default: 0.0 },
+});
 
 type BrokerageDocumentProps = {
-  pricesByPair: Types.DocumentArray<IBrokeragePairPrices>
-}
+  pricesByPair: Types.DocumentArray<IBrokeragePairPrices>;
+};
 
-type BrokerageModelType = Model<IBrokerage, Record<string, never>, BrokerageDocumentProps>
+type BrokerageModelType = Model<
+  IBrokerage,
+  Record<string, never>,
+  BrokerageDocumentProps
+>;
 
 const brokerageSchema = new Schema<IBrokerage, BrokerageModelType>(
   {
-    pricesByPair: { type: [cryptoAssetPairSchema] }
+    pricesByPair: { type: [cryptoAssetPairSchema] },
   },
   { discriminatorKey: 'exchangeType' }
-)
+);
 
 export const Brokerage = ExchangeBase.discriminator<
   IBrokerage,
   BrokerageModelType
->('Brokerage', brokerageSchema)
+>('Brokerage', brokerageSchema);

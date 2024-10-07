@@ -1,27 +1,27 @@
-import { IPair } from "../databases/model/exchange_base.model.js";
+import { IPair } from '../data/model/exchange_base.model.js';
 import {
-	IP2PExchange,
-	IP2POrder,
-	IP2PPairOrders,
-	P2POrderType,
-} from "../databases/model/exchange_p2p.model.js";
+  IP2PExchange,
+  IP2POrder,
+  IP2PPairOrders,
+  P2POrderType,
+} from '../data/model/exchange_p2p.model.js';
 import {
-	ExchangeBaseRepository,
-	IPriceableRepository,
-} from "./exchange-base-repository.js";
+  ExchangeBaseRepository,
+  IPriceableRepository,
+} from './exchange-base-repository.js';
 
 export interface IExchangeP2PRepository
-	extends ExchangeBaseRepository<IP2PExchange>,
-		IPriceableRepository {
-	getP2POrders(
-		exchangeName: string,
-		pair: IPair,
-	): Promise<IP2PPairOrders | null>;
-	updateP2POrders(
-		exchangeName: string,
-		baseAsset: string,
-		fiat: string,
-		orderType: P2POrderType,
-		orders: IP2POrder[],
-	): Promise<void>;
+  extends ExchangeBaseRepository<IP2PExchange>,
+    IPriceableRepository {
+  getP2POrders(
+    exchangeName: string,
+    pair: IPair
+  ): Promise<IP2PPairOrders | null>;
+  updateP2POrders(
+    exchangeName: string,
+    baseAsset: string,
+    fiat: string,
+    orderType: P2POrderType,
+    orders: IP2POrder[]
+  ): Promise<void>;
 }

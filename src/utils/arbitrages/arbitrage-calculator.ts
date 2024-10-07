@@ -1,192 +1,200 @@
-import { IExchangeFeesDTO } from "../../types/dto/index.js";
-import { type IExchangePairPricing } from "../../types/exchange.js";
-import { IExchangePricingDTO } from "../../types/dto/index.js";
-import ExchangeService from "../../services/exchanges.service.js";
-import ExchangeRepositoryMongoDB from "../../repository/impl/exchange-repository-mongodb.js";
-import BrokerageRepositoryMongoDB from "../../repository/impl/brokerage-repository-mongodb.js";
-import { ExchangeP2PRepositoryMongoDB } from "../../repository/impl/exchange-p2p-repository-mongodb.js";
-import { ExchangeBaseRepositoryMongoBD } from "../../repository/impl/exchange-base-repository-mongodb.js";
+import { IExchangeFeesDTO } from '../../types/dto/index.js';
+import { IExchangePricingDTO } from '../../types/dto/index.js';
 import {
-	CalculateP2PArbitrageParams,
-	P2PArbitrageResult,
-	IP2PArbitrageStrategy,
-} from "./p2p_strategies/types.js";
-
-const exchangeService = new ExchangeService(
-	new ExchangeBaseRepositoryMongoBD(),
-	new ExchangeRepositoryMongoDB(),
-	new BrokerageRepositoryMongoDB(),
-	new ExchangeP2PRepositoryMongoDB(),
-);
+  CalculateP2PArbitrageParams,
+  P2PArbitrageResult,
+  IP2PArbitrageStrategy,
+} from './p2p_strategies/types.js';
+import { ExchangesFeesType } from '../../services/exchanges.service.js';
+import { IPair } from '../../data/model/exchange_base.model.js';
 
 export interface ICryptoArbitrageResult {
-	askExchange: string;
-	askPrice: number;
-	bidExchange: string;
-	bidPrice: number;
-	profit: number;
-	time: number;
+  crypto: string;
+  fiat: string;
+  askExchange: string;
+  askPrice: number;
+  totalAskPrice: number;
+  bidExchange: string;
+  bidPrice: number;
+  totalBidPrice: number;
+  profit: number;
+  time: number;
 }
 
-export async function calculateArbitragesFromPairData(
-	data: IExchangePairPricing | undefined,
-): Promise<ICryptoArbitrageResult[]> {
-	if (data === undefined) return [];
+export function calculateArbitragesFromPairData(
+  exchangesArr: { exchange: string; value: IExchangePricingDTO }[] | undefined,
+  fees: ExchangesFeesType,
+  pair: IPair,
+  minimumProfit = 0.8,
+  includeSellBuyFees = true,
+  includeDepositFiat = true,
+  includeWithdrawalFiat = true
+): ICryptoArbitrageResult[] {
+  if (exchangesArr === undefined) return [];
 
-	const arbitrages: ICryptoArbitrageResult[] = [];
+  const arbitrages: ICryptoArbitrageResult[] = [];
 
-	// Get exchange fees. Se supone que los fees son porcentajes (hay que dividir por 100).
-	const fees = await exchangeService.getAllFees();
+  for (let i = 0; i < exchangesArr.length; i++) {
+    const iExchangeAsk = exchangesArr[i].value.ask;
+    const iExchangeBid = exchangesArr[i].value.bid;
+    let iExchangeAskTotal = iExchangeAsk;
+    let iExchangeBidTotal = iExchangeBid;
 
-	const exchangesArr: { exchange: string; value: IExchangePricingDTO }[] = [];
-	data.forEach((value, exchange) => {
-		exchangesArr.push({ exchange, value });
-	});
+    const iExchangeNameFormatted = exchangesArr[i].exchange
+      .toLowerCase()
+      .replaceAll(' ', '')
+      .replaceAll("'", '');
 
-	for (let i = 0; i < exchangesArr.length; i++) {
-		const askExchange1 = exchangesArr[i].value.ask;
-		const bidExchange1 = exchangesArr[i].value.bid;
-		let totalAskExchange1 =
-			exchangesArr[i].value.ask !== null ? exchangesArr[i].value.ask : 0;
-		let totalBidExchange1 = exchangesArr[i].value.bid;
+    const iExchangeFees = fees[iExchangeNameFormatted];
 
-		const exchangeFees1 = Object.hasOwn(fees, exchangesArr[i].exchange)
-			? fees[exchangesArr[i].exchange]
-			: undefined;
+    if (iExchangeFees !== undefined && includeSellBuyFees) {
+      iExchangeAskTotal = calculateTotalAsk({
+        baseAsk: iExchangeAsk,
+        fees: iExchangeFees,
+        includeDepositFiatFee: includeDepositFiat === true,
+      });
+      iExchangeBidTotal = calculateTotalBid({
+        baseBid: iExchangeBid,
+        fees: iExchangeFees,
+        includeWithdrawalFiatFee: includeWithdrawalFiat === true,
+      });
+    }
 
-		if (exchangeFees1 !== undefined) {
-			const buyFeeExchange1 = Math.max(
-				exchangeFees1.buyFee,
-				exchangeFees1.takerFee,
-			);
+    for (let j = i; j < exchangesArr.length; j++) {
+      const jExchangeAsk = exchangesArr[j].value.ask;
+      const jExchangeBid = exchangesArr[j].value.bid;
+      let jExchangeAskTotal = jExchangeAsk;
+      let jExchangeBidTotal = jExchangeBid;
 
-			const sellFeeExchange1 = Math.max(
-				exchangeFees1.sellFee,
-				exchangeFees1.takerFee,
-			);
+      const jExchangeNameFormatted = exchangesArr[j].exchange
+        .toLowerCase()
+        .replaceAll(' ', '')
+        .replaceAll("'", '');
 
-			totalAskExchange1 *= 1 + buyFeeExchange1 / 100;
-			totalBidExchange1 *= 1 - sellFeeExchange1 / 100;
-		}
+      const jExchangeFees = fees[jExchangeNameFormatted];
 
-		for (let j = i; j < exchangesArr.length; j++) {
-			const askExchange2 = exchangesArr[j].value.ask;
-			const bidExchange2 = exchangesArr[j].value.bid;
-			let totalAskExchange2 = exchangesArr[j].value.ask;
-			let totalBidExchange2 = exchangesArr[j].value.bid;
+      if (jExchangeFees !== undefined && includeSellBuyFees) {
+        jExchangeAskTotal = calculateTotalAsk({
+          baseAsk: jExchangeAsk,
+          fees: jExchangeFees,
+          includeDepositFiatFee: includeDepositFiat === true,
+        });
+        jExchangeBidTotal = calculateTotalBid({
+          baseBid: jExchangeBid,
+          fees: jExchangeFees,
+          includeWithdrawalFiatFee: includeWithdrawalFiat === true,
+        });
+      }
 
-			const exchangeFees2 = Object.hasOwn(fees, exchangesArr[j].exchange)
-				? fees[exchangesArr[j].exchange]
-				: undefined;
+      let maxBidExchange = '';
+      let minAskExchange = '';
+      let maxBid = 0;
+      let maxTotalBid = 0;
+      let minAsk = 0;
+      let minTotalAsk = 0;
 
-			if (exchangeFees2 !== undefined) {
-				const buyFeeExchange2 = Math.max(
-					exchangeFees2.buyFee,
-					exchangeFees2.takerFee,
-				);
+      if (iExchangeBidTotal >= jExchangeBidTotal) {
+        maxBidExchange = exchangesArr[i].exchange;
+        maxBid = iExchangeBid;
+        maxTotalBid = iExchangeBidTotal;
+      } else {
+        maxBidExchange = exchangesArr[j].exchange;
+        maxBid = jExchangeBid;
+        maxTotalBid = jExchangeBidTotal;
+      }
 
-				const sellFeeExchange2 = Math.max(
-					exchangeFees2.sellFee,
-					exchangeFees2.takerFee,
-				);
+      if (iExchangeAskTotal <= jExchangeAskTotal) {
+        minAskExchange = exchangesArr[i].exchange;
+        minAsk = iExchangeAsk;
+        minTotalAsk = iExchangeAskTotal;
+      } else {
+        minAskExchange = exchangesArr[j].exchange;
+        minAsk = jExchangeAsk;
+        minTotalAsk = jExchangeAskTotal;
+      }
 
-				totalAskExchange2 *= 1 + buyFeeExchange2 / 100;
-				totalBidExchange2 *= 1 - sellFeeExchange2 / 100;
-			}
+      // Check > 0 because some exchanges can have ask price = 0 or bid price = 0
+      const profit = minAsk > 0 ? (maxTotalBid / minTotalAsk - 1) * 100 : 0;
 
-			let [maxBidExchange, minAskExchange] = ["", ""];
-			let [maxBid, maxTotalBid, minAsk, minTotalAsk] = [0, 0, 0, 0];
+      // Before checks duplicates and profitability
+      if (
+        profit > 0 &&
+        profit >= minimumProfit &&
+        arbitrages.find(
+          (arb) =>
+            arb.askExchange + arb.askExchange ===
+            minAskExchange + maxBidExchange
+        ) === undefined
+      ) {
+        arbitrages.push({
+          crypto: pair.crypto ?? '',
+          fiat: pair.fiat ?? '',
+          askExchange: minAskExchange,
+          askPrice: minAsk,
+          totalAskPrice: minTotalAsk,
+          bidExchange: maxBidExchange,
+          bidPrice: maxBid,
+          totalBidPrice: maxTotalBid,
+          profit: profit,
+          time: Math.max(
+            exchangesArr[i].value.time,
+            exchangesArr[j].value.time
+          ),
+        });
+      }
+    }
+  }
 
-			if (totalBidExchange1 >= totalBidExchange2) {
-				maxBidExchange = exchangesArr[i].exchange;
-				maxBid = bidExchange1;
-				maxTotalBid = totalBidExchange1;
-			} else {
-				maxBidExchange = exchangesArr[j].exchange;
-				maxBid = bidExchange2;
-				maxTotalBid = totalBidExchange2;
-			}
-
-			if (totalAskExchange1 <= totalAskExchange2) {
-				minAskExchange = exchangesArr[i].exchange;
-				minAsk = askExchange1;
-				minTotalAsk = totalAskExchange1;
-			} else {
-				minAskExchange = exchangesArr[j].exchange;
-				minAsk = askExchange2;
-				minTotalAsk = totalAskExchange2;
-			}
-
-			// Check > 0 because some exchanges can have ask price = 0 or bid price = 0
-			const profit =
-				minAsk > 0 ? ((maxTotalBid - minTotalAsk) / minTotalAsk) * 100 : 0;
-
-			if (profit > 0) {
-				arbitrages.push({
-					askExchange: minAskExchange,
-					askPrice: minAsk,
-					bidExchange: maxBidExchange,
-					bidPrice: maxBid,
-					profit: profit,
-					time: Math.max(
-						exchangesArr[i].value.time,
-						exchangesArr[j].value.time,
-					),
-				});
-			}
-		}
-	}
-
-	return arbitrages;
+  return arbitrages.sort((arb1, arb2) => (arb1.profit - arb2.profit) * -1);
 }
 
 export function calculateTotalBid({
-	baseBid,
-	fees,
-	includeWithdrawalFiatFee,
+  baseBid,
+  fees,
+  includeWithdrawalFiatFee,
 }: {
-	baseBid: number;
-	fees?: IExchangeFeesDTO;
-	includeWithdrawalFiatFee: boolean;
+  baseBid: number;
+  fees?: IExchangeFeesDTO;
+  includeWithdrawalFiatFee: boolean;
 }) {
-	if (fees !== undefined) {
-		const totalFees = includeWithdrawalFiatFee
-			? fees.sellFee + fees.withdrawalFiatFee
-			: fees.sellFee;
-		return baseBid * (1 - totalFees / 100);
-	}
-	return baseBid;
+  if (fees !== undefined) {
+    const totalFees = includeWithdrawalFiatFee
+      ? fees.sellFee + fees.withdrawalFiatFee
+      : fees.sellFee;
+    return baseBid * (1 - totalFees / 100);
+  }
+  return baseBid;
 }
 
 export function calculateTotalAsk({
-	baseAsk,
-	fees,
-	includeDepositFiatFee,
+  baseAsk,
+  fees,
+  includeDepositFiatFee,
 }: {
-	baseAsk: number;
-	fees?: IExchangeFeesDTO;
-	includeDepositFiatFee: boolean;
+  baseAsk: number;
+  fees?: IExchangeFeesDTO;
+  includeDepositFiatFee: boolean;
 }) {
-	if (fees !== undefined) {
-		const totalFees = includeDepositFiatFee
-			? fees.buyFee + fees.depositFiatFee
-			: fees.buyFee;
+  if (fees !== undefined) {
+    const totalFees = includeDepositFiatFee
+      ? fees.buyFee + fees.depositFiatFee
+      : fees.buyFee;
 
-		return baseAsk * (1 + totalFees / 100);
-	}
-	return baseAsk;
+    return baseAsk * (1 + totalFees / 100);
+  }
+  return baseAsk;
 }
 
 export class ArbitrageCalculator {
-	p2pArbitrageStrategy: IP2PArbitrageStrategy;
+  p2pArbitrageStrategy: IP2PArbitrageStrategy;
 
-	constructor(p2pArbitrageStrategy: IP2PArbitrageStrategy) {
-		this.p2pArbitrageStrategy = p2pArbitrageStrategy;
-	}
+  constructor(p2pArbitrageStrategy: IP2PArbitrageStrategy) {
+    this.p2pArbitrageStrategy = p2pArbitrageStrategy;
+  }
 
-	calculateP2PArbitrage(
-		params: CalculateP2PArbitrageParams,
-	): P2PArbitrageResult {
-		return this.p2pArbitrageStrategy.calculateP2PArbitrage(params);
-	}
+  calculateP2PArbitrage(
+    params: CalculateP2PArbitrageParams
+  ): P2PArbitrageResult {
+    return this.p2pArbitrageStrategy.calculateP2PArbitrage(params);
+  }
 }

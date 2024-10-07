@@ -4,7 +4,7 @@
   "description": "API for cryptocurrency arbitrage.",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_PATH=./dist node dist/src/app.js",
+    "start": "NODE_PATH=./dist node dist/src/framework/app.js",
     "build": "tsc -p .",
     "dev": "nodemon",
     "test": "jest --watch"
@@ -28,6 +28,7 @@
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/mongoose": "^5.11.97",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^20.8.4",
     "@types/node-fetch": "^2.6.11",
     "@types/pug": "^2.0.10",
@@ -48,6 +49,7 @@
     "@types/cookie-parser": "^1.4.6",
     "@types/express-session": "^1.17.10",
     "@types/module-alias": "^2.0.4",
+    "@types/web-push": "^3.6.3",
     "@types/ws": "^8.5.10",
     "adminjs": "^7.8.1",
     "bitget-api": "^2.0.1",
@@ -66,9 +68,11 @@
     "module-alias": "^2.2.3",
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.2",
+    "morgan": "^1.10.0",
     "pug": "^3.0.2",
     "query-string": "^8.1.0",
     "tslib": "^2.6.2",
+    "web-push": "^3.6.7",
     "ws": "^8.16.0"
   }
 }

@@ -1,5 +1,5 @@
-import { Schema, model } from 'mongoose'
-import { type ICryptoArbitrage } from '../../model/arbitrage.model.js'
+import { Schema, model } from 'mongoose';
+import { type ICryptoArbitrage } from '../../../data/model/arbitrage.model.js';
 
 const schema = new Schema<ICryptoArbitrage>(
   {
@@ -10,10 +10,10 @@ const schema = new Schema<ICryptoArbitrage>(
     bidExchange: { type: String, required: true },
     bidPrice: { type: Number, required: true },
     profit: { type: Number, required: true },
-    time: { type: Number, required: true }
+    time: { type: Number, required: true },
   },
   { timestamps: true }
-)
+);
 
 schema.index(
   {
@@ -22,10 +22,10 @@ schema.index(
     askExchange: 1,
     bidExchange: 1,
     profit: 1,
-    time: 1
+    time: 1,
   },
   { unique: true }
-)
-schema.index({ createdAt: 1 }, { expireAfterSeconds: 60 })
+);
+schema.index({ createdAt: 1 }, { expireAfterSeconds: 60 });
 
-export default model<ICryptoArbitrage>('CryptoArbitrage', schema)
+export default model<ICryptoArbitrage>('CryptoArbitrage', schema);
