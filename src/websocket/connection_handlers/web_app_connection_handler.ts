@@ -40,17 +40,27 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
       fees = {};
     });
 
+  const sendCryptoMessage = (
+    asset: string,
+    fiat: string,
+    volume: number,
+    fees?: ExchangesFeesType
+  ) => {
+    compileCryptoMessage(asset, fiat, volume, fees).then((msg) =>
+      websocket.send(msg)
+    );
+  };
+
   const exchangePricesTimeout = setInterval(() => {
     cryptoPairConfig.forEach((value, key) => {
-      compileCryptoMessage(
+      sendCryptoMessage(
         key.split('-')[0],
         key.split('-')[1],
         value.volume,
-        fees,
-        includeFees
-      ).then((msg) => websocket.send(msg));
+        includeFees ? fees : undefined
+      );
     });
-  }, 1000 * 6);
+  }, 1000 * 60);
 
   websocket.on('error', (error) => {
     console.log('An error has ocurred in the websocket: %s', error);
@@ -68,10 +78,10 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
     const parsedMessage = JSON.parse(message.toString());
 
     if (Object.hasOwn(parsedMessage, 'crypto')) {
-      cryptoPairConfig.set(
-        `${parsedMessage.crypto.asset}-${parsedMessage.crypto.fiat}`,
-        { volume: parsedMessage.crypto.volume }
-      );
+      const { asset, fiat, volume } = parsedMessage.crypto;
+
+      cryptoPairConfig.set(`${asset}-${fiat}`, { volume: volume });
+      sendCryptoMessage(asset, fiat, volume, includeFees ? fees : undefined);
     } else if (Object.hasOwn(parsedMessage, 'currency')) {
       clearInterval(currencyRatesTimeout);
 
@@ -99,35 +109,33 @@ async function compileCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
-  fees?: ExchangesFeesType,
-  includeFees = true
+  fees?: ExchangesFeesType
 ) {
   const prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
-  const pricesWithFees =
-    fees && includeFees
-      ? prices.map((price) => {
-          const exchangeFees =
-            fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+  const pricesWithFees = fees
+    ? prices.map((price) => {
+        const exchangeFees =
+          fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
 
-          if (exchangeFees !== undefined) {
-            return {
-              ...price,
-              totalAsk: calculateTotalAsk({
-                baseAsk: price.ask,
-                fees: exchangeFees,
-                includeDepositFiatFee: false,
-              }),
-              totalBid: calculateTotalBid({
-                baseBid: price.bid,
-                fees: exchangeFees,
-                includeWithdrawalFiatFee: false,
-              }),
-            };
-          }
-          return price;
-        })
-      : prices;
+        if (exchangeFees !== undefined) {
+          return {
+            ...price,
+            totalAsk: calculateTotalAsk({
+              baseAsk: price.ask,
+              fees: exchangeFees,
+              includeDepositFiatFee: false,
+            }),
+            totalBid: calculateTotalBid({
+              baseBid: price.bid,
+              fees: exchangeFees,
+              includeWithdrawalFiatFee: false,
+            }),
+          };
+        }
+        return price;
+      })
+    : prices;
 
   const __dirname = new URL('.', import.meta.url).pathname;
 
@@ -138,6 +146,8 @@ async function compileCryptoMessage(
   return template({
     asset: asset,
     fiat: fiat,
+    volume: volume,
+    includeFees: fees !== null,
     pricesSortedByAsk: [...pricesWithFees].sort((p1, p2) =>
       p1.totalAsk && p2.totalAsk
         ? p1.totalAsk - p2.totalAsk

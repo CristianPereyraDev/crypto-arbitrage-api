@@ -21,3 +21,6 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                     span(class="price")=val.totalBid.toFixed(2)
                 else
                     span(class="price")="Not available"
+
+div(id=`${asset}-${fiat}-info-container` hx-swap-oob='innerHTML')
+    span(class="volume")=volume
