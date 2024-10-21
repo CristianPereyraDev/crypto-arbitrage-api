@@ -30,7 +30,6 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
   const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
   let fees: ExchangesFeesType;
-  let includeFees = false;
   exchangeService
     .getAllFees()
     .then((value) => {
@@ -57,7 +56,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
         key.split('-')[0],
         key.split('-')[1],
         value.volume,
-        includeFees ? fees : undefined
+        value.includeFees ? fees : undefined
       );
     });
   }, 1000 * 60);
@@ -78,10 +77,19 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
     const parsedMessage = JSON.parse(message.toString());
 
     if (Object.hasOwn(parsedMessage, 'crypto')) {
-      const { asset, fiat, volume } = parsedMessage.crypto;
+      const { asset, fiat, volume, includeFees } = parsedMessage.crypto;
 
-      cryptoPairConfig.set(`${asset}-${fiat}`, { volume: volume });
-      sendCryptoMessage(asset, fiat, volume, includeFees ? fees : undefined);
+      if (Number.isNaN(Number(volume))) {
+        sendCryptoMessage(
+          asset,
+          fiat,
+          cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
+          includeFees ? fees : undefined
+        );
+      } else {
+        cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
+        sendCryptoMessage(asset, fiat, volume, includeFees ? fees : undefined);
+      }
     } else if (Object.hasOwn(parsedMessage, 'currency')) {
       clearInterval(currencyRatesTimeout);
 
@@ -96,11 +104,6 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
           parsedMessage.currency.quote
         ).then((msg) => websocket.send(msg));
       }, 1000 * 60);
-    } else if (Object.hasOwn(parsedMessage, 'HEADERS')) {
-      const headers = parsedMessage.HEADERS;
-      if (headers['HX-Trigger'] === 'form-settings') {
-        includeFees = Object.hasOwn(parsedMessage, 'includeFees');
-      }
     }
   });
 }
@@ -147,7 +150,7 @@ async function compileCryptoMessage(
     asset: asset,
     fiat: fiat,
     volume: volume,
-    includeFees: fees !== null,
+    includeFees: fees !== null && fees !== undefined,
     pricesSortedByAsk: [...pricesWithFees].sort((p1, p2) =>
       p1.totalAsk && p2.totalAsk
         ? p1.totalAsk - p2.totalAsk

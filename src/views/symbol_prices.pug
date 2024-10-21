@@ -22,5 +22,13 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                 else
                     span(class="price")="Not available"
 
-div(id=`${asset}-${fiat}-info-container` hx-swap-oob='innerHTML')
-    span(class="volume")=volume
+
+if includeFees
+    input(type='checkbox' name="includeFees" id=`input-include-fees-${asset}-${fiat}` hx-swap-oob='outerHTML' checked=includeFees)
+else
+    input(type='checkbox' name="includeFees" id=`input-include-fees-${asset}-${fiat}` hx-swap-oob='outerHTML')
+
+input(type='text' name="volume" id=`input-volume-${asset}-${fiat}` hx-swap-oob='outerHTML' value=volume)
+
+div(hx-swap-oob=`beforeend: #form-${asset}-${fiat}`)
+    div(hx-ext="class-tools" apply-parent-classes="remove htmx-ws-request")

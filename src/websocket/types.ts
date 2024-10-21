@@ -3,6 +3,7 @@ import { P2PArbitrage } from '../utils/arbitrages/p2p_strategies/types.js';
 
 export type CryptoPairWebSocketConfig = {
   volume: number;
+  includeFees?: boolean;
 };
 
 export type CryptoP2PWebSocketConfig = {
