@@ -29,7 +29,7 @@ const currencyService = new CurrencyService();
 export async function wsWebConnectionHandler(websocket: WebSocket) {
   const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
-  let fees: ExchangesFeesType;
+  let fees: ExchangesFeesType = {};
   exchangeService
     .getAllFees()
     .then((value) => {

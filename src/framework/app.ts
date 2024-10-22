@@ -41,11 +41,11 @@ appSetup(app)
 
     // Crypto rates collector interval
     setInterval(() => {
-      // collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
-      // collectCryptoBrokeragesPricesToDB().catch((reason) =>
-      //   console.log(reason)
-      // );
-      // collectP2POrdersToDB().catch((reason) => console.log(reason));
+      collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
+      collectCryptoBrokeragesPricesToDB().catch((reason) =>
+        console.log(reason)
+      );
+      collectP2POrdersToDB().catch((reason) => console.log(reason));
     }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6));
 
     setInterval(async () => {
