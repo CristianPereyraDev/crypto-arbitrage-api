@@ -1,3 +1,4 @@
+import { getP2PProfit } from '../../../operations/profits.js';
 import {
   IP2POrder,
   P2POrderType,
@@ -52,17 +53,6 @@ export const DEFAULT_ARBITRAGE: P2PArbitrage = {
   sellOrderPosition: 0,
 };
 
-/**
- *
- * @param sellPrice number that represents the amount of fiat units needed to sell an asset
- * @param buyPrice number that represents the amount of fiat units needed to buy an asset
- * @returns number that represents the profit in percentage. For example, for an volume(v) = 500USDT,
- * 1% means an profit = 0.01USDT * 500 = 5USDT
- */
-export function calculateP2PProfit(sellPrice: number, buyPrice: number) {
-  return ((sellPrice - buyPrice) / buyPrice) * 100;
-}
-
 export function getUserOrders(
   orders: IP2POrder[],
   nickName?: string
@@ -78,20 +68,18 @@ export function isRangesOverlapping(
 }
 
 export class BasicStrategy implements IP2PArbitrageStrategy {
-  calculateP2PArbitrage(
-    params: CalculateP2PArbitrageParams
-  ): P2PArbitrageResult {
-    const {
-      sellOrders,
-      buyOrders,
-      userType,
-      nickName,
-      volume,
-      minProfit,
-      maxSellOrderPosition,
-      maxBuyOrderPosition,
-    } = params;
-
+  calculateP2PArbitrage({
+    sellOrders,
+    buyOrders,
+    userType,
+    buyLimits,
+    sellLimits,
+    nickName,
+    volume,
+    minProfit,
+    maxSellOrderPosition,
+    maxBuyOrderPosition,
+  }: CalculateP2PArbitrageParams): P2PArbitrageResult {
     const arbitrage: P2PArbitrage = DEFAULT_ARBITRAGE;
     const orderListMaxSize = Number(
       process.env.P2P_ARBITRAGE_RESPONSE_ORDER_LIST_SIZE ?? 20
@@ -100,24 +88,24 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
     const userBuyOrders = getUserOrders(buyOrders, nickName);
     const userSellOrders = getUserOrders(sellOrders, nickName);
 
-    const buyLimits =
+    const finalBuyLimits =
       userBuyOrders.length > 0
         ? [userBuyOrders[0].min, userBuyOrders[0].max]
-        : params.buyLimits;
-    const sellLimits =
+        : buyLimits;
+    const finalSellLimits =
       userSellOrders.length > 0
         ? [userSellOrders[0].min, userSellOrders[0].max]
-        : params.sellLimits;
+        : sellLimits;
 
     const buyConditions = [
       (order: IP2POrder) => order.userType === userType,
       (order: IP2POrder) =>
-        isRangesOverlapping(buyLimits, [order.min, order.max]),
+        isRangesOverlapping(finalBuyLimits, [order.min, order.max]),
     ];
     const sellConditions = [
       (order: IP2POrder) => order.userType === userType,
       (order: IP2POrder) =>
-        isRangesOverlapping(sellLimits, [order.min, order.max]),
+        isRangesOverlapping(finalSellLimits, [order.min, order.max]),
     ];
 
     const buyOrdersFiltered = buyOrders.filter(
@@ -144,10 +132,13 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
     if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {
       return {
         arbitrage: {
-          profit: calculateP2PProfit(
+          profit: getP2PProfit(
+            volume,
             sellOrdersFiltered[locatedSellOrderIndex].price,
-            buyOrdersFiltered[locatedBuyOrderIndex].price
-          ),
+            buyOrdersFiltered[locatedBuyOrderIndex].price,
+            0.0016,
+            0.0016
+          ).profitPercent,
           sellOrderPosition: locatedSellOrderIndex + 1,
           buyOrderPosition: locatedBuyOrderIndex + 1,
           suggestedSellOrder: sellOrdersFiltered[locatedSellOrderIndex],
@@ -187,7 +178,13 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
           ? currentBuyOrder.price
           : currentBuyOrder.price + 0.01;
 
-      profit = calculateP2PProfit(sellPrice, buyPrice);
+      profit = getP2PProfit(
+        volume,
+        sellPrice,
+        buyPrice,
+        0.0016,
+        0.0016
+      ).profitPercent;
 
       if (profit >= minProfit) {
         arbitrageFound = true;
@@ -198,8 +195,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
           arbitrage.suggestedSellOrder = {
             ...DEFAULT_SUGGESTED_SELL_ORDER,
             volume: volume,
-            min: sellLimits[0],
-            max: sellLimits[1],
+            min: finalSellLimits[0],
+            max: finalSellLimits[1],
             price: sellPrice,
           };
         }
@@ -209,8 +206,8 @@ export class BasicStrategy implements IP2PArbitrageStrategy {
           arbitrage.suggestedBuyOrder = {
             ...DEFAULT_SUGGESTED_BUY_ORDER,
             volume: volume,
-            min: buyLimits[0],
-            max: buyLimits[1],
+            min: finalBuyLimits[0],
+            max: finalBuyLimits[1],
             price: buyPrice,
           };
         }

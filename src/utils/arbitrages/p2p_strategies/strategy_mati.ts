@@ -1,9 +1,9 @@
+import { getP2PProfit } from '../../../operations/profits.js';
 import { IP2POrder } from '../../../data/model/exchange_p2p.model.js';
 import {
   DEFAULT_ARBITRAGE,
   DEFAULT_SUGGESTED_BUY_ORDER,
   DEFAULT_SUGGESTED_SELL_ORDER,
-  calculateP2PProfit,
   getUserOrders,
 } from './strategy_basic.js';
 import {
@@ -80,10 +80,13 @@ export class MatiStrategy implements IP2PArbitrageStrategy {
     if (locatedBuyOrderIndex >= 0 && locatedSellOrderIndex >= 0) {
       return {
         arbitrage: {
-          profit: calculateP2PProfit(
+          profit: getP2PProfit(
+            volume,
             sellOrdersFiltered[locatedSellOrderIndex].price,
-            buyOrdersFiltered[locatedBuyOrderIndex].price
-          ),
+            buyOrdersFiltered[locatedBuyOrderIndex].price,
+            0.0016,
+            0.0016
+          ).profitPercent,
           sellOrderPosition: locatedSellOrderIndex + 1,
           buyOrderPosition: locatedBuyOrderIndex + 1,
           suggestedSellOrder: sellOrdersFiltered[locatedSellOrderIndex],
@@ -123,7 +126,13 @@ export class MatiStrategy implements IP2PArbitrageStrategy {
           ? currentBuyOrder.price
           : currentBuyOrder.price + 0.01;
 
-      profit = calculateP2PProfit(sellPrice, buyPrice);
+      profit = getP2PProfit(
+        volume,
+        sellPrice,
+        buyPrice,
+        0.0016,
+        0.0016
+      ).profitPercent;
 
       if (profit >= minProfit) {
         arbitrageFound = true;

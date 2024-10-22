@@ -25,6 +25,7 @@ const exchangePriceCollectors = new Map<
   string,
   (pairs: IPair[]) => Promise<IExchangePairPrices[]>
 >();
+
 const brokeragePriceCollectors = new Map<
   string,
   (pairs: IPair[]) => Promise<IBrokeragePairPrices[]>
