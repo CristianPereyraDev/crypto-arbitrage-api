@@ -43,19 +43,38 @@ export async function wsNativeConnectionHandler(
 ) {
   const arbitrageCalculator = new ArbitrageCalculator(new MatiStrategy());
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
+  let exchangePricesTimeout: ReturnType<typeof setInterval>;
 
   const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
   const cryptoPairP2PConfig = new Map<string, CryptoP2PWebSocketConfig>();
 
   let fees: ExchangesFeesType | null = null;
 
-  try {
-    fees = await exchangeService.getAllFees();
-  } catch (error) {
-    websocket.close(1011, "Exchanges's fees could not be obtained.");
+  exchangeService
+    .getAllFees()
+    .then((value) => {
+      fees = value;
 
-    return;
-  }
+      sendAllConfiguredMessages();
+      exchangePricesTimeout = setInterval(() => {
+        sendAllConfiguredMessages();
+      }, 1000 * 6);
+    })
+    .catch((reason) => {
+      console.log('error:', reason);
+      websocket.close(1011, "Exchanges's fees could not be obtained.");
+    });
+
+  const sendAllConfiguredMessages = () => {
+    cryptoPairConfig.forEach((value, key) => {
+      sendCryptoMessage(
+        key.split('-')[0],
+        key.split('-')[1],
+        value.volume,
+        value.includeFees ? fees : undefined
+      );
+    });
+  };
 
   const sendCryptoMessage = (
     asset: string,
@@ -67,17 +86,6 @@ export async function wsNativeConnectionHandler(
       websocket.send(msg)
     );
   };
-
-  const exchangePricesTimeout = setInterval(() => {
-    cryptoPairConfig.forEach((value, key) => {
-      sendCryptoMessage(
-        key.split('-')[0],
-        key.split('-')[1],
-        value.volume,
-        value.includeFees ? fees : undefined
-      );
-    });
-  }, 1000 * 6);
 
   const p2pOrdersTimeout = setInterval(() => {
     cryptoPairP2PConfig.forEach((msgConfig, p2pConfigKey) => {
@@ -141,21 +149,22 @@ export async function wsNativeConnectionHandler(
       const { asset, fiat, volume, includeFees } = parsedMessage.crypto;
 
       if (Number.isNaN(Number(volume))) {
-        cryptoPairConfig.set(`${asset}-${fiat}`, {
-          volume: cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
-          includeFees,
-        });
-      } else {
-        cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
+        websocket.send(JSON.stringify({ error: 'Volume format error.' }));
+        return;
       }
 
-      sendCryptoMessage(
-        asset,
-        fiat,
-        cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
-        cryptoPairConfig.get(`${asset}-${fiat}`)?.includeFees ? fees : undefined
-      );
-    } else if (Object.hasOwn(parsedMessage, 'p2p')) {
+      cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
+
+      if (includeFees && fees === null) {
+        return;
+      }
+
+      sendCryptoMessage(asset, fiat, volume, includeFees ? fees : undefined);
+
+      return;
+    }
+
+    if (Object.hasOwn(parsedMessage, 'p2p')) {
       cryptoPairP2PConfig.set(
         `${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
         {
@@ -175,7 +184,11 @@ export async function wsNativeConnectionHandler(
           maxSellOrderPosition: parsedMessage.p2p.maxSellOrderPosition ?? 500,
         }
       );
-    } else if (Object.hasOwn(parsedMessage, 'currency')) {
+
+      return;
+    }
+
+    if (Object.hasOwn(parsedMessage, 'currency')) {
       clearInterval(currencyRatesTimeout);
 
       makeCurrencyPairMessage(
@@ -189,6 +202,8 @@ export async function wsNativeConnectionHandler(
           parsedMessage.currency.quote
         ).then((msg) => websocket.send(msg));
       }, 1000 * 60);
+
+      return;
     }
   });
 }
