@@ -44,11 +44,11 @@ export async function wsNativeConnectionHandler(
   const arbitrageCalculator = new ArbitrageCalculator(new MatiStrategy());
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
 
-  const cryptoPairMsgConfig = new Map<string, CryptoPairWebSocketConfig>();
-  const cryptoP2PMsgConfig = new Map<string, CryptoP2PWebSocketConfig>();
+  const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
+  const cryptoPairP2PConfig = new Map<string, CryptoP2PWebSocketConfig>();
 
   let fees: ExchangesFeesType;
-  let includeFees = false;
+  let includeFeesGlobal = false;
   exchangeService
     .getAllFees()
     .then((value) => {
@@ -59,19 +59,18 @@ export async function wsNativeConnectionHandler(
     });
 
   const exchangePricesTimeout = setInterval(() => {
-    cryptoPairMsgConfig.forEach((value, key) => {
+    cryptoPairConfig.forEach((value, key) => {
       makeCryptoMessage(
         key.split('-')[0],
         key.split('-')[1],
         value.volume,
-        fees,
-        includeFees
+        value.includeFees ? fees : undefined
       ).then((msg) => websocket.send(msg));
     });
   }, 1000 * 6);
 
   const p2pOrdersTimeout = setInterval(() => {
-    cryptoP2PMsgConfig.forEach((msgConfig, p2pConfigKey) => {
+    cryptoPairP2PConfig.forEach((msgConfig, p2pConfigKey) => {
       const exchangeName = p2pConfigKey.split('/')[0];
       const pair: IPair = {
         crypto: p2pConfigKey.split('/')[1].split('-')[0],
@@ -129,12 +128,14 @@ export async function wsNativeConnectionHandler(
     const parsedMessage = JSON.parse(message.toString());
 
     if (Object.hasOwn(parsedMessage, 'crypto')) {
-      cryptoPairMsgConfig.set(
-        `${parsedMessage.crypto.asset}-${parsedMessage.crypto.fiat}`,
-        { volume: parsedMessage.crypto.volume }
-      );
+      const { asset, fiat, volume, includeFees } = parsedMessage.crypto;
+
+      cryptoPairConfig.set(`${asset}-${fiat}`, {
+        volume: volume,
+        includeFees: includeFees,
+      });
     } else if (Object.hasOwn(parsedMessage, 'p2p')) {
-      cryptoP2PMsgConfig.set(
+      cryptoPairP2PConfig.set(
         `${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
         {
           minProfit: parsedMessage.p2p.minProfit ?? 1,
@@ -170,7 +171,7 @@ export async function wsNativeConnectionHandler(
     } else if (Object.hasOwn(parsedMessage, 'HEADERS')) {
       const headers = parsedMessage.HEADERS;
       if (headers['HX-Trigger'] === 'form-settings') {
-        includeFees = Object.hasOwn(parsedMessage, 'includeFees');
+        includeFeesGlobal = Object.hasOwn(parsedMessage, 'includeFees');
       }
     }
   });
@@ -180,35 +181,33 @@ export async function makeCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
-  fees?: ExchangesFeesType,
-  includeFees = true
+  fees?: ExchangesFeesType
 ) {
   const prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
-  const pricesWithFees =
-    fees && includeFees
-      ? prices.map((price) => {
-          const exchangeFees =
-            fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+  const pricesWithFees = fees
+    ? prices.map((price) => {
+        const exchangeFees =
+          fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
 
-          if (exchangeFees !== undefined) {
-            return {
-              ...price,
-              totalAsk: calculateTotalAsk({
-                baseAsk: price.ask,
-                fees: exchangeFees,
-                includeDepositFiatFee: false,
-              }),
-              totalBid: calculateTotalBid({
-                baseBid: price.bid,
-                fees: exchangeFees,
-                includeWithdrawalFiatFee: false,
-              }),
-            };
-          }
-          return price;
-        })
-      : prices;
+        if (exchangeFees !== undefined) {
+          return {
+            ...price,
+            totalAsk: calculateTotalAsk({
+              baseAsk: price.ask,
+              fees: exchangeFees,
+              includeDepositFiatFee: false,
+            }),
+            totalBid: calculateTotalBid({
+              baseBid: price.bid,
+              fees: exchangeFees,
+              includeWithdrawalFiatFee: false,
+            }),
+          };
+        }
+        return price;
+      })
+    : prices;
 
   return JSON.stringify({
     asset: asset,
