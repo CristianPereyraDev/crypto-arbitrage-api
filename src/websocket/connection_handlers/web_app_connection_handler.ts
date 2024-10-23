@@ -20,7 +20,7 @@ import path from 'path';
 import {
   sortPricesByAsk,
   sortPricesByBid,
-} from 'src/operations/sort-prices.js';
+} from '../../operations/sort-prices.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),
