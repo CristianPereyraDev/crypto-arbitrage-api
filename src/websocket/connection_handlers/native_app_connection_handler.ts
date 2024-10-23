@@ -58,14 +58,25 @@ export async function wsNativeConnectionHandler(
       fees = {};
     });
 
+  const sendCryptoMessage = (
+    asset: string,
+    fiat: string,
+    volume: number,
+    fees?: ExchangesFeesType
+  ) => {
+    makeJSONCryptoMessage(asset, fiat, volume, fees).then((msg) =>
+      websocket.send(msg)
+    );
+  };
+
   const exchangePricesTimeout = setInterval(() => {
     cryptoPairConfig.forEach((value, key) => {
-      makeCryptoMessage(
+      sendCryptoMessage(
         key.split('-')[0],
         key.split('-')[1],
         value.volume,
         value.includeFees ? fees : undefined
-      ).then((msg) => websocket.send(msg));
+      );
     });
   }, 1000 * 6);
 
@@ -130,10 +141,21 @@ export async function wsNativeConnectionHandler(
     if (Object.hasOwn(parsedMessage, 'crypto')) {
       const { asset, fiat, volume, includeFees } = parsedMessage.crypto;
 
-      cryptoPairConfig.set(`${asset}-${fiat}`, {
-        volume: volume,
-        includeFees: includeFees,
-      });
+      if (Number.isNaN(Number(volume))) {
+        cryptoPairConfig.set(`${asset}-${fiat}`, {
+          volume: cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
+          includeFees,
+        });
+      } else {
+        cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
+      }
+
+      sendCryptoMessage(
+        asset,
+        fiat,
+        cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
+        cryptoPairConfig.get(`${asset}-${fiat}`)?.includeFees ? fees : undefined
+      );
     } else if (Object.hasOwn(parsedMessage, 'p2p')) {
       cryptoPairP2PConfig.set(
         `${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
@@ -177,42 +199,43 @@ export async function wsNativeConnectionHandler(
   });
 }
 
-export async function makeCryptoMessage(
+export async function makeJSONCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
   fees?: ExchangesFeesType
 ) {
-  const prices: IExchangePricingDTO[] =
+  let prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
-  const pricesWithFees = fees
-    ? prices.map((price) => {
-        const exchangeFees =
-          fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
 
-        if (exchangeFees !== undefined) {
-          return {
-            ...price,
-            totalAsk: calculateTotalAsk({
-              baseAsk: price.ask,
-              fees: exchangeFees,
-              includeDepositFiatFee: false,
-            }),
-            totalBid: calculateTotalBid({
-              baseBid: price.bid,
-              fees: exchangeFees,
-              includeWithdrawalFiatFee: false,
-            }),
-          };
-        }
-        return price;
-      })
-    : prices;
+  if (fees) {
+    prices = prices.map((price) => {
+      const exchangeFees =
+        fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+
+      if (exchangeFees !== undefined) {
+        return {
+          ...price,
+          totalAsk: calculateTotalAsk({
+            baseAsk: price.ask,
+            fees: exchangeFees,
+            includeDepositFiatFee: false,
+          }),
+          totalBid: calculateTotalBid({
+            baseBid: price.bid,
+            fees: exchangeFees,
+            includeWithdrawalFiatFee: false,
+          }),
+        };
+      }
+      return price;
+    });
+  }
 
   return JSON.stringify({
     asset: asset,
     fiat: fiat,
-    prices: pricesWithFees,
+    prices: prices,
   });
 }
 

@@ -17,6 +17,10 @@ import { IExchangePricingDTO } from '../../types/dto/index.js';
 import { WebSocket } from 'ws';
 import pug from 'pug';
 import path from 'path';
+import {
+  sortPricesByAsk,
+  sortPricesByBid,
+} from 'src/operations/sort-prices.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),
@@ -80,16 +84,20 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
       const { asset, fiat, volume, includeFees } = parsedMessage.crypto;
 
       if (Number.isNaN(Number(volume))) {
-        sendCryptoMessage(
-          asset,
-          fiat,
-          cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
-          includeFees ? fees : undefined
-        );
+        cryptoPairConfig.set(`${asset}-${fiat}`, {
+          volume: cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
+          includeFees,
+        });
       } else {
         cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
-        sendCryptoMessage(asset, fiat, volume, includeFees ? fees : undefined);
       }
+
+      sendCryptoMessage(
+        asset,
+        fiat,
+        cryptoPairConfig.get(`${asset}-${fiat}`)?.volume || 1,
+        cryptoPairConfig.get(`${asset}-${fiat}`)?.includeFees ? fees : undefined
+      );
     } else if (Object.hasOwn(parsedMessage, 'currency')) {
       clearInterval(currencyRatesTimeout);
 
@@ -114,31 +122,32 @@ async function compileCryptoMessage(
   volume: number,
   fees?: ExchangesFeesType
 ) {
-  const prices: IExchangePricingDTO[] =
+  let prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
-  const pricesWithFees = fees
-    ? prices.map((price) => {
-        const exchangeFees =
-          fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
 
-        if (exchangeFees !== undefined) {
-          return {
-            ...price,
-            totalAsk: calculateTotalAsk({
-              baseAsk: price.ask,
-              fees: exchangeFees,
-              includeDepositFiatFee: false,
-            }),
-            totalBid: calculateTotalBid({
-              baseBid: price.bid,
-              fees: exchangeFees,
-              includeWithdrawalFiatFee: false,
-            }),
-          };
-        }
-        return price;
-      })
-    : prices;
+  if (fees) {
+    prices = prices.map((price) => {
+      const exchangeFees =
+        fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+
+      if (exchangeFees !== undefined) {
+        return {
+          ...price,
+          totalAsk: calculateTotalAsk({
+            baseAsk: price.ask,
+            fees: exchangeFees,
+            includeDepositFiatFee: false,
+          }),
+          totalBid: calculateTotalBid({
+            baseBid: price.bid,
+            fees: exchangeFees,
+            includeWithdrawalFiatFee: false,
+          }),
+        };
+      }
+      return price;
+    });
+  }
 
   const __dirname = new URL('.', import.meta.url).pathname;
 
@@ -151,20 +160,8 @@ async function compileCryptoMessage(
     fiat: fiat,
     volume: volume,
     includeFees: fees !== null && fees !== undefined,
-    pricesSortedByAsk: [...pricesWithFees].sort((p1, p2) =>
-      p1.totalAsk && p2.totalAsk
-        ? p1.totalAsk - p2.totalAsk
-        : p1.totalAsk
-        ? -1
-        : 1
-    ),
-    pricesSortedByBid: [...pricesWithFees].sort((p1, p2) =>
-      p1.totalBid && p2.totalBid
-        ? p2.totalBid - p1.totalBid
-        : p1.totalBid
-        ? -1
-        : 1
-    ),
+    pricesSortedByAsk: sortPricesByAsk([...prices]),
+    pricesSortedByBid: sortPricesByBid([...prices]),
   });
 }
 
