@@ -47,7 +47,7 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
     asset: string,
     fiat: string,
     volume: number,
-    fees?: ExchangesFeesType
+    fees?: ExchangesFeesType | null
   ) => {
     compileCryptoMessage(asset, fiat, volume, fees).then((msg) =>
       websocket.send(msg)
@@ -120,7 +120,7 @@ async function compileCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
-  fees?: ExchangesFeesType
+  fees?: ExchangesFeesType | null
 ) {
   let prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
