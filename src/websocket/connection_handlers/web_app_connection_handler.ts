@@ -33,15 +33,15 @@ const currencyService = new CurrencyService();
 export async function wsWebConnectionHandler(websocket: WebSocket) {
   const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
-  let fees: ExchangesFeesType = {};
-  exchangeService
-    .getAllFees()
-    .then((value) => {
-      fees = value;
-    })
-    .catch(() => {
-      fees = {};
-    });
+  let fees: ExchangesFeesType | null = null;
+
+  try {
+    fees = await exchangeService.getAllFees();
+  } catch (error) {
+    websocket.close(1011, "Exchanges's fees could not be obtained.");
+
+    return;
+  }
 
   const sendCryptoMessage = (
     asset: string,

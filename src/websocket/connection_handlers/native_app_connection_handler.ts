@@ -47,22 +47,21 @@ export async function wsNativeConnectionHandler(
   const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
   const cryptoPairP2PConfig = new Map<string, CryptoP2PWebSocketConfig>();
 
-  let fees: ExchangesFeesType;
-  let includeFeesGlobal = false;
-  exchangeService
-    .getAllFees()
-    .then((value) => {
-      fees = value;
-    })
-    .catch(() => {
-      fees = {};
-    });
+  let fees: ExchangesFeesType | null = null;
+
+  try {
+    fees = await exchangeService.getAllFees();
+  } catch (error) {
+    websocket.close(1011, "Exchanges's fees could not be obtained.");
+
+    return;
+  }
 
   const sendCryptoMessage = (
     asset: string,
     fiat: string,
     volume: number,
-    fees?: ExchangesFeesType
+    fees?: ExchangesFeesType | null
   ) => {
     makeJSONCryptoMessage(asset, fiat, volume, fees).then((msg) =>
       websocket.send(msg)
@@ -190,11 +189,6 @@ export async function wsNativeConnectionHandler(
           parsedMessage.currency.quote
         ).then((msg) => websocket.send(msg));
       }, 1000 * 60);
-    } else if (Object.hasOwn(parsedMessage, 'HEADERS')) {
-      const headers = parsedMessage.HEADERS;
-      if (headers['HX-Trigger'] === 'form-settings') {
-        includeFeesGlobal = Object.hasOwn(parsedMessage, 'includeFees');
-      }
     }
   });
 }
@@ -203,7 +197,7 @@ export async function makeJSONCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
-  fees?: ExchangesFeesType
+  fees?: ExchangesFeesType | null
 ) {
   let prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
