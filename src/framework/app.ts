@@ -12,7 +12,7 @@ import {
   collectP2POrdersToDB,
 } from '../utils/pricing_collector/pricing_collector.js';
 import websocketSetup from '../websocket/index.js';
-import { ExchangeService } from '../services/exchanges.service.js';
+import { ExchangeService } from '../exchanges/services/exchanges.service.js';
 import { ExchangeBaseRepositoryMongoBD } from '../repository/impl/exchange-base-repository-mongodb.js';
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';

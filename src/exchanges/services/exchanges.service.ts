@@ -1,21 +1,21 @@
-import { IExchangePricingDTO } from '../types/dto/index.js';
+import { IExchangePricingDTO } from '../../types/dto/index.js';
 import {
   IP2POrder,
   IP2PPairOrders,
   P2POrderType,
-} from '../data/model/exchange_p2p.model.js';
-import { IExchangeBase, IPair } from '../data/model/exchange_base.model.js';
-import { IExchangeRepository } from '../repository/exchange-repository.js';
-import { IBrokerageRepository } from '../repository/brokerage-repository.js';
-import { IExchangeP2PRepository } from '../repository/exchange-p2p-repository.js';
-import { IExchangeFeesDTO } from '../types/dto/index.js';
-import { ExchangeBaseRepository } from '../repository/exchange-base-repository.js';
-import { IExchangePairPrices } from '../data/model/exchange.model.js';
-import { IBrokeragePairPrices } from '../data/model/brokerage.model.js';
+} from '../../data/model/exchange_p2p.model.js';
+import { IExchangeBase, IPair } from '../../data/model/exchange_base.model.js';
+import { IExchangeRepository } from '../../repository/exchange-repository.js';
+import { IBrokerageRepository } from '../../repository/brokerage-repository.js';
+import { IExchangeP2PRepository } from '../../repository/exchange-p2p-repository.js';
+import { IExchangeFeesDTO } from '../../types/dto/index.js';
+import { ExchangeBaseRepository } from '../../repository/exchange-base-repository.js';
+import { IExchangePairPrices } from '../../data/model/exchange.model.js';
+import { IBrokeragePairPrices } from '../../data/model/brokerage.model.js';
 import {
   calculateTotalAsk,
   calculateTotalBid,
-} from '../utils/arbitrages/arbitrage-calculator.js';
+} from '../../utils/arbitrages/arbitrage-calculator.js';
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFeesDTO };
 

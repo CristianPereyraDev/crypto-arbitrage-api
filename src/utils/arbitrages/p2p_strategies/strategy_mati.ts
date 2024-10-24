@@ -1,4 +1,4 @@
-import { getP2PProfit } from '../../../operations/profits.js';
+import { getP2PProfit } from '../../../exchanges/operations/profits.js';
 import { IP2POrder } from '../../../data/model/exchange_p2p.model.js';
 import {
   DEFAULT_ARBITRAGE,

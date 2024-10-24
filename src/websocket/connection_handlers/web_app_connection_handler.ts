@@ -5,9 +5,9 @@ import { ExchangeBaseRepositoryMongoBD } from '../../repository/impl/exchange-ba
 import {
   ExchangeService,
   ExchangesFeesType,
-} from '../../services/exchanges.service.js';
+} from '../../exchanges/services/exchanges.service.js';
 import { CryptoPairWebSocketConfig } from '../types.js';
-import CurrencyService from '../../services/currency.service.js';
+import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
   calculateTotalAsk,
   calculateTotalBid,
@@ -20,7 +20,7 @@ import path from 'path';
 import {
   sortPricesByAsk,
   sortPricesByBid,
-} from '../../operations/sort-prices.js';
+} from '../../exchanges/operations/sort-prices.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),

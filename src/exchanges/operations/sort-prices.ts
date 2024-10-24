@@ -1,4 +1,4 @@
-import { IExchangePricingDTO } from '../types/dto/index.js';
+import { IExchangePricingDTO } from '../../types/dto/index.js';
 
 export function sortPricesByAsk(prices: IExchangePricingDTO[]) {
   return [...prices].sort((p1, p2) =>

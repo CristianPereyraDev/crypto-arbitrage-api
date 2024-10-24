@@ -1,5 +1,5 @@
-import { ICurrencyRate } from '../data/model/currency_pair.model.js';
-import { CurrencyPair } from '../databases/mongodb/schema/currency_pair.schema.js';
+import { ICurrencyRate } from '../../data/model/currency_pair.model.js';
+import { CurrencyPair } from '../../databases/mongodb/schema/currency_pair.schema.js';
 
 export default class CurrencyService {
   async updateCurrencyPairRate(

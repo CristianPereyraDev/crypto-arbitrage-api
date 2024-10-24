@@ -6,13 +6,13 @@ import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p
 import {
   ExchangeService,
   type ExchangesFeesType,
-} from '../../services/exchanges.service.js';
+} from '../../exchanges/services/exchanges.service.js';
 import {
   CryptoP2PWebSocketConfig,
   CryptoPairWebSocketConfig,
   P2POutgoingMessage,
 } from '../types.js';
-import CurrencyService from '../../services/currency.service.js';
+import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
   ArbitrageCalculator,
   calculateTotalAsk,

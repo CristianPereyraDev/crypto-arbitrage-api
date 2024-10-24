@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { getP2PProfit } from '../../operations/profits.js';
+import { getP2PProfit } from '../../exchanges/operations/profits.js';
 
 const binanceP2PAskFee = 0.0016;
 const binanceP2PBidFee = 0.0016;

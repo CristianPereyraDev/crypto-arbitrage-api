@@ -3,11 +3,12 @@ import {
   p2pOrderCollectors,
   exchangePriceCollectors,
   brokeragePriceCollectors,
+  brokeragePriceCollectorMulti,
 } from '../apis/crypto_exchanges/index.js';
-import { ExchangeService } from '../../services/exchanges.service.js';
+import { ExchangeService } from '../../exchanges/services/exchanges.service.js';
 import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js';
 import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js';
-import CurrencyService from '../../services/currency.service.js';
+import CurrencyService from '../../exchanges/services/currency.service.js';
 import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js';
 import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js';
 import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js';
@@ -20,7 +21,11 @@ import {
   P2POrderType,
   P2PUserType,
 } from '../../data/model/exchange_p2p.model.js';
-import { IBrokeragePairPrices } from '../../data/model/brokerage.model.js';
+import {
+  IBrokerage,
+  IBrokeragePairPrices,
+} from '../../data/model/brokerage.model.js';
+import { reduceAvailablePairs } from 'src/exchanges/operations/exchange-utils.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),
@@ -151,12 +156,16 @@ type BrokeragePromiseAllElemResultType = {
 
 export async function collectCryptoBrokeragesPricesToDB() {
   try {
-    const brokerages = await exchangeService.getAvailableBrokerages();
+    const availableBrokerages = await exchangeService.getAvailableBrokerages();
     const collectors: Promise<BrokeragePromiseAllElemResultType>[] = [];
+    const brokeragesMulti: IBrokerage[] = [];
 
-    for (const brokerage of brokerages) {
+    for (const brokerage of availableBrokerages) {
       const priceCollector = brokeragePriceCollectors.get(brokerage.name);
-      if (priceCollector === undefined) continue;
+      if (priceCollector === undefined) {
+        brokeragesMulti.push(brokerage);
+        continue;
+      }
 
       collectors.push(
         new Promise<BrokeragePromiseAllElemResultType>((resolve, reject) => {
@@ -187,6 +196,16 @@ export async function collectCryptoBrokeragesPricesToDB() {
         console.error(priceCollectorResult.reason);
       }
     }
+
+    // Get prices for all brokerages that has not defined a collector.
+    brokeragePriceCollectorMulti(
+      brokeragesMulti.map((b) => b.name),
+      reduceAvailablePairs(brokeragesMulti)
+    ).then((prices) => {
+      for (const e of prices.entries()) {
+        exchangeService.updateBrokeragePrices(e[0], e[1]);
+      }
+    });
   } catch (error) {
     console.error('There was an error in collectExchangesPricesToBD:', error);
   }

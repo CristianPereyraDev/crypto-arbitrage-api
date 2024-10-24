@@ -11,7 +11,75 @@ type CryptoYaAPIResponseType = {
   time: number;
 };
 
-export async function getBrokeragePairPrices(
+type AllExchangesResponseType = {
+  [exchange: string]: CryptoYaAPIResponseType;
+};
+
+export async function getAllBrokeragePricesByPair(
+  brokerages: string[],
+  pairs: IPair[]
+): Promise<Map<string, IBrokeragePairPrices[]>> {
+  const result = new Map<string, IBrokeragePairPrices[]>();
+
+  const exchangePairPricesMaps = await Promise.all(
+    pairs.map(
+      (pair) =>
+        new Promise<Map<string, IBrokeragePairPrices>>((resolve, reject) => {
+          const endpoint = `https://criptoya.com/api/${pair.crypto}/${pair.fiat}/0.1`;
+          fetchWithTimeout(endpoint)
+            .then((res) => {
+              if (!res.ok) {
+                throw new APIError(
+                  endpoint,
+                  'Criptoya',
+                  `${res.status} - ${res.statusText}`
+                );
+              }
+
+              return res.json();
+            })
+            .then((jsonResponse) => {
+              const data = jsonResponse as AllExchangesResponseType;
+              const value: Map<string, IBrokeragePairPrices> = new Map();
+
+              for (const exchange of Object.keys(data)) {
+                const prices = data[exchange];
+                value.set(exchange, {
+                  ...pair,
+                  ask: prices.ask,
+                  bid: prices.bid,
+                });
+              }
+
+              resolve(value);
+            })
+            .catch((reason) => reject(reason));
+        })
+    )
+  );
+
+  for (const exchangePairPricesMap of exchangePairPricesMaps) {
+    for (const exchange of exchangePairPricesMap.keys()) {
+      const pairPrices = exchangePairPricesMap.get(exchange);
+      const pairPricesArr = result.get(exchange);
+
+      if (!pairPrices) {
+        continue;
+      }
+
+      if (!pairPricesArr) {
+        result.set(exchange, [pairPrices]);
+        continue;
+      }
+
+      result.set(exchange, [...pairPricesArr, pairPrices]);
+    }
+  }
+
+  return result;
+}
+
+export async function getBrokeragePairPricesByExchange(
   pairs: IPair[],
   exchange: string
 ): Promise<IBrokeragePairPrices[]> {

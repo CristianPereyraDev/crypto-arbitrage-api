@@ -31,6 +31,13 @@ const brokeragePriceCollectors = new Map<
   (pairs: IPair[]) => Promise<IBrokeragePairPrices[]>
 >();
 
+// Multi brokerage collector
+const brokeragePriceCollectorMulti: (
+  brokerages: string[],
+  pairs: IPair[]
+) => Promise<Map<string, IBrokeragePairPrices[]>> =
+  cryptoya.getAllBrokeragePricesByPair;
+
 // Exchange collectors
 exchangePriceCollectors.set('Binance', binance.getSpotAskBidPrices);
 exchangePriceCollectors.set('CryptoMarket', cryptomarket.getPairPrices);
@@ -39,21 +46,21 @@ exchangePriceCollectors.set('TruBit', trubit.getPairPrices);
 exchangePriceCollectors.set('Bitso', bitso.getPairPrices);
 
 // Brokerage collectors
-brokeragePriceCollectors.set('Plus Crypto', pluscrypto.getPairPrices);
-brokeragePriceCollectors.set('Bitmonedero', bitmonedero.getPairPrices);
-brokeragePriceCollectors.set('Fiwind', fiwind.getPairPrices);
-brokeragePriceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices);
-brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices);
-brokeragePriceCollectors.set('Saldo', saldo.getPairPrices);
 brokeragePriceCollectors.set('ArgenBTC', (pairs: IPair[]) =>
-  cryptoya.getBrokeragePairPrices(pairs, 'argenbtc')
-);
-brokeragePriceCollectors.set('Lemon Cash', (pairs: IPair[]) =>
-  cryptoya.getBrokeragePairPrices(pairs, 'lemoncash')
+  cryptoya.getBrokeragePairPricesByExchange(pairs, 'argenbtc')
 );
 brokeragePriceCollectors.set('belo', (pairs: IPair[]) =>
-  cryptoya.getBrokeragePairPrices(pairs, 'belo')
+  cryptoya.getBrokeragePairPricesByExchange(pairs, 'belo')
 );
+brokeragePriceCollectors.set('Bitmonedero', bitmonedero.getPairPrices);
+brokeragePriceCollectors.set('Fiwind', fiwind.getPairPrices);
+brokeragePriceCollectors.set('Lemon Cash', (pairs: IPair[]) =>
+  cryptoya.getBrokeragePairPricesByExchange(pairs, 'lemoncash')
+);
+brokeragePriceCollectors.set('Plus Crypto', pluscrypto.getPairPrices);
+brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices);
+brokeragePriceCollectors.set('Saldo', saldo.getPairPrices);
+brokeragePriceCollectors.set('TiendaCrypto', tiendacrypto.getPairPrices);
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (
@@ -70,5 +77,6 @@ p2pOrderCollectors.set('Binance P2P', binancep2p.getP2POrders);
 export {
   exchangePriceCollectors,
   brokeragePriceCollectors,
+  brokeragePriceCollectorMulti,
   p2pOrderCollectors,
 };

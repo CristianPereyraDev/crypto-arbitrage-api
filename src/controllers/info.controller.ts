@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken';
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js';
 import { INetworkFee } from '../data/model/exchange_base.model.js';
 import { performScraping } from '../utils/scraping/cryptoya.js';
-import { ExchangeService } from '../services/exchanges.service.js';
+import { ExchangeService } from '../exchanges/services/exchanges.service.js';
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';
 import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js';
