@@ -35,14 +35,14 @@ export class ExchangeService {
   }
 
   async updateP2POrders(
-    exchangeName: string,
+    exchangeSlugName: string,
     baseAsset: string,
     fiat: string,
     orderType: P2POrderType,
     orders: IP2POrder[]
   ) {
     this.exchangeP2PRepository.updateP2POrders(
-      exchangeName,
+      exchangeSlugName,
       baseAsset,
       fiat,
       orderType,
@@ -51,17 +51,17 @@ export class ExchangeService {
   }
 
   async updateBrokeragePrices(
-    exchangeName: string,
+    brokerageSlugName: string,
     prices: IBrokeragePairPrices[]
   ) {
-    this.brokerageRepository.updateBrokeragePrices(exchangeName, prices);
+    this.brokerageRepository.updateBrokeragePrices(brokerageSlugName, prices);
   }
 
   async updateExchangePrices(
-    exchangeName: string,
+    exchangeSlugName: string,
     prices: IExchangePairPrices[]
   ) {
-    this.exchangeRepository.updateExchangePrices(exchangeName, prices);
+    this.exchangeRepository.updateExchangePrices(exchangeSlugName, prices);
   }
 
   async removeOlderPrices() {

@@ -56,13 +56,13 @@ export default class ExchangeRepositoryMongoDB
   }
 
   async updateExchangePrices(
-    exchangeName: string,
+    exchangeSlugName: string,
     prices: IExchangePairPrices[]
   ): Promise<void> {
     try {
       await Exchange.findOneAndUpdate(
         {
-          name: exchangeName,
+          slug: exchangeSlugName,
         },
         {
           $set: {

@@ -18,7 +18,7 @@ export interface IExchangeRepository
   ): Promise<IExchangePricingDTO[]>;
 
   updateExchangePrices(
-    exchangeName: string,
+    exchangeSlugName: string,
     prices: IExchangePairPrices[]
   ): Promise<void>;
 }

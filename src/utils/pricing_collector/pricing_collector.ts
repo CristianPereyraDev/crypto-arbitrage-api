@@ -25,7 +25,7 @@ import {
   IBrokerage,
   IBrokeragePairPrices,
 } from '../../data/model/brokerage.model.js';
-import { reduceAvailablePairs } from 'src/exchanges/operations/exchange-utils.js';
+import { reduceAvailablePairs } from '../../exchanges/operations/exchange-utils.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),
@@ -59,7 +59,7 @@ export async function collectP2POrdersToDB() {
     const p2pExchanges = await P2PExchange.find({ available: true });
 
     for (const p2pExchange of p2pExchanges) {
-      const orderCollector = p2pOrderCollectors.get(p2pExchange.name);
+      const orderCollector = p2pOrderCollectors.get(p2pExchange.slug);
 
       if (orderCollector !== undefined) {
         for (const p2pPair of p2pExchange.ordersByPair) {
@@ -112,7 +112,7 @@ export async function collectCryptoExchangesPricesToDB() {
     const collectors: Promise<PromiseAllElemResultType>[] = [];
 
     for (const exchange of exchanges) {
-      const priceCollector = exchangePriceCollectors.get(exchange.name);
+      const priceCollector = exchangePriceCollectors.get(exchange.slug);
       if (priceCollector === undefined) continue;
 
       collectors.push(
@@ -120,7 +120,7 @@ export async function collectCryptoExchangesPricesToDB() {
           priceCollector(exchange.availablePairs)
             .then((prices) => {
               resolve({
-                exchangeName: exchange.name,
+                exchangeName: exchange.slug,
                 prices,
               });
             })
@@ -161,7 +161,7 @@ export async function collectCryptoBrokeragesPricesToDB() {
     const brokeragesMulti: IBrokerage[] = [];
 
     for (const brokerage of availableBrokerages) {
-      const priceCollector = brokeragePriceCollectors.get(brokerage.name);
+      const priceCollector = brokeragePriceCollectors.get(brokerage.slug);
       if (priceCollector === undefined) {
         brokeragesMulti.push(brokerage);
         continue;
@@ -189,7 +189,9 @@ export async function collectCryptoBrokeragesPricesToDB() {
         priceCollectorResult.value.prices !== undefined
       ) {
         exchangeService.updateBrokeragePrices(
-          priceCollectorResult.value.exchangeName,
+          priceCollectorResult.value.exchangeName
+            .toLowerCase()
+            .replace(' ', ''),
           priceCollectorResult.value.prices
         );
       } else if (priceCollectorResult.status === 'rejected') {
@@ -201,13 +203,23 @@ export async function collectCryptoBrokeragesPricesToDB() {
     brokeragePriceCollectorMulti(
       brokeragesMulti.map((b) => b.name),
       reduceAvailablePairs(brokeragesMulti)
-    ).then((prices) => {
-      for (const e of prices.entries()) {
-        exchangeService.updateBrokeragePrices(e[0], e[1]);
-      }
-    });
+    )
+      .then((prices) => {
+        for (const e of prices.entries()) {
+          exchangeService.updateBrokeragePrices(e[0], e[1]);
+        }
+      })
+      .catch((reason) =>
+        console.error(
+          'There was an error in brokeragePriceCollectorMulti:',
+          reason
+        )
+      );
   } catch (error) {
-    console.error('There was an error in collectExchangesPricesToBD:', error);
+    console.error(
+      'There was an error in collectCryptoBrokeragesPricesToDB:',
+      error
+    );
   }
 }
 

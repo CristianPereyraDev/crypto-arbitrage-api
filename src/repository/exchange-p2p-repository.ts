@@ -18,7 +18,7 @@ export interface IExchangeP2PRepository
     pair: IPair
   ): Promise<IP2PPairOrders | null>;
   updateP2POrders(
-    exchangeName: string,
+    exchangeSlugName: string,
     baseAsset: string,
     fiat: string,
     orderType: P2POrderType,

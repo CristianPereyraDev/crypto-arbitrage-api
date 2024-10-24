@@ -19,6 +19,9 @@ export async function getAllBrokeragePricesByPair(
   brokerages: string[],
   pairs: IPair[]
 ): Promise<Map<string, IBrokeragePairPrices[]>> {
+  const lowercaseBrokerages = brokerages.map((b) =>
+    b.toLowerCase().replaceAll(' ', '')
+  );
   const result = new Map<string, IBrokeragePairPrices[]>();
 
   const exchangePairPricesMaps = await Promise.all(
@@ -45,7 +48,8 @@ export async function getAllBrokeragePricesByPair(
               for (const exchange of Object.keys(data)) {
                 const prices = data[exchange];
                 value.set(exchange, {
-                  ...pair,
+                  crypto: pair.crypto,
+                  fiat: pair.fiat,
                   ask: prices.ask,
                   bid: prices.bid,
                 });
@@ -60,6 +64,9 @@ export async function getAllBrokeragePricesByPair(
 
   for (const exchangePairPricesMap of exchangePairPricesMaps) {
     for (const exchange of exchangePairPricesMap.keys()) {
+      if (!lowercaseBrokerages.includes(exchange)) {
+        continue;
+      }
       const pairPrices = exchangePairPricesMap.get(exchange);
       const pairPricesArr = result.get(exchange);
 

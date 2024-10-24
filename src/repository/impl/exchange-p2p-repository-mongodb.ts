@@ -59,16 +59,8 @@ export class ExchangeP2PRepositoryMongoDB
     }
   }
 
-  getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
-    throw new Error('Method not implemented.');
-  }
-
-  getAllAvailablePairs(): Promise<IPair[]> {
-    throw new Error('Method not implemented.');
-  }
-
   async updateP2POrders(
-    exchangeName: string,
+    exchangeSlugName: string,
     baseAsset: string,
     fiat: string,
     orderType: P2POrderType,
@@ -81,7 +73,7 @@ export class ExchangeP2PRepositoryMongoDB
           : 'ordersByPair.$[i].sellOrders';
 
       await P2PExchange.findOneAndUpdate(
-        { name: exchangeName },
+        { slug: exchangeSlugName },
         { $set: { [target]: orders } },
         {
           arrayFilters: [
@@ -95,6 +87,14 @@ export class ExchangeP2PRepositoryMongoDB
     } catch (error) {
       console.error('An error in updateP2POrders has ocurred: %s', error);
     }
+  }
+
+  getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
+    throw new Error('Method not implemented.');
+  }
+
+  getAllAvailablePairs(): Promise<IPair[]> {
+    throw new Error('Method not implemented.');
   }
 
   removeOlderPrices(): Promise<void> {

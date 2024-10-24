@@ -8,7 +8,7 @@ import { IExchangeBase, IPair } from '../../data/model/exchange_base.model.js';
 export function reduceAvailablePairs(exchanges: IExchangeBase[]): IPair[] {
   return exchanges
     .map((b) => b.availablePairs)
-    .reduce((prev, curr) => prev.concat(curr))
+    .reduce((prev, curr) => prev.concat(curr), [])
     .filter(
       (outerPair, index, array) =>
         array.findIndex(

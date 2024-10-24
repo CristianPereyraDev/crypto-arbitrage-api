@@ -14,7 +14,7 @@ export interface IBrokerageRepository
     IPriceableRepository {
   getAllPricesByPair(pair: IPair): Promise<IExchangePricingDTO[]>;
   updateBrokeragePrices(
-    exchangeName: string,
+    slugName: string,
     prices: IBrokeragePairPrices[]
   ): Promise<void>;
 }
