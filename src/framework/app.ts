@@ -40,36 +40,36 @@ appSetup(app)
     websocketSetup(server);
 
     // Crypto rates collector interval
-    // setInterval(() => {
-    //   collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
-    //   collectCryptoBrokeragesPricesToDB().catch((reason) =>
-    //     console.log(reason)
-    //   );
-    //   collectP2POrdersToDB().catch((reason) => console.log(reason));
-    // }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6));
+    setInterval(() => {
+      collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
+      collectCryptoBrokeragesPricesToDB().catch((reason) =>
+        console.log(reason)
+      );
+      collectP2POrdersToDB().catch((reason) => console.log(reason));
+    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6));
 
-    // setInterval(async () => {
-    //   try {
-    //     const prices = await exchangeService.getAllExchangesPricesBySymbol(
-    //       'USDT',
-    //       'ARS'
-    //     );
-    //     const fees = await exchangeService.getAllFees();
+    setInterval(async () => {
+      try {
+        const prices = await exchangeService.getAllExchangesPricesBySymbol(
+          'USDT',
+          'ARS'
+        );
+        const fees = await exchangeService.getAllFees();
 
-    //     const pushSubscriptions =
-    //       await pushSubscriptionProvider.getAllSubscriptions();
+        const pushSubscriptions =
+          await pushSubscriptionProvider.getAllSubscriptions();
 
-    //     if (prices.length > 0) {
-    //       for (const subs of pushSubscriptions) {
-    //         sendNotification(prices, fees, subs).catch((reason) =>
-    //           console.log(reason)
-    //         );
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }, 1000 * 60);
+        if (prices.length > 0) {
+          for (const subs of pushSubscriptions) {
+            sendNotification(prices, fees, subs).catch((reason) =>
+              console.log(reason)
+            );
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }, 1000 * 60);
 
     // Currency rates collector
     const currencyJob = new CronJob(
