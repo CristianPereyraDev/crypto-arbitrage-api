@@ -1,5 +1,3 @@
-import { IPair } from '../data/model/exchange_base.model.js';
-import { IExchangePricingDTO } from '../types/dto/index.js';
 import {
   ExchangeBaseRepository,
   IPriceableRepository,
@@ -12,11 +10,6 @@ import {
 export interface IExchangeRepository
   extends ExchangeBaseRepository<IExchange>,
     IPriceableRepository {
-  getAllPricesByPair(
-    pair: IPair,
-    volume: number
-  ): Promise<IExchangePricingDTO[]>;
-
   updateExchangePrices(
     exchangeSlugName: string,
     prices: IExchangePairPrices[]

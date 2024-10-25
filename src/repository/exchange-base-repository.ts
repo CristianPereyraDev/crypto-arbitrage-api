@@ -1,4 +1,4 @@
-import { IExchangeFeesDTO } from '../types/dto/index.js';
+import { IExchangeFeesDTO, IExchangePricingDTO } from '../types/dto/index.js';
 import { IPair } from '../data/model/exchange_base.model.js';
 
 export interface ExchangeBaseRepository<T> {
@@ -8,6 +8,10 @@ export interface ExchangeBaseRepository<T> {
   getExchangesFees(): Promise<{
     [exchange: string]: IExchangeFeesDTO;
   }>;
+  getAllPricesByPair(
+    pair: IPair,
+    volume: number
+  ): Promise<IExchangePricingDTO[]>;
 }
 
 export interface IPriceableRepository {

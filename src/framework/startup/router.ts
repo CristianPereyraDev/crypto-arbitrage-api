@@ -55,8 +55,21 @@ const routerSetup = async (app: Express): Promise<Express> => {
         resource: P2PExchange,
         options: {
           properties: {
-            'ordersByPair.orders': {
-              isVisible: { edit: false, list: false },
+            ordersByPair: {
+              isVisible: {
+                edit: false,
+                show: false,
+                list: false,
+                filter: false,
+              },
+            },
+            networkFees: {
+              isVisible: {
+                edit: false,
+                show: false,
+                list: false,
+                filter: false,
+              },
             },
           },
         },

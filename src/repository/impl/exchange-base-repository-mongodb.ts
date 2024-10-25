@@ -1,12 +1,21 @@
 import { IExchangeBase, IPair } from '../../data/model/exchange_base.model.js';
 import { ExchangeBaseRepository } from '../exchange-base-repository.js';
-import { IExchangeFeesDTO } from '../../types/dto/index.js';
+import {
+  IExchangeFeesDTO,
+  IExchangePricingDTO,
+} from '../../types/dto/index.js';
 import { ExchangeBase } from '../../databases/mongodb/schema/exchange_base.schema.js';
 import { DatabaseError } from '../../types/errors/index.js';
 
 export class ExchangeBaseRepositoryMongoBD
   implements ExchangeBaseRepository<IExchangeBase>
 {
+  getAllPricesByPair(
+    pair: IPair,
+    volume: number
+  ): Promise<IExchangePricingDTO[]> {
+    throw new Error('Method not implemented.');
+  }
   getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
     throw new Error('Method not implemented.');
   }

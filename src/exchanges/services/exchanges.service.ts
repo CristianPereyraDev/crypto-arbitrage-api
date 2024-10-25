@@ -88,8 +88,12 @@ export class ExchangeService {
     volume = 1.0
   ): Promise<IExchangePricingDTO[]> {
     const prices = await Promise.all([
-      this.brokerageRepository.getAllPricesByPair({ crypto: asset, fiat }),
+      this.brokerageRepository.getAllPricesByPair({ crypto: asset, fiat }, 1),
       this.exchangeRepository.getAllPricesByPair(
+        { crypto: asset, fiat },
+        volume
+      ),
+      this.exchangeP2PRepository.getAllPricesByPair(
         { crypto: asset, fiat },
         volume
       ),

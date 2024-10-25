@@ -80,15 +80,18 @@ export default class BrokerageRepositoryMongoDB
     throw new Error('Method not implemented.');
   }
 
-  async getAllPricesByPair(pair: IPair): Promise<IExchangePricingDTO[]> {
+  async getAllPricesByPair(
+    pair: IPair,
+    volume: number
+  ): Promise<IExchangePricingDTO[]> {
     try {
-      const exchanges = await Brokerage.find({
+      const brokerages = await Brokerage.find({
         'pricesByPair.crypto': pair.crypto,
         'pricesByPair.fiat': pair.fiat,
         available: true,
       });
 
-      const prices = exchanges.map((brokerage) => {
+      const prices = brokerages.map((brokerage) => {
         // Find pair's prices for current exchange and sort
         const pairPrices = brokerage.pricesByPair.find(
           (priceByPair) =>

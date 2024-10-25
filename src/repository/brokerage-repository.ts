@@ -12,7 +12,6 @@ import {
 export interface IBrokerageRepository
   extends ExchangeBaseRepository<IBrokerage>,
     IPriceableRepository {
-  getAllPricesByPair(pair: IPair): Promise<IExchangePricingDTO[]>;
   updateBrokeragePrices(
     slugName: string,
     prices: IBrokeragePairPrices[]

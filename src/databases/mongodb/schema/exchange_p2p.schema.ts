@@ -19,7 +19,7 @@ const p2pOrderSchema = new Schema<IP2POrder>(
     payments: [
       new Schema<IPaymentMethod>({
         slug: { type: String, required: true },
-        name: { type: String, required: true },
+        name: { type: String },
       }),
     ],
     merchantId: { type: String, required: true },

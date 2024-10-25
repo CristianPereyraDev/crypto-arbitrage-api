@@ -79,14 +79,14 @@ export async function collectP2POrdersToDB() {
             ),
           ]);
           exchangeService.updateP2POrders(
-            p2pExchange.name,
+            p2pExchange.slug,
             p2pPair.crypto,
             p2pPair.fiat,
             P2POrderType.BUY,
             orders[0]
           );
           exchangeService.updateP2POrders(
-            p2pExchange.name,
+            p2pExchange.slug,
             p2pPair.crypto,
             p2pPair.fiat,
             P2POrderType.SELL,
