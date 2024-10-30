@@ -5,7 +5,7 @@ import {
   IExchangePricingDTO,
 } from '../../types/dto/index.js';
 import { ExchangeBase } from '../../databases/mongodb/schema/exchange_base.schema.js';
-import { DatabaseError } from '../../types/errors/index.js';
+import { DatabaseError } from '../../data/errors/index.js';
 
 export class ExchangeBaseRepositoryMongoBD
   implements ExchangeBaseRepository<IExchangeBase>

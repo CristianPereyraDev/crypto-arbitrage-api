@@ -4,7 +4,7 @@ import cryptomarket from 'cryptomarket';
 import { IPair } from '../../../../../../data/model/exchange_base.model.js';
 import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
 import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
-import { APIError } from '../../../../../../types/errors/index.js';
+import { APIError } from '../../../../../../data/errors/index.js';
 
 const apiKey = process.env.CRYPTOMARKET_API_KEY ?? '';
 const apiSecret = process.env.CRYPTOMARKET_API_SECRET ?? '';

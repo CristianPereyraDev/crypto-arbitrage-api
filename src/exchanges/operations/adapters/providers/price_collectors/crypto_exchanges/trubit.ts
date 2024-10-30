@@ -1,7 +1,7 @@
 import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
 import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
 import { IPair } from '../../../../../../data/model/exchange_base.model.js';
-import { APIError } from '../../../../../../types/errors/index.js';
+import { APIError } from '../../../../../../data/errors/index.js';
 
 type TrueBitOrderbookResponse = {
   time: number;

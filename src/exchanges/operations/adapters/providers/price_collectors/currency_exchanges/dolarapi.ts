@@ -1,4 +1,4 @@
-import { APIError } from '../../../../../../types/errors/index.js';
+import { APIError } from '../../../../../../data/errors/index.js';
 import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
 import { CurrencyCollectorFunctionReturnType } from './index.js';
 

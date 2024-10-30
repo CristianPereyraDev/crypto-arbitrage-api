@@ -3,7 +3,7 @@ import { RestMarketTypes, Spot } from '@binance/connector-typescript';
 
 import { IPair } from '../../../../../../data/model/exchange_base.model.js';
 import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
-import { APIError } from '../../../../../../types/errors/index.js';
+import { APIError } from '../../../../../../data/errors/index.js';
 
 dotenv.config();
 

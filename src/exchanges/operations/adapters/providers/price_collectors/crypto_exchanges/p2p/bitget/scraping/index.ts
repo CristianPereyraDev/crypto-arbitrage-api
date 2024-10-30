@@ -6,7 +6,7 @@ import {
   P2POrderType,
   P2PUserType,
 } from '../../../../../../../../../data/model/exchange_p2p.model.js';
-import { ScrapingError } from 'src/types/errors/index.js';
+import { ScrapingError } from '../../../../../../../../../data/errors/index.js';
 
 export async function performStaticScraping(): Promise<IP2POrder[]> {
   try {
