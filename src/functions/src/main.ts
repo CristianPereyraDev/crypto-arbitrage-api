@@ -1,5 +1,8 @@
 import { Client, Users } from 'node-appwrite';
 
+import { performDynamicScraping } from './index.js';
+import { P2POrderType, P2PUserType } from './data/exchange_p2p.model.js';
+
 type AppWriteFuntionParams = {
   req: any;
   res: any;
@@ -33,10 +36,18 @@ export default async ({ req, res, log, error }: AppWriteFuntionParams) => {
     return res.text('Pong');
   }
 
+  const scraping = performDynamicScraping(
+    'USDT',
+    'ARS',
+    P2POrderType.BUY,
+    P2PUserType.merchant
+  );
+
   return res.json({
     motto: 'Build like a team of hundreds_',
     learn: 'https://appwrite.io/docs',
     connect: 'https://appwrite.io/discord',
     getInspired: 'https://builtwith.appwrite.io',
+    scraping: scraping,
   });
 };
