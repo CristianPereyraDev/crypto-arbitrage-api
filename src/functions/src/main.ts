@@ -36,7 +36,7 @@ export default async ({ req, res, log, error }: AppWriteFuntionParams) => {
     return res.text('Pong');
   }
 
-  const scraping = performDynamicScraping(
+  const scraping = await performDynamicScraping(
     'USDT',
     'ARS',
     P2POrderType.BUY,
