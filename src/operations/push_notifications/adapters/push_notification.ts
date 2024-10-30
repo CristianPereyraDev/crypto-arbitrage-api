@@ -1,7 +1,7 @@
 import { IPushSubscription } from '../../../data/model/push_subscription.model.js';
 import { ExchangesFeesType } from '../../../exchanges/services/exchanges.service.js';
 import { IExchangePricingDTO } from '../../../types/dto/index.js';
-import { calculateArbitragesFromPairData } from '../../../utils/arbitrages/arbitrage-calculator.js';
+import { calculateArbitragesFromPairData } from '../../../arbitrages/arbitrage-calculator.js';
 
 import webpush, { PushSubscription } from 'web-push';
 

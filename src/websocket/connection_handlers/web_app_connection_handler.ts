@@ -11,7 +11,7 @@ import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
   calculateTotalAsk,
   calculateTotalBid,
-} from '../../utils/arbitrages/arbitrage-calculator.js';
+} from '../../arbitrages/arbitrage-calculator.js';
 import { IExchangePricingDTO } from '../../types/dto/index.js';
 
 import { WebSocket } from 'ws';

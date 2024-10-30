@@ -1,12 +1,12 @@
-import { IExchangeFeesDTO } from '../../types/dto/index.js';
-import { IExchangePricingDTO } from '../../types/dto/index.js';
+import { IExchangeFeesDTO } from '../types/dto/index.js';
+import { IExchangePricingDTO } from '../types/dto/index.js';
 import {
   CalculateP2PArbitrageParams,
   P2PArbitrageResult,
   IP2PArbitrageStrategy,
 } from './p2p_strategies/types.js';
-import { ExchangesFeesType } from '../../exchanges/services/exchanges.service.js';
-import { IPair } from '../../data/model/exchange_base.model.js';
+import { ExchangesFeesType } from '../exchanges/services/exchanges.service.js';
+import { IPair } from '../data/model/exchange_base.model.js';
 
 export interface ICryptoArbitrageResult {
   crypto: string;

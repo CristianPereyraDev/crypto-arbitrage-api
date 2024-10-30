@@ -5,7 +5,7 @@ import {
   IP2POrder,
   P2POrderType,
   P2PUserType,
-} from '../../../../../../data/model/exchange_p2p.model.js';
+} from '../../../../../../../../../data/model/exchange_p2p.model.js';
 import { ScrapingError } from 'src/types/errors/index.js';
 
 export async function performStaticScraping(): Promise<IP2POrder[]> {
@@ -55,20 +55,26 @@ export async function performDynamicScraping(
       }
     });
 
-    await page.goto(
+    console.log('I am going to...');
+    const pageResponse = await page.goto(
       `https://www.bitget.com/es/p2p-trade/sell/${asset}?fiatName=${fiat}`
     );
     console.log('Dynamic Page loaded');
-    await page.waitForSelector('.payment', { timeout: 5000 });
 
-    const htmlContent = await page.content();
+    if (pageResponse?.ok) {
+      await page.waitForSelector('.payment', { timeout: 5000 });
 
-    const orders = scrapData(htmlContent);
+      const htmlContent = await page.content();
 
-    await page.close();
-    await browser.close();
+      const orders = scrapData(htmlContent);
 
-    return orders;
+      await page.close();
+      await browser.close();
+
+      return orders;
+    }
+
+    throw new Error(pageResponse?.statusText());
   } catch (error) {
     throw new ScrapingError(`${asset}-${fiat}`, 'Bitget', 'unknown');
   }
@@ -81,27 +87,35 @@ function scrapData(content: string) {
 
   $('div#hall-publish-list_item-box .hall-list > .hall-list-item').each(
     (i, element) => {
-      const nick = $(element).find('.list-item__nickname').first().text();
+      const nick = $(element)
+        .find('.list-item__nickname')
+        .first()
+        .text()
+        .trim();
       const price = $(element)
         .find('.price-shower')
         .first()
         .text()
         .trim()
-        .split(' ')[0];
+        .split(' ')[0]
+        .replaceAll(',', '');
       const volume = $(element)
         .find('.list_limit')
         .find('span')
         .eq(2)
         .text()
         .trim()
-        .split(' ')[0];
+        .split(' ')[0]
+        .replaceAll(',', '');
       const limits = $(element)
         .find('.list_limit')
         .find('span')
         .eq(3)
         .text()
         .trim()
-        .split(' ')[0];
+        .replaceAll(',', '')
+        .split(' ')[0]
+        .trim();
       const payments = $(element)
         .find('.list-payment')
         .find('span.payment')
@@ -112,15 +126,21 @@ function scrapData(content: string) {
         })
         .toArray();
 
-      console.log(nick.trim(), price.trim(), volume, limits, payments);
+      // console.log(
+      //   nick,
+      //   Number(price),
+      //   Number(volume),
+      //   limits.split('–'),
+      //   payments
+      // );
 
       orders.push({
         orderType: P2POrderType.SELL,
         orderId: '',
         volume: Number(volume),
         price: Number(price),
-        min: Number(limits.split('-')[0]),
-        max: Number(limits.split('-')[1]),
+        min: Number(limits.split('–')[0]),
+        max: Number(limits.split('–')[1]),
         payments: payments.map((p) => ({ slug: p, name: p })),
         userType: P2PUserType.merchant,
         merchantId: '',
@@ -137,4 +157,4 @@ function scrapData(content: string) {
 }
 
 //performStaticScraping();
-performDynamicScraping('USDT', 'ARS', P2POrderType.BUY, P2PUserType.merchant);
+//performDynamicScraping('USDT', 'ARS', P2POrderType.BUY, P2PUserType.merchant);

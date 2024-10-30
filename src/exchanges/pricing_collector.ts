@@ -1,4 +1,3 @@
-import { ICryptoArbitrageResult } from '../utils/arbitrages/arbitrage-calculator.js';
 import {
   p2pOrderCollectors,
   exchangePriceCollectors,
@@ -6,7 +5,6 @@ import {
   brokeragePriceCollectorMulti,
 } from './operations/adapters/providers/price_collectors/crypto_exchanges/index.js';
 import { ExchangeService } from './services/exchanges.service.js';
-import { P2PExchange } from '../databases/mongodb/schema/exchange_p2p.schema.js';
 import { currencyPriceCollectors } from './operations/adapters/providers/price_collectors/currency_exchanges/index.js';
 import CurrencyService from './services/currency.service.js';
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
@@ -31,25 +29,6 @@ const exchangeService = new ExchangeService(
   new ExchangeP2PRepositoryMongoDB()
 );
 const currencyService = new CurrencyService();
-
-// Crypto exchanges prices (USDT-ARS, BTC-ARS, ...)
-
-export async function collectArbitrages(
-  crypto: string,
-  fiat: string,
-  volume: number
-): Promise<ICryptoArbitrageResult[]> {
-  // try {
-  //   const prices = await getBrokeragePairPrices(crypto, fiat, volume)
-  //   const arbitrageResult = await calculateArbitragesFromPairData(prices)
-
-  //   return arbitrageResult
-  // } catch (error) {
-  //   //console.log(error)
-  //   return []
-  // }
-  return [];
-}
 
 export async function collectP2POrdersToDB() {
   console.log('Hello, here from collectP2POrdersToBD');

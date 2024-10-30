@@ -1,5 +1,5 @@
 import { IP2POrder, P2PUserType } from '../data/model/exchange_p2p.model.js';
-import { P2PArbitrage } from '../utils/arbitrages/p2p_strategies/types.js';
+import { P2PArbitrage } from '../arbitrages/p2p_strategies/types.js';
 
 export type CryptoPairWebSocketConfig = {
   volume: number;

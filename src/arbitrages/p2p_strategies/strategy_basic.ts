@@ -1,9 +1,9 @@
-import { getP2PProfit } from '../../../exchanges/operations/profits.js';
+import { getP2PProfit } from '../../exchanges/operations/profits.js';
 import {
   IP2POrder,
   P2POrderType,
   P2PUserType,
-} from '../../../data/model/exchange_p2p.model.js';
+} from '../../data/model/exchange_p2p.model.js';
 import {
   CalculateP2PArbitrageParams,
   P2PArbitrageResult,

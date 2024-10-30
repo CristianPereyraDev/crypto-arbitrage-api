@@ -15,7 +15,7 @@ import { IBrokeragePairPrices } from '../../data/model/brokerage.model.js';
 import {
   calculateTotalAsk,
   calculateTotalBid,
-} from '../../utils/arbitrages/arbitrage-calculator.js';
+} from '../../arbitrages/arbitrage-calculator.js';
 
 export type ExchangesFeesType = { [exchange: string]: IExchangeFeesDTO };
 
@@ -41,6 +41,11 @@ export class ExchangeService {
     orderType: P2POrderType,
     orders: IP2POrder[]
   ) {
+    console.log(
+      `${exchangeSlugName}: ${baseAsset}-${fiat}: ${orders.map(
+        (order) => `${order.merchantName} ${order.price}`
+      )}`
+    );
     this.exchangeP2PRepository.updateP2POrders(
       exchangeSlugName,
       baseAsset,

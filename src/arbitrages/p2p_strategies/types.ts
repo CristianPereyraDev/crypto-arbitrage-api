@@ -1,7 +1,4 @@
-import {
-  IP2POrder,
-  P2PUserType,
-} from '../../../data/model/exchange_p2p.model.js';
+import { IP2POrder, P2PUserType } from '../../data/model/exchange_p2p.model.js';
 
 export type P2PArbitrage = {
   profit: number;

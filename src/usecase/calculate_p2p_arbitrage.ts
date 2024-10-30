@@ -1,5 +1,5 @@
 import { IExchangeP2PRepository } from '../repository/exchange-p2p-repository.js';
-import { IP2PArbitrageStrategy } from '../utils/arbitrages/p2p_strategies/types.js';
+import { IP2PArbitrageStrategy } from '../arbitrages/p2p_strategies/types.js';
 
 export class CalculateP2PArbitrage {
   strategy: IP2PArbitrageStrategy;

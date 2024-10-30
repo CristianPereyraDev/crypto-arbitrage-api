@@ -17,7 +17,7 @@ import {
   ArbitrageCalculator,
   calculateTotalAsk,
   calculateTotalBid,
-} from '../../utils/arbitrages/arbitrage-calculator.js';
+} from '../../arbitrages/arbitrage-calculator.js';
 import { IExchangePricingDTO } from '../../types/dto/index.js';
 
 import { WebSocket } from 'ws';
@@ -25,8 +25,8 @@ import { IncomingMessage } from 'http';
 import { ExchangeBaseRepositoryMongoBD } from '../../repository/impl/exchange-base-repository-mongodb.js';
 import { IPair } from '../../data/model/exchange_base.model.js';
 import { P2PUserType } from '../../data/model/exchange_p2p.model.js';
-import { P2PArbitrageResult } from '../../utils/arbitrages/p2p_strategies/types.js';
-import { MatiStrategy } from '../../utils/arbitrages/p2p_strategies/strategy_mati.js';
+import { P2PArbitrageResult } from '../../arbitrages/p2p_strategies/types.js';
+import { MatiStrategy } from '../../arbitrages/p2p_strategies/strategy_mati.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),

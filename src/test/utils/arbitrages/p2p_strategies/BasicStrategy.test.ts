@@ -5,8 +5,8 @@ import {
   P2POrderType,
   P2PUserType,
 } from '../../../../data/model/exchange_p2p.model.js';
-import { BasicStrategy } from '../../../../utils/arbitrages/p2p_strategies/strategy_basic.js';
-import { CalculateP2PArbitrageParams } from '../../../../utils/arbitrages/p2p_strategies/types.js';
+import { BasicStrategy } from '../../../../arbitrages/p2p_strategies/strategy_basic.js';
+import { CalculateP2PArbitrageParams } from '../../../../arbitrages/p2p_strategies/types.js';
 
 describe('P2P arbitrage basic strategy', () => {
   const buyOrders: IP2POrder[] = orders.buyOrders.map((jsonOrder) => {

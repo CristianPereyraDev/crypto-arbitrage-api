@@ -1,5 +1,5 @@
-import { getP2PProfit } from '../../../exchanges/operations/profits.js';
-import { IP2POrder } from '../../../data/model/exchange_p2p.model.js';
+import { getP2PProfit } from '../../exchanges/operations/profits.js';
+import { IP2POrder } from '../../data/model/exchange_p2p.model.js';
 import {
   DEFAULT_ARBITRAGE,
   DEFAULT_SUGGESTED_BUY_ORDER,

@@ -8,7 +8,6 @@ import jwt from 'jsonwebtoken';
 
 import { Exchange } from '../databases/mongodb/schema/exchange.schema.js';
 import { INetworkFee } from '../data/model/exchange_base.model.js';
-import { performScraping } from '../exchanges/operations/adapters/providers/price_collectors/scraping/cryptoya.js';
 import { ExchangeService } from '../exchanges/services/exchanges.service.js';
 import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
 import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';
@@ -171,23 +170,6 @@ controller
       } catch (error) {
         return res.status(404).json({ message: error });
       }
-    }
-  )
-  .get(
-    '/exchangeIdsByPair',
-    async (req: Request, res: Response, next: NextFunction) => {
-      const scraping = await performScraping();
-      const response: { [symbol: string]: { [id: string]: string } } = {};
-
-      for (const symbol in scraping) {
-        response[symbol] = scraping[symbol].ids;
-      }
-
-      if (scraping !== null) {
-        res.status(200).json({ success: true, message: 'ok', data: response });
-        next();
-      } else
-        res.status(400).json({ success: false, message: 'error', data: null });
     }
   )
   .post(
