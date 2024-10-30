@@ -1,7 +1,7 @@
-import { APIError } from '../../../types/errors/index.js';
-import { IBrokeragePairPrices } from '../../../data/model/brokerage.model.js';
-import { IPair } from '../../../data/model/exchange_base.model.js';
-import { fetchWithTimeout } from '../../../utils/network.utils.js';
+import { APIError } from '../../../../../../types/errors/index.js';
+import { IBrokeragePairPrices } from '../../../../../../data/model/brokerage.model.js';
+import { IPair } from '../../../../../../data/model/exchange_base.model.js';
+import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
 
 export async function getPairPrices(
   pairs: IPair[]

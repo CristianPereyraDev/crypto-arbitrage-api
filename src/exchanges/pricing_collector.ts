@@ -1,31 +1,28 @@
-import { ICryptoArbitrageResult } from '../arbitrages/arbitrage-calculator.js';
+import { ICryptoArbitrageResult } from '../utils/arbitrages/arbitrage-calculator.js';
 import {
   p2pOrderCollectors,
   exchangePriceCollectors,
   brokeragePriceCollectors,
   brokeragePriceCollectorMulti,
-} from '../apis/crypto_exchanges/index.js';
-import { ExchangeService } from '../../exchanges/services/exchanges.service.js';
-import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js';
-import { currencyPriceCollectors } from '../apis/currency_exchanges/index.js';
-import CurrencyService from '../../exchanges/services/currency.service.js';
-import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js';
-import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js';
-import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js';
+} from './operations/adapters/providers/price_collectors/crypto_exchanges/index.js';
+import { ExchangeService } from './services/exchanges.service.js';
+import { P2PExchange } from '../databases/mongodb/schema/exchange_p2p.schema.js';
+import { currencyPriceCollectors } from './operations/adapters/providers/price_collectors/currency_exchanges/index.js';
+import CurrencyService from './services/currency.service.js';
+import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
+import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';
+import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js';
 import {
   IExchange,
   IExchangePairPrices,
-} from '../../data/model/exchange.model.js';
-import { ExchangeBaseRepositoryMongoBD } from '../../repository/impl/exchange-base-repository-mongodb.js';
-import {
-  P2POrderType,
-  P2PUserType,
-} from '../../data/model/exchange_p2p.model.js';
+} from '../data/model/exchange.model.js';
+import { ExchangeBaseRepositoryMongoBD } from '../repository/impl/exchange-base-repository-mongodb.js';
+import { P2POrderType, P2PUserType } from '../data/model/exchange_p2p.model.js';
 import {
   IBrokerage,
   IBrokeragePairPrices,
-} from '../../data/model/brokerage.model.js';
-import { reduceAvailablePairs } from '../../exchanges/operations/exchange-utils.js';
+} from '../data/model/brokerage.model.js';
+import { reduceAvailablePairs } from './operations/exchange-utils.js';
 
 const exchangeService = new ExchangeService(
   new ExchangeBaseRepositoryMongoBD(),
@@ -55,16 +52,18 @@ export async function collectArbitrages(
 }
 
 export async function collectP2POrdersToDB() {
+  console.log('Hello, here from collectP2POrdersToBD');
   try {
-    const p2pExchanges = await P2PExchange.find({ available: true });
+    const p2pExchanges = await exchangeService.getAvailableP2PExchanges();
+    console.log(`${p2pExchanges.map((e) => e.name)}`);
 
     for (const p2pExchange of p2pExchanges) {
       const orderCollector = p2pOrderCollectors.get(p2pExchange.slug);
 
       if (orderCollector !== undefined) {
-        for (const p2pPair of p2pExchange.ordersByPair) {
+        for (const p2pPair of p2pExchange.availablePairs) {
           // Get all buy orders and all sell orders
-          const orders = await Promise.all([
+          Promise.all([
             orderCollector(
               p2pPair.crypto,
               p2pPair.fiat,
@@ -77,21 +76,24 @@ export async function collectP2POrdersToDB() {
               P2POrderType.SELL,
               P2PUserType.merchant
             ),
-          ]);
-          exchangeService.updateP2POrders(
-            p2pExchange.slug,
-            p2pPair.crypto,
-            p2pPair.fiat,
-            P2POrderType.BUY,
-            orders[0]
-          );
-          exchangeService.updateP2POrders(
-            p2pExchange.slug,
-            p2pPair.crypto,
-            p2pPair.fiat,
-            P2POrderType.SELL,
-            orders[1]
-          );
+          ])
+            .then((orders) => {
+              exchangeService.updateP2POrders(
+                p2pExchange.slug,
+                p2pPair.crypto,
+                p2pPair.fiat,
+                P2POrderType.BUY,
+                orders[0]
+              );
+              exchangeService.updateP2POrders(
+                p2pExchange.slug,
+                p2pPair.crypto,
+                p2pPair.fiat,
+                P2POrderType.SELL,
+                orders[1]
+              );
+            })
+            .catch((reason) => console.log(reason));
         }
       }
     }
@@ -157,6 +159,7 @@ type BrokeragePromiseAllElemResultType = {
 export async function collectCryptoBrokeragesPricesToDB() {
   try {
     const availableBrokerages = await exchangeService.getAvailableBrokerages();
+    console.log(availableBrokerages.map((b) => b.slug));
     const collectors: Promise<BrokeragePromiseAllElemResultType>[] = [];
     const brokeragesMulti: IBrokerage[] = [];
 

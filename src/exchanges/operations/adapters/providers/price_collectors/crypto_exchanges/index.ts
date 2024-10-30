@@ -11,15 +11,16 @@ import * as fiwind from './fiwind.js';
 import * as tiendacrypto from './tiendacrypto.js';
 import * as satoshitango from './satoshitango.js';
 import * as cryptoya from './cryptoya.js';
+import * as bitget from './p2p/bitget.js';
 
 import {
   IP2POrder,
   P2POrderType,
   P2PUserType,
-} from '../../../data/model/exchange_p2p.model.js';
-import { IExchangePairPrices } from '../../../data/model/exchange.model.js';
-import { IBrokeragePairPrices } from '../../../data/model/brokerage.model.js';
-import { IPair } from '../../../data/model/exchange_base.model.js';
+} from '../../../../../../data/model/exchange_p2p.model.js';
+import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
+import { IBrokeragePairPrices } from '../../../../../../data/model/brokerage.model.js';
+import { IPair } from '../../../../../../data/model/exchange_base.model.js';
 
 const exchangePriceCollectors = new Map<
   string,
@@ -39,18 +40,18 @@ const brokeragePriceCollectorMulti: (
   cryptoya.getAllBrokeragePricesByPair;
 
 // Exchange collectors
-exchangePriceCollectors.set('binance', binance.getSpotAskBidPrices);
-exchangePriceCollectors.set('cryptomarket', cryptomarket.getPairPrices);
-exchangePriceCollectors.set('ripiotrade', ripiotrade.getPairPrices);
-exchangePriceCollectors.set('trubit', trubit.getPairPrices);
-exchangePriceCollectors.set('bitso', bitso.getPairPrices);
+// exchangePriceCollectors.set('binance', binance.getSpotAskBidPrices);
+// exchangePriceCollectors.set('cryptomarket', cryptomarket.getPairPrices);
+// exchangePriceCollectors.set('ripiotrade', ripiotrade.getPairPrices);
+// exchangePriceCollectors.set('trubit', trubit.getPairPrices);
+// exchangePriceCollectors.set('bitso', bitso.getPairPrices);
 
 // Brokerage collectors
-brokeragePriceCollectors.set('fiwind', fiwind.getPairPrices);
-brokeragePriceCollectors.set('pluscrypto', pluscrypto.getPairPrices);
-brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices);
-brokeragePriceCollectors.set('saldo', saldo.getPairPrices);
-brokeragePriceCollectors.set('tiendacrypto', tiendacrypto.getPairPrices);
+// brokeragePriceCollectors.set('fiwind', fiwind.getPairPrices);
+// brokeragePriceCollectors.set('pluscrypto', pluscrypto.getPairPrices);
+// brokeragePriceCollectors.set('satoshitango', satoshitango.getPairPrices);
+// brokeragePriceCollectors.set('saldo', saldo.getPairPrices);
+// brokeragePriceCollectors.set('tiendacrypto', tiendacrypto.getPairPrices);
 
 // P2P Exchange collectors
 export type P2PCollectorFunctionType = (
@@ -62,7 +63,8 @@ export type P2PCollectorFunctionType = (
 
 const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>();
 
-p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
+//p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
+p2pOrderCollectors.set('bitgetp2p', bitget.getBitgetPairPrices);
 
 export {
   exchangePriceCollectors,

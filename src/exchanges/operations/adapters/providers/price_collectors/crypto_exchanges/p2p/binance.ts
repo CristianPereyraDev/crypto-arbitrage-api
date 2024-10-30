@@ -2,8 +2,8 @@ import {
   IP2POrder,
   P2POrderType,
   P2PUserType,
-} from '../../../../data/model/exchange_p2p.model.js';
-import { fetchWithTimeout } from '../../../../utils/network.utils.js';
+} from '../../../../../../../data/model/exchange_p2p.model.js';
+import { fetchWithTimeout } from '../../../../../../../utils/network.utils.js';
 
 /**
  * Success response from Binance P2P endpoint.

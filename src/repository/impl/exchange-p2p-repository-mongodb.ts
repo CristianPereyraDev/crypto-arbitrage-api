@@ -175,7 +175,22 @@ export class ExchangeP2PRepositoryMongoDB
     throw new Error('Method not implemented.');
   }
 
-  getAllExchanges(): Promise<IP2PExchange[]> {
-    throw new Error('Method not implemented.');
+  async getAllExchanges(
+    projection: string[] = [],
+    onlyAvailable?: boolean
+  ): Promise<IP2PExchange[]> {
+    try {
+      if (projection.length > 0) {
+        return await P2PExchange.find(
+          { available: !!onlyAvailable },
+          Object.fromEntries(projection.map((p) => [p, 1]))
+        );
+      }
+
+      return await P2PExchange.find({ available: !!onlyAvailable });
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   }
 }

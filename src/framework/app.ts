@@ -10,7 +10,7 @@ import {
   collectCryptoExchangesPricesToDB,
   collectCurrencyExchangesPricesToDB,
   collectP2POrdersToDB,
-} from '../utils/pricing_collector/pricing_collector.js';
+} from '../exchanges/pricing_collector.js';
 import websocketSetup from '../websocket/index.js';
 import { ExchangeService } from '../exchanges/services/exchanges.service.js';
 import { ExchangeBaseRepositoryMongoBD } from '../repository/impl/exchange-base-repository-mongodb.js';
@@ -41,35 +41,36 @@ appSetup(app)
 
     // Crypto rates collector interval
     setInterval(() => {
-      collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
-      collectCryptoBrokeragesPricesToDB().catch((reason) =>
-        console.log(reason)
-      );
+      // collectCryptoExchangesPricesToDB().catch((reason) => console.log(reason));
+      // collectCryptoBrokeragesPricesToDB().catch((reason) =>
+      //   console.log(reason)
+      // );
       collectP2POrdersToDB().catch((reason) => console.log(reason));
     }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6));
 
-    setInterval(async () => {
-      try {
-        const prices = await exchangeService.getAllExchangesPricesBySymbol(
-          'USDT',
-          'ARS'
-        );
-        const fees = await exchangeService.getAllFees();
+    // Push notifications interval
+    // setInterval(async () => {
+    //   try {
+    //     const prices = await exchangeService.getAllExchangesPricesBySymbol(
+    //       'USDT',
+    //       'ARS'
+    //     );
+    //     const fees = await exchangeService.getAllFees();
 
-        const pushSubscriptions =
-          await pushSubscriptionProvider.getAllSubscriptions();
+    //     const pushSubscriptions =
+    //       await pushSubscriptionProvider.getAllSubscriptions();
 
-        if (prices.length > 0) {
-          for (const subs of pushSubscriptions) {
-            sendNotification(prices, fees, subs).catch((reason) =>
-              console.log(reason)
-            );
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }, 1000 * 60);
+    //     if (prices.length > 0) {
+    //       for (const subs of pushSubscriptions) {
+    //         sendNotification(prices, fees, subs).catch((reason) =>
+    //           console.log(reason)
+    //         );
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }, 1000 * 60);
 
     // Currency rates collector
     const currencyJob = new CronJob(

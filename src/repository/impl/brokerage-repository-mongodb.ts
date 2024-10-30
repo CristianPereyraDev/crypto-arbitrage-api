@@ -135,16 +135,19 @@ export default class BrokerageRepositoryMongoDB
     throw new Error('Method not implemented.');
   }
 
-  async getAllExchanges(projection: string[] = []): Promise<IBrokerage[]> {
+  async getAllExchanges(
+    projection: string[] = [],
+    onlyAvailable?: boolean
+  ): Promise<IBrokerage[]> {
     try {
       if (projection.length > 0) {
         return await Brokerage.find(
-          { available: true },
+          { available: !!onlyAvailable },
           Object.fromEntries(projection.map((p) => [p, 1]))
         );
       }
 
-      return await Brokerage.find({ available: true });
+      return await Brokerage.find({ available: !!onlyAvailable });
     } catch (error) {
       console.error(error);
       return [];

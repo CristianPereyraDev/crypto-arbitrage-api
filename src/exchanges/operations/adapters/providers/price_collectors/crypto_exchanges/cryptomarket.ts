@@ -1,17 +1,14 @@
-import { IPair } from '../../../data/model/exchange_base.model.js';
-import { IExchangePairPrices } from '../../../data/model/exchange.model.js';
-import { fetchWithTimeout } from '../../../utils/network.utils.js';
 import { OrderBookLevel } from 'cryptomarket/lib/models.js';
-import {
-  Client,
-  CryptomarketAPIException,
-  CryptomarketSDKException,
-} from 'cryptomarket/lib/index.js';
-import { APIError } from '../../../types/errors/index.js';
+import cryptomarket from 'cryptomarket';
+
+import { IPair } from '../../../../../../data/model/exchange_base.model.js';
+import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
+import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
+import { APIError } from '../../../../../../types/errors/index.js';
 
 const apiKey = process.env.CRYPTOMARKET_API_KEY ?? '';
 const apiSecret = process.env.CRYPTOMARKET_API_SECRET ?? '';
-const client = new Client(apiKey, apiSecret);
+const client = new cryptomarket.Client(apiKey, apiSecret);
 
 export type CryptoMarketAPIOrderBookResponse = {
   timestamp: string;
@@ -134,8 +131,8 @@ export async function getPairPrices(
   } catch (error) {
     if (
       !(
-        error instanceof CryptomarketSDKException ||
-        error instanceof CryptomarketAPIException
+        error instanceof cryptomarket.CryptomarketSDKException ||
+        error instanceof cryptomarket.CryptomarketAPIException
       )
     ) {
       throw new APIError(client.apiUrl, 'CryptoMarket API', 'unknown');

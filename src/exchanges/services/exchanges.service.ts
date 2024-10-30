@@ -137,15 +137,15 @@ export class ExchangeService {
   }
 
   async getAvailableExchanges() {
-    return this.exchangeRepository.getAllExchanges([]);
+    return this.exchangeRepository.getAllExchanges([], true);
   }
 
   async getAvailableBrokerages() {
-    return this.brokerageRepository.getAllExchanges([]);
+    return this.brokerageRepository.getAllExchanges([], true);
   }
 
   async getAvailableP2PExchanges() {
-    return this.exchangeP2PRepository.getAllExchanges([]);
+    return this.exchangeP2PRepository.getAllExchanges([], true);
   }
 
   async getAllAvailableExchanges() {

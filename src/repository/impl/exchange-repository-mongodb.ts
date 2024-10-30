@@ -166,9 +166,19 @@ export default class ExchangeRepositoryMongoDB
     throw new Error('Method not implemented.');
   }
 
-  async getAllExchanges(): Promise<IExchange[]> {
+  async getAllExchanges(
+    projection: string[],
+    onlyAvailable?: boolean
+  ): Promise<IExchange[]> {
     try {
-      return await Exchange.find({ available: true });
+      if (projection.length > 0) {
+        return await Exchange.find(
+          { available: !!onlyAvailable },
+          Object.fromEntries(projection.map((p) => [p, 1]))
+        );
+      }
+
+      return await Exchange.find({ available: !!onlyAvailable });
     } catch (error) {
       console.error(error);
       return [];

@@ -1,7 +1,7 @@
-import { APIError } from '../../../types/errors/index.js';
-import { IExchangePairPrices } from '../../../data/model/exchange.model.js';
-import { IPair } from '../../../data/model/exchange_base.model.js';
-import { fetchWithTimeout } from '../../../utils/network.utils.js';
+import { APIError } from '../../../../../../types/errors/index.js';
+import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
+import { IPair } from '../../../../../../data/model/exchange_base.model.js';
+import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
 
 export type BitsoAPIOrderbookResponse = {
   success: boolean;

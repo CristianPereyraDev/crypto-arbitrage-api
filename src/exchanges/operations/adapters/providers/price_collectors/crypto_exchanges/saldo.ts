@@ -1,7 +1,7 @@
-import { IPair } from '../../../data/model/exchange_base.model.js';
-import { fetchWithTimeout } from '../../../utils/network.utils.js';
-import { IBrokeragePairPrices } from '../../../data/model/brokerage.model.js';
-import { APIError } from '../../../types/errors/index.js';
+import { IPair } from '../../../../../../data/model/exchange_base.model.js';
+import { fetchWithTimeout } from '../../../../../../utils/network.utils.js';
+import { IBrokeragePairPrices } from '../../../../../../data/model/brokerage.model.js';
+import { APIError } from '../../../../../../types/errors/index.js';
 
 type SaldoAPIResponse = {
   [asset: string]: {
