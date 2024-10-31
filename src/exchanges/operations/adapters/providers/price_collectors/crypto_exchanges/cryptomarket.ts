@@ -1,5 +1,5 @@
 import { OrderBookLevel } from 'cryptomarket/lib/models.js';
-import cryptomarket from 'cryptomarket';
+import cryptomarket from 'cryptomarket/lib/index.js';
 
 import { IPair } from '../../../../../../data/model/exchange_base.model.js';
 import { IExchangePairPrices } from '../../../../../../data/model/exchange.model.js';
