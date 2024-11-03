@@ -18,7 +18,7 @@ import {
   sortPricesByBid,
 } from '../../exchanges/operations/sort-prices.js';
 import { exchangeService } from '../../framework/app.js';
-import { IExchangeBase } from 'src/data/model/exchange_base.model.js';
+import { IExchangeBase } from '../../data/model/exchange_base.model.js';
 
 const currencyService = new CurrencyService();
 
