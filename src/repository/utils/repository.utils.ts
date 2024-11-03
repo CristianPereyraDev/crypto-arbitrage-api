@@ -1,4 +1,4 @@
-import { IExchangeFeesDTO } from '../../types/dto/index.js';
+import { IExchangeFeesDTO } from '../../data/dto/index.js';
 import { IExchangeBase } from '../../data/model/exchange_base.model.js';
 
 export function exchangeFeesToDTO(exchange: IExchangeBase): IExchangeFeesDTO {

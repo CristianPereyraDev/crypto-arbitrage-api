@@ -1,5 +1,5 @@
-import { IExchangeFeesDTO } from '../types/dto/index.js';
-import { IExchangePricingDTO } from '../types/dto/index.js';
+import { IExchangeFeesDTO } from '../data/dto/index.js';
+import { IExchangePricingDTO } from '../data/dto/index.js';
 import {
   CalculateP2PArbitrageParams,
   P2PArbitrageResult,

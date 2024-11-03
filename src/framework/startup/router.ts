@@ -8,10 +8,10 @@ import MongoStore from 'connect-mongo';
 import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
 
-import infoRouter from '../../controllers/info.controller.js';
-import arbitragesRouter from '../../controllers/arbitrages.controller.js';
-import currenciesController from '../../controllers/currencies.controller.js';
-import webpushController from '../../controllers/webpush.controller.js';
+import infoRouter from '../controllers/info.controller.js';
+import arbitragesRouter from '../controllers/arbitrages.controller.js';
+import currenciesController from '../controllers/currencies.controller.js';
+import webpushController from '../controllers/webpush.controller.js';
 
 import { ExchangeBase } from '../../databases/mongodb/schema/exchange_base.schema.js';
 import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js';

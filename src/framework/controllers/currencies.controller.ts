@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import CurrencyService from '../exchanges/services/currency.service.js';
+import CurrencyService from '../../exchanges/services/currency.service.js';
 
 const currenciesController = Router();
 const currencyService = new CurrencyService();

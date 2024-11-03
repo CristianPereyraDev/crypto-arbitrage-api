@@ -1,16 +1,8 @@
-import {
-  ExchangeBaseRepository,
-  IPriceableRepository,
-} from './exchange-base-repository.js';
-import {
-  IExchange,
-  IExchangePairPrices,
-} from '../data/model/exchange.model.js';
+import { IExchangePricingRepository } from './exchange-base-repository.js';
+import { IExchangePairPrices } from '../data/model/exchange.model.js';
 
-export interface IExchangeRepository
-  extends ExchangeBaseRepository<IExchange>,
-    IPriceableRepository {
-  updateExchangePrices(
+export interface IExchangeRepository extends IExchangePricingRepository {
+  updatePrices(
     exchangeSlugName: string,
     prices: IExchangePairPrices[]
   ): Promise<void>;

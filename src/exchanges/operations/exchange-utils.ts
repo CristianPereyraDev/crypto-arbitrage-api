@@ -17,3 +17,26 @@ export function reduceAvailablePairs(exchanges: IExchangeBase[]): IPair[] {
         ) === index
     );
 }
+
+export function calculateOrderBookAvgPrice(orders: number[][], volume: number) {
+  if (orders.length <= 0) {
+    return 0;
+  }
+
+  let totalQuantity = 0;
+  let sum = 0;
+  let i = 0;
+
+  while (i < orders.length && totalQuantity < volume) {
+    if (orders[i][1] <= volume - totalQuantity) {
+      sum += orders[i][0] * orders[i][1];
+      totalQuantity += orders[i][1];
+    } else {
+      sum += orders[i][0] * (volume - totalQuantity);
+      totalQuantity = volume;
+    }
+    i++;
+  }
+
+  return sum / totalQuantity;
+}

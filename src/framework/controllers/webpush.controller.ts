@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PushSubscription } from 'web-push';
 
-import { PushSubscriptionProviderMongoDB } from '../operations/adapters/providers/push-subscription-provider-mongodb.js';
+import { PushSubscriptionProviderMongoDB } from '../../operations/adapters/providers/push-subscription-provider-mongodb.js';
 
 const pushSubscriptionProvider = new PushSubscriptionProviderMongoDB();
 
@@ -16,8 +16,6 @@ let pushSubscription: PushSubscription & {
 
 controller.post('/subscription', async (req, res) => {
   pushSubscription = req.body;
-
-  console.log(pushSubscription);
 
   try {
     await pushSubscriptionProvider.addSubscription({

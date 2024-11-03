@@ -1,12 +1,4 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js';
-import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js';
-import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js';
-import {
-  ExchangeService,
-  type ExchangesFeesType,
-} from '../../exchanges/services/exchanges.service.js';
+import { type ExchangesFeesType } from '../../exchanges/services/exchanges.service.js';
 import {
   CryptoP2PWebSocketConfig,
   CryptoPairWebSocketConfig,
@@ -18,22 +10,15 @@ import {
   calculateTotalAsk,
   calculateTotalBid,
 } from '../../arbitrages/arbitrage-calculator.js';
-import { IExchangePricingDTO } from '../../types/dto/index.js';
+import { IExchangePricingDTO } from '../../data/dto/index.js';
 
 import { WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import { ExchangeBaseRepositoryMongoBD } from '../../repository/impl/exchange-base-repository-mongodb.js';
 import { IPair } from '../../data/model/exchange_base.model.js';
 import { P2PUserType } from '../../data/model/exchange_p2p.model.js';
 import { P2PArbitrageResult } from '../../arbitrages/p2p_strategies/types.js';
 import { MatiStrategy } from '../../arbitrages/p2p_strategies/strategy_mati.js';
-
-const exchangeService = new ExchangeService(
-  new ExchangeBaseRepositoryMongoBD(),
-  new ExchangeRepositoryMongoDB(),
-  new BrokerageRepositoryMongoDB(),
-  new ExchangeP2PRepositoryMongoDB()
-);
+import { exchangeService } from '../../framework/app.js';
 
 const currencyService = new CurrencyService();
 
@@ -220,7 +205,7 @@ export async function makeJSONCryptoMessage(
   if (fees) {
     prices = prices.map((price) => {
       const exchangeFees =
-        fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+        fees[price.exchangeSlug.replaceAll(' ', '').toLocaleLowerCase()];
 
       if (exchangeFees !== undefined) {
         return {

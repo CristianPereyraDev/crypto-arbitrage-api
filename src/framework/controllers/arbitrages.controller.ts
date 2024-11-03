@@ -4,7 +4,7 @@ import {
   type Response,
   type NextFunction,
 } from 'express';
-import CryptoArbitrageModel from '../databases/mongodb/schema/arbitrage.schema.js';
+import CryptoArbitrageModel from '../../databases/mongodb/schema/arbitrage.schema.js';
 
 const controller = Router();
 

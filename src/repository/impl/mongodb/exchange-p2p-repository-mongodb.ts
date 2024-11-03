@@ -1,22 +1,15 @@
 import {
-  IP2PExchange,
   IP2POrder,
   IP2PPairOrders,
   P2POrderType,
-} from '../../data/model/exchange_p2p.model.js';
-import { ExchangeBaseRepository } from '../exchange-base-repository.js';
-import { IExchangeP2PRepository } from '../exchange-p2p-repository.js';
-import { P2PExchange } from '../../databases/mongodb/schema/exchange_p2p.schema.js';
-import { IPair } from '../../data/model/exchange_base.model.js';
-import {
-  IExchangeFeesDTO,
-  IExchangePricingDTO,
-} from '../../types/dto/index.js';
-import { calculateOrderBookAvgPrice } from './exchange-repository-mongodb.js';
+} from '../../../data/model/exchange_p2p.model.js';
+import { IExchangeP2PRepository } from '../../exchange-p2p-repository.js';
+import { P2PExchange } from '../../../databases/mongodb/schema/exchange_p2p.schema.js';
+import { IPair } from '../../../data/model/exchange_base.model.js';
+import { IExchangePricingDTO } from '../../../data/dto/index.js';
+import { calculateOrderBookAvgPrice } from '../../../exchanges/operations/exchange-utils.js';
 
-export class ExchangeP2PRepositoryMongoDB
-  implements ExchangeBaseRepository<IP2PExchange>, IExchangeP2PRepository
-{
+export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
   async getP2POrders(
     exchangeName: string,
     pair: IPair
@@ -67,18 +60,16 @@ export class ExchangeP2PRepositoryMongoDB
     exchangeSlugName: string,
     baseAsset: string,
     fiat: string,
-    orderType: P2POrderType,
-    orders: IP2POrder[]
+    sellOrders: IP2POrder[],
+    buyOrders: IP2POrder[]
   ): Promise<void> {
     try {
-      const target =
-        orderType === 'BUY'
-          ? 'ordersByPair.$[i].buyOrders'
-          : 'ordersByPair.$[i].sellOrders';
+      const buyTarget = 'ordersByPair.$[i].buyOrders';
+      const sellTarget = 'ordersByPair.$[i].sellOrders';
 
       await P2PExchange.findOneAndUpdate(
         { slug: exchangeSlugName },
-        { $set: { [target]: orders } },
+        { $set: { [buyTarget]: buyOrders, [sellTarget]: sellOrders } },
         {
           arrayFilters: [
             {
@@ -154,42 +145,6 @@ export class ExchangeP2PRepositoryMongoDB
       return prices;
     } catch (error) {
       console.log(error);
-      return [];
-    }
-  }
-
-  getExchangesFees(): Promise<{ [exchange: string]: IExchangeFeesDTO }> {
-    throw new Error('Method not implemented.');
-  }
-
-  getAllAvailablePairs(): Promise<IPair[]> {
-    throw new Error('Method not implemented.');
-  }
-
-  removeOlderPrices(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getExchangeByName(name: string): Promise<IP2PExchange> {
-    throw new Error('Method not implemented.');
-  }
-
-  async getAllExchanges(
-    projection: string[] = [],
-    onlyAvailable?: boolean
-  ): Promise<IP2PExchange[]> {
-    try {
-      if (projection.length > 0) {
-        return await P2PExchange.find(
-          { available: !!onlyAvailable },
-          Object.fromEntries(projection.map((p) => [p, 1]))
-        );
-      }
-
-      return await P2PExchange.find({ available: !!onlyAvailable });
-    } catch (error) {
-      console.error(error);
       return [];
     }
   }

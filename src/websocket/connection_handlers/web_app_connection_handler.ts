@@ -1,18 +1,14 @@
-import BrokerageRepositoryMongoDB from '../../repository/impl/brokerage-repository-mongodb.js';
-import ExchangeRepositoryMongoDB from '../../repository/impl/exchange-repository-mongodb.js';
-import { ExchangeP2PRepositoryMongoDB } from '../../repository/impl/exchange-p2p-repository-mongodb.js';
-import { ExchangeBaseRepositoryMongoBD } from '../../repository/impl/exchange-base-repository-mongodb.js';
-import {
-  ExchangeService,
-  ExchangesFeesType,
-} from '../../exchanges/services/exchanges.service.js';
+import { ExchangesFeesType } from '../../exchanges/services/exchanges.service.js';
 import { CryptoPairWebSocketConfig } from '../types.js';
 import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
   calculateTotalAsk,
   calculateTotalBid,
 } from '../../arbitrages/arbitrage-calculator.js';
-import { IExchangePricingDTO } from '../../types/dto/index.js';
+import {
+  ExchangePricingCompletedDTO,
+  IExchangePricingDTO,
+} from '../../data/dto/index.js';
 
 import { WebSocket } from 'ws';
 import pug from 'pug';
@@ -21,13 +17,9 @@ import {
   sortPricesByAsk,
   sortPricesByBid,
 } from '../../exchanges/operations/sort-prices.js';
+import { exchangeService } from '../../framework/app.js';
+import { IExchangeBase } from 'src/data/model/exchange_base.model.js';
 
-const exchangeService = new ExchangeService(
-  new ExchangeBaseRepositoryMongoBD(),
-  new ExchangeRepositoryMongoDB(),
-  new BrokerageRepositoryMongoDB(),
-  new ExchangeP2PRepositoryMongoDB()
-);
 const currencyService = new CurrencyService();
 
 export async function wsWebConnectionHandler(websocket: WebSocket) {
@@ -35,11 +27,15 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
   let exchangePricesTimeout: ReturnType<typeof setInterval>;
   let fees: ExchangesFeesType | null = null;
+  let exchanges: Map<string, IExchangeBase> | null = null;
 
-  exchangeService
-    .getAllFees()
+  Promise.all([
+    exchangeService.getAllFees(),
+    exchangeService.getAllAvailableExchanges(),
+  ])
     .then((value) => {
-      fees = value;
+      fees = value[0];
+      exchanges = value[1];
 
       sendAllConfiguredMessages();
       exchangePricesTimeout = setInterval(() => {
@@ -68,7 +64,11 @@ export async function wsWebConnectionHandler(websocket: WebSocket) {
     volume: number,
     fees?: ExchangesFeesType | null
   ) => {
-    compileCryptoMessage(asset, fiat, volume, fees).then((msg) =>
+    if (!exchanges) {
+      return;
+    }
+
+    compileCryptoMessage(asset, fiat, volume, exchanges, fees).then((msg) =>
       websocket.send(msg)
     );
   };
@@ -129,34 +129,42 @@ async function compileCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
+  exchanges: Map<string, IExchangeBase>,
   fees?: ExchangesFeesType | null
-) {
-  let prices: IExchangePricingDTO[] =
+): Promise<string> {
+  const prices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
 
-  if (fees) {
-    prices = prices.map((price) => {
-      const exchangeFees =
-        fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+  const pricesCompleted = prices.map((price) => {
+    const exchangeFees = fees ? fees[price.exchangeSlug] : undefined;
+    const exchange = exchanges.get(price.exchangeSlug);
 
-      if (exchangeFees !== undefined) {
-        return {
-          ...price,
-          totalAsk: calculateTotalAsk({
-            baseAsk: price.ask,
-            fees: exchangeFees,
-            includeDepositFiatFee: false,
-          }),
-          totalBid: calculateTotalBid({
-            baseBid: price.bid,
-            fees: exchangeFees,
-            includeWithdrawalFiatFee: false,
-          }),
-        };
-      }
-      return price;
-    });
-  }
+    if (exchangeFees !== undefined) {
+      price.ask = calculateTotalAsk({
+        baseAsk: price.ask,
+        fees: exchangeFees,
+        includeDepositFiatFee: false,
+      });
+
+      price.bid = calculateTotalBid({
+        baseBid: price.bid,
+        fees: exchangeFees,
+        includeWithdrawalFiatFee: false,
+      });
+    }
+
+    return {
+      ...price,
+      exchangeName: exchange?.name || price.exchangeSlug,
+      exchangeSlug: exchange?.name || price.exchangeSlug,
+      URL: '',
+      logoURL: exchange?.logoURL || '',
+      ask: price.ask,
+      bid: price.bid,
+      available: exchange?.available || false,
+      availablePairs: exchange?.availablePairs || [],
+    } satisfies ExchangePricingCompletedDTO;
+  });
 
   const __dirname = new URL('.', import.meta.url).pathname;
 
@@ -169,8 +177,8 @@ async function compileCryptoMessage(
     fiat: fiat,
     volume: volume,
     includeFees: fees !== null && fees !== undefined,
-    pricesSortedByAsk: sortPricesByAsk([...prices]),
-    pricesSortedByBid: sortPricesByBid([...prices]),
+    pricesSortedByAsk: sortPricesByAsk([...pricesCompleted]),
+    pricesSortedByBid: sortPricesByBid([...pricesCompleted]),
   });
 }
 

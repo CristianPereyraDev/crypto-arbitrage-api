@@ -1,4 +1,4 @@
-import { IPair } from '../../data/model/exchange_base.model.js';
+import { ExchangeType, IPair } from '../model/exchange_base.model.js';
 
 export type NetworkFees = { [crypto: string]: { [network: string]: number } };
 
@@ -13,21 +13,27 @@ export interface IExchangeFeesDTO {
 }
 
 export interface IExchangeBaseDTO {
-  name: string;
-  slug: string;
+  exchangeName: string;
+  exchangeSlug: string;
   URL: string;
   logoURL: string;
   exchangeType: string;
   available: boolean;
   availablePairs: IPair[];
+}
+
+export interface IExchangeBaseWithFeesDTO extends IExchangeBaseDTO {
   fees: IExchangeFeesDTO;
 }
 
 export interface IExchangePricingDTO {
-  exchange: string;
-  exchangeType: string;
-  exchangeLogoURL: string;
+  exchangeSlug: string;
+  pair: IPair;
+  exchangeType: ExchangeType;
   ask: number;
   bid: number;
   time: number;
 }
+
+export type ExchangePricingCompletedDTO = IExchangeBaseDTO &
+  IExchangePricingDTO;

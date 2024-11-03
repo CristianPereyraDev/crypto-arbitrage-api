@@ -4,37 +4,20 @@ import {
   brokeragePriceCollectors,
   brokeragePriceCollectorMulti,
 } from './operations/adapters/providers/price_collectors/crypto_exchanges/index.js';
-import { ExchangeService } from './services/exchanges.service.js';
 import { currencyPriceCollectors } from './operations/adapters/providers/price_collectors/currency_exchanges/index.js';
 import CurrencyService from './services/currency.service.js';
-import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
-import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';
-import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js';
-import {
-  IExchange,
-  IExchangePairPrices,
-} from '../data/model/exchange.model.js';
-import { ExchangeBaseRepositoryMongoBD } from '../repository/impl/exchange-base-repository-mongodb.js';
+import { IExchangePairPrices } from '../data/model/exchange.model.js';
 import { P2POrderType, P2PUserType } from '../data/model/exchange_p2p.model.js';
-import {
-  IBrokerage,
-  IBrokeragePairPrices,
-} from '../data/model/brokerage.model.js';
+import { IBrokeragePairPrices } from '../data/model/brokerage.model.js';
 import { reduceAvailablePairs } from './operations/exchange-utils.js';
+import { IExchangeBase } from '../data/model/exchange_base.model.js';
+import { exchangeService } from '../framework/app.js';
 
-const exchangeService = new ExchangeService(
-  new ExchangeBaseRepositoryMongoBD(),
-  new ExchangeRepositoryMongoDB(),
-  new BrokerageRepositoryMongoDB(),
-  new ExchangeP2PRepositoryMongoDB()
-);
 const currencyService = new CurrencyService();
 
 export async function collectP2POrdersToDB() {
-  console.log('Hello, here from collectP2POrdersToBD');
   try {
     const p2pExchanges = await exchangeService.getAvailableP2PExchanges();
-    console.log(`${p2pExchanges.map((e) => e.name)}`);
 
     for (const p2pExchange of p2pExchanges) {
       const orderCollector = p2pOrderCollectors.get(p2pExchange.slug);
@@ -46,13 +29,13 @@ export async function collectP2POrdersToDB() {
             orderCollector(
               p2pPair.crypto,
               p2pPair.fiat,
-              P2POrderType.BUY,
+              P2POrderType.SELL,
               P2PUserType.merchant
             ),
             orderCollector(
               p2pPair.crypto,
               p2pPair.fiat,
-              P2POrderType.SELL,
+              P2POrderType.BUY,
               P2PUserType.merchant
             ),
           ])
@@ -61,14 +44,7 @@ export async function collectP2POrdersToDB() {
                 p2pExchange.slug,
                 p2pPair.crypto,
                 p2pPair.fiat,
-                P2POrderType.BUY,
-                orders[0]
-              );
-              exchangeService.updateP2POrders(
-                p2pExchange.slug,
-                p2pPair.crypto,
-                p2pPair.fiat,
-                P2POrderType.SELL,
+                orders[0],
                 orders[1]
               );
             })
@@ -88,7 +64,7 @@ type PromiseAllElemResultType = {
 
 export async function collectCryptoExchangesPricesToDB() {
   try {
-    const exchanges: IExchange[] =
+    const exchanges: IExchangeBase[] =
       await exchangeService.getAvailableExchanges();
     const collectors: Promise<PromiseAllElemResultType>[] = [];
 
@@ -138,9 +114,8 @@ type BrokeragePromiseAllElemResultType = {
 export async function collectCryptoBrokeragesPricesToDB() {
   try {
     const availableBrokerages = await exchangeService.getAvailableBrokerages();
-    console.log(availableBrokerages.map((b) => b.slug));
     const collectors: Promise<BrokeragePromiseAllElemResultType>[] = [];
-    const brokeragesMulti: IBrokerage[] = [];
+    const brokeragesMulti: IExchangeBase[] = [];
 
     for (const brokerage of availableBrokerages) {
       const priceCollector = brokeragePriceCollectors.get(brokerage.slug);

@@ -57,7 +57,8 @@ export async function performDynamicScraping(
 
     console.log('I am going to...');
     const pageResponse = await page.goto(
-      `https://www.bitget.com/es/p2p-trade/sell/${asset}?fiatName=${fiat}`
+      `https://www.bitget.com/es/p2p-trade/sell/${asset}?fiatName=${fiat}`,
+      { timeout: 15000 }
     );
     console.log('Dynamic Page loaded');
 

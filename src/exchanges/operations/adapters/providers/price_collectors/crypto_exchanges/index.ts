@@ -63,8 +63,8 @@ export type P2PCollectorFunctionType = (
 
 const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>();
 
-//p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
-p2pOrderCollectors.set('bitgetp2p', bitgetP2P.getBitgetP2POrders);
+p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
+//p2pOrderCollectors.set('bitgetp2p', bitgetP2P.getBitgetP2POrders);
 
 export {
   exchangePriceCollectors,

@@ -6,26 +6,15 @@ import {
 } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { Exchange } from '../databases/mongodb/schema/exchange.schema.js';
-import { INetworkFee } from '../data/model/exchange_base.model.js';
-import { ExchangeService } from '../exchanges/services/exchanges.service.js';
-import ExchangeRepositoryMongoDB from '../repository/impl/exchange-repository-mongodb.js';
-import BrokerageRepositoryMongoDB from '../repository/impl/brokerage-repository-mongodb.js';
-import { ExchangeP2PRepositoryMongoDB } from '../repository/impl/exchange-p2p-repository-mongodb.js';
-import { ExchangeBase } from '../databases/mongodb/schema/exchange_base.schema.js';
-import { ICriptoyaFees } from '../types/apis/criptoya/index.js';
-import { ExchangeBaseRepositoryMongoBD } from '../repository/impl/exchange-base-repository-mongodb.js';
-import { IExchangeBaseDTO } from '../types/dto/index.js';
-import { exchangeFeesToDTO } from '../repository/utils/repository.utils.js';
+import { Exchange } from '../../databases/mongodb/schema/exchange.schema.js';
+import { INetworkFee } from '../../data/model/exchange_base.model.js';
+import { ExchangeBase } from '../../databases/mongodb/schema/exchange_base.schema.js';
+import { ICriptoyaFees } from '../../data/apis/criptoya/index.js';
+import { IExchangeBaseWithFeesDTO } from '../../data/dto/index.js';
+import { exchangeFeesToDTO } from '../../repository/utils/repository.utils.js';
+import { exchangeService } from '../app.js';
 
 const controller = Router();
-
-const exchangeService = new ExchangeService(
-  new ExchangeBaseRepositoryMongoBD(),
-  new ExchangeRepositoryMongoDB(),
-  new BrokerageRepositoryMongoDB(),
-  new ExchangeP2PRepositoryMongoDB()
-);
 
 controller
   .get(
@@ -58,11 +47,11 @@ controller
   )
   .get('/exchanges_available', async (req: Request, res: Response) => {
     try {
-      const exchanges = await exchangeService.getAllAvailableExchanges();
+      const exchanges = await exchangeService.getAllAvailableExchangesList();
       const response = exchanges.map((exchange) => {
-        const exchangeDTO: IExchangeBaseDTO = {
-          name: exchange.name,
-          slug: exchange.slug,
+        const exchangeDTO: IExchangeBaseWithFeesDTO = {
+          exchangeName: exchange.name,
+          exchangeSlug: exchange.slug,
           URL: exchange.URL,
           logoURL: exchange.logoURL,
           exchangeType: exchange.exchangeType,

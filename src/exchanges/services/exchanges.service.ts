@@ -1,4 +1,4 @@
-import { IExchangePricingDTO } from '../../types/dto/index.js';
+import { IExchangePricingDTO } from '../../data/dto/index.js';
 import {
   IP2POrder,
   IP2PPairOrders,
@@ -8,7 +8,7 @@ import { IExchangeBase, IPair } from '../../data/model/exchange_base.model.js';
 import { IExchangeRepository } from '../../repository/exchange-repository.js';
 import { IBrokerageRepository } from '../../repository/brokerage-repository.js';
 import { IExchangeP2PRepository } from '../../repository/exchange-p2p-repository.js';
-import { IExchangeFeesDTO } from '../../types/dto/index.js';
+import { IExchangeFeesDTO } from '../../data/dto/index.js';
 import { ExchangeBaseRepository } from '../../repository/exchange-base-repository.js';
 import { IExchangePairPrices } from '../../data/model/exchange.model.js';
 import { IBrokeragePairPrices } from '../../data/model/brokerage.model.js';
@@ -38,20 +38,15 @@ export class ExchangeService {
     exchangeSlugName: string,
     baseAsset: string,
     fiat: string,
-    orderType: P2POrderType,
-    orders: IP2POrder[]
+    sellOrders: IP2POrder[],
+    buyOrders: IP2POrder[]
   ) {
-    console.log(
-      `${exchangeSlugName}: ${baseAsset}-${fiat}: ${orders.map(
-        (order) => `${order.merchantName} ${order.price}`
-      )}`
-    );
     this.exchangeP2PRepository.updateP2POrders(
       exchangeSlugName,
       baseAsset,
       fiat,
-      orderType,
-      orders
+      sellOrders,
+      buyOrders
     );
   }
 
@@ -59,32 +54,21 @@ export class ExchangeService {
     brokerageSlugName: string,
     prices: IBrokeragePairPrices[]
   ) {
-    this.brokerageRepository.updateBrokeragePrices(brokerageSlugName, prices);
+    this.brokerageRepository.updatePrices(brokerageSlugName, prices);
   }
 
   async updateExchangePrices(
     exchangeSlugName: string,
     prices: IExchangePairPrices[]
   ) {
-    this.exchangeRepository.updateExchangePrices(exchangeSlugName, prices);
-  }
-
-  async removeOlderPrices() {
-    this.exchangeRepository.removeOlderPrices();
+    this.exchangeRepository.updatePrices(exchangeSlugName, prices);
   }
 
   async getAvailablePairs(): Promise<IPair[]> {
-    const exchangesPairs = await this.exchangeRepository.getAllAvailablePairs();
-    const brokeragePairs =
-      await this.brokerageRepository.getAllAvailablePairs();
-    const allPairs = exchangesPairs.concat(brokeragePairs);
-    return allPairs.filter(
-      (outerPair, index) =>
-        allPairs.findIndex(
-          (pair) =>
-            pair.crypto === outerPair.crypto && pair.fiat === outerPair.fiat
-        ) === index
-    );
+    const exchangesPairs =
+      await this.exchangeBaseRepository.getAllAvailablePairs();
+
+    return exchangesPairs;
   }
 
   async getAllExchangesPricesBySymbol(
@@ -117,7 +101,7 @@ export class ExchangeService {
     const pricesWithFees = fees
       ? prices.map((price) => {
           const exchangeFees =
-            fees[price.exchange.replaceAll(' ', '').toLocaleLowerCase()];
+            fees[price.exchangeSlug.replaceAll(' ', '').toLocaleLowerCase()];
 
           if (exchangeFees !== undefined) {
             return {
@@ -142,39 +126,50 @@ export class ExchangeService {
   }
 
   async getAvailableExchanges() {
-    return this.exchangeRepository.getAllExchanges([], true);
+    return this.exchangeBaseRepository.getAllExchanges([], 'Exchange', true);
   }
 
   async getAvailableBrokerages() {
-    return this.brokerageRepository.getAllExchanges([], true);
+    return this.exchangeBaseRepository.getAllExchanges([], 'Brokerage', true);
   }
 
   async getAvailableP2PExchanges() {
-    return this.exchangeP2PRepository.getAllExchanges([], true);
+    return this.exchangeBaseRepository.getAllExchanges([], 'P2PExchange', true);
   }
 
-  async getAllAvailableExchanges() {
-    return this.exchangeBaseRepository.getAllExchanges([
-      'name',
-      'slug',
-      'availablePairs',
-      'logoURL',
-      'networkFees',
-      'depositFiatFee',
-      'withdrawalFiatFee',
-      'makerFee',
-      'takerFee',
-      'buyFee',
-      'sellFee',
-      'exchangeType',
-    ]);
+  async getAllAvailableExchangesList() {
+    return this.exchangeBaseRepository.getAllExchanges(
+      [
+        'name',
+        'slug',
+        'availablePairs',
+        'logoURL',
+        'networkFees',
+        'depositFiatFee',
+        'withdrawalFiatFee',
+        'makerFee',
+        'takerFee',
+        'buyFee',
+        'sellFee',
+        'exchangeType',
+      ],
+      undefined,
+      true
+    );
+  }
+
+  async getAllAvailableExchanges(): Promise<Map<string, IExchangeBase>> {
+    const exchanges = await this.getAllAvailableExchangesList();
+
+    return new Map<string, IExchangeBase>(
+      exchanges.map((exchange) => [exchange.slug, { ...exchange }])
+    );
   }
 
   async getAllFees() {
     const allFees: ExchangesFeesType = {};
     const feesArray = await Promise.all([
-      this.brokerageRepository.getExchangesFees(),
-      this.exchangeRepository.getExchangesFees(),
+      this.exchangeBaseRepository.getExchangesFees(),
     ]);
 
     for (const exchangeFees of feesArray) {

@@ -1,19 +1,30 @@
-import { IExchangeFeesDTO, IExchangePricingDTO } from '../types/dto/index.js';
-import { IPair } from '../data/model/exchange_base.model.js';
+import { IExchangeFeesDTO, IExchangePricingDTO } from '../data/dto/index.js';
+import { ExchangeType, IPair } from '../data/model/exchange_base.model.js';
 
 export interface ExchangeBaseRepository<T> {
-  getAllExchanges(projection: string[], onlyAvailable?: boolean): Promise<T[]>;
+  getAllExchanges(
+    projection: string[],
+    exchangeType?: ExchangeType,
+    onlyAvailable?: boolean
+  ): Promise<T[]>;
+
   getAllAvailablePairs(): Promise<IPair[]>;
+
   getExchangeByName(name: string): Promise<T | null>;
+
   getExchangesFees(): Promise<{
     [exchange: string]: IExchangeFeesDTO;
   }>;
+
   getAllPricesByPair(
     pair: IPair,
     volume: number
   ): Promise<IExchangePricingDTO[]>;
 }
 
-export interface IPriceableRepository {
-  removeOlderPrices(): Promise<void>;
+export interface IExchangePricingRepository {
+  getAllPricesByPair(
+    pair: IPair,
+    volume: number
+  ): Promise<IExchangePricingDTO[]>;
 }

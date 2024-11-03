@@ -2,7 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 
 import ExchangeRepositoryMongoDB, {
   calculateOrderBookAvgPrice,
-} from '../../../repository/impl/exchange-repository-mongodb.js';
+} from '../../../repository/impl/mongodb/exchange-repository-mongodb.js';
 import orderbook from './orderbook.json';
 
 describe('Exchange repository', () => {
