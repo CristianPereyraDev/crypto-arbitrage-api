@@ -119,9 +119,9 @@ export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
           );
 
           return {
-            exchange: exchangeP2P.name,
+            exchangeSlug: exchangeP2P.name,
+            pair,
             exchangeType: exchangeP2P.exchangeType,
-            exchangeLogoURL: exchangeP2P.logoURL,
             ask: avgAsk,
             totalAsk: avgAsk,
             bid: avgBid,
@@ -131,9 +131,9 @@ export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
         }
 
         return {
-          exchange: exchangeP2P.name,
+          exchangeSlug: exchangeP2P.name,
+          pair,
           exchangeType: exchangeP2P.exchangeType,
-          exchangeLogoURL: exchangeP2P.logoURL,
           ask: 0,
           totalAsk: 0,
           bid: 0,

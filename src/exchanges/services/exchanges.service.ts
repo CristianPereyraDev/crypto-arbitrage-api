@@ -4,7 +4,11 @@ import {
   IP2PPairOrders,
   P2POrderType,
 } from '../../data/model/exchange_p2p.model.js';
-import { IExchangeBase, IPair } from '../../data/model/exchange_base.model.js';
+import {
+  ExchangeType,
+  IExchangeBase,
+  IPair,
+} from '../../data/model/exchange_base.model.js';
 import { IExchangeRepository } from '../../repository/exchange-repository.js';
 import { IBrokerageRepository } from '../../repository/brokerage-repository.js';
 import { IExchangeP2PRepository } from '../../repository/exchange-p2p-repository.js';
@@ -126,15 +130,27 @@ export class ExchangeService {
   }
 
   async getAvailableExchanges() {
-    return this.exchangeBaseRepository.getAllExchanges([], 'Exchange', true);
+    return this.exchangeBaseRepository.getAllExchanges(
+      [],
+      ExchangeType.Exchange,
+      true
+    );
   }
 
   async getAvailableBrokerages() {
-    return this.exchangeBaseRepository.getAllExchanges([], 'Brokerage', true);
+    return this.exchangeBaseRepository.getAllExchanges(
+      [],
+      ExchangeType.Brokerage,
+      true
+    );
   }
 
   async getAvailableP2PExchanges() {
-    return this.exchangeBaseRepository.getAllExchanges([], 'P2PExchange', true);
+    return this.exchangeBaseRepository.getAllExchanges(
+      [],
+      ExchangeType.P2PExchange,
+      true
+    );
   }
 
   async getAllAvailableExchangesList() {

@@ -1,9 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import ExchangeRepositoryMongoDB, {
-  calculateOrderBookAvgPrice,
-} from '../../../repository/impl/mongodb/exchange-repository-mongodb.js';
+import ExchangeRepositoryMongoDB from '../../../repository/impl/mongodb/exchange-repository-mongodb.js';
 import orderbook from './orderbook.json';
+import { calculateOrderBookAvgPrice } from '../../../exchanges/operations/exchange-utils.js';
 
 describe('Exchange repository', () => {
   const repository = new ExchangeRepositoryMongoDB();
