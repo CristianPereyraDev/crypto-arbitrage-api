@@ -16,7 +16,7 @@ div(id=`${asset}-${fiat}-container` hx-swap-oob='innerHTML')
                 span(class="data")
                     img(src=`${val.logoURL}` class='exchange-logo')
                     span(class="exchange-type")=exchangeType
-                    span(class="exchange-name")=val.exchange
+                    span(class="exchange-name")=val.exchangeName
                 if val.bid
                     span(class="price")=val.bid.toFixed(2)
                 else
