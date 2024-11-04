@@ -57,14 +57,13 @@ brokeragePriceCollectors.set('tiendacrypto', tiendacrypto.getPairPrices);
 export type P2PCollectorFunctionType = (
   asset: string,
   fiat: string,
-  tradeType: P2POrderType,
   publisherType: P2PUserType | null
-) => Promise<IP2POrder[]>;
+) => Promise<{ buy: IP2POrder[]; sell: IP2POrder[] }>;
 
 const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>();
 
 p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
-//p2pOrderCollectors.set('bitgetp2p', bitgetP2P.getBitgetP2POrders);
+p2pOrderCollectors.set('bitgetp2p', bitgetP2P.getP2POrders);
 
 export {
   exchangePriceCollectors,

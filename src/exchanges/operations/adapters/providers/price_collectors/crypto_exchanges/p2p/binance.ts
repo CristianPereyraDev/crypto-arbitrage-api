@@ -134,14 +134,13 @@ function mapP2PResponse(apiResponse: BinanceP2PResponse): IP2POrder[] {
 export async function getP2POrders(
   asset: string,
   fiat: string,
-  tradeType: P2POrderType,
   publisherType: P2PUserType | null
-): Promise<IP2POrder[]> {
+): Promise<{ buy: IP2POrder[]; sell: IP2POrder[] }> {
   const fetchConfig: BinanceP2PPostConfig = {
     fiat: fiat,
     page: 1,
     rows: 20,
-    tradeType: tradeType === 'BUY' ? P2POrderType.SELL : P2POrderType.BUY,
+    tradeType: P2POrderType.SELL,
     asset: asset,
     countries: [],
     proMerchantAds: false,
@@ -152,24 +151,43 @@ export async function getP2POrders(
   };
 
   try {
-    const firstOrder = await fetchP2POrders({
+    const firstBuyOrdersPage = await fetchP2POrders({
       ...fetchConfig,
+      tradeType: P2POrderType.SELL,
+      rows: 1,
+      page: 1,
+    });
+    const firstSellOrdersPage = await fetchP2POrders({
+      ...fetchConfig,
+      tradeType: P2POrderType.BUY,
       rows: 1,
       page: 1,
     });
 
-    const pages = Math.min(
-      Math.ceil(firstOrder.total / fetchConfig.rows),
+    const numBuyPages = Math.min(
+      Math.ceil(firstBuyOrdersPage.total / fetchConfig.rows),
+      Number(process.env.BINANCE_P2P_MAX_CONCURRENT_API_CALLS || '1')
+    );
+    const numSellPages = Math.min(
+      Math.ceil(firstSellOrdersPage.total / fetchConfig.rows),
       Number(process.env.BINANCE_P2P_MAX_CONCURRENT_API_CALLS || '1')
     );
 
-    const results = await Promise.all(
-      [...Array(pages).keys()].map((page) =>
+    const allBuyPages = await Promise.all(
+      [...Array(numBuyPages).keys()].map((page) =>
+        fetchP2POrders({ ...fetchConfig, page: page + 1 })
+      )
+    );
+    const allSellPages = await Promise.all(
+      [...Array(numSellPages).keys()].map((page) =>
         fetchP2POrders({ ...fetchConfig, page: page + 1 })
       )
     );
 
-    return results.flatMap((apiResponse) => mapP2PResponse(apiResponse));
+    return {
+      buy: allBuyPages.flatMap((apiResponse) => mapP2PResponse(apiResponse)),
+      sell: allSellPages.flatMap((apiResponse) => mapP2PResponse(apiResponse)),
+    };
   } catch (error) {
     throw new Error(
       `binance.getP2POrders error for pair ${asset}-${fiat}, ${error}`

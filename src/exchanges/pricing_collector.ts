@@ -25,27 +25,14 @@ export async function collectP2POrdersToDB() {
       if (orderCollector !== undefined) {
         for (const p2pPair of p2pExchange.availablePairs) {
           // Get all buy orders and all sell orders
-          Promise.all([
-            orderCollector(
-              p2pPair.crypto,
-              p2pPair.fiat,
-              P2POrderType.SELL,
-              P2PUserType.merchant
-            ),
-            orderCollector(
-              p2pPair.crypto,
-              p2pPair.fiat,
-              P2POrderType.BUY,
-              P2PUserType.merchant
-            ),
-          ])
+          orderCollector(p2pPair.crypto, p2pPair.fiat, P2PUserType.merchant)
             .then((orders) => {
               exchangeService.updateP2POrders(
                 p2pExchange.slug,
                 p2pPair.crypto,
                 p2pPair.fiat,
-                orders[0],
-                orders[1]
+                orders.sell,
+                orders.buy
               );
             })
             .catch((reason) => console.log(reason));
