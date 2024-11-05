@@ -190,10 +190,12 @@ export async function getP2POrders(
     const buyOrders = await fetchP2POrders({
       ...fetchConfig,
       adv_type: 'SELL',
+      sort_type: 'DESC',
     });
     const sellOrders = await fetchP2POrders({
       ...fetchConfig,
       adv_type: 'BUY',
+      sort_type: 'ASC',
     });
 
     // const pages = Math.min(
