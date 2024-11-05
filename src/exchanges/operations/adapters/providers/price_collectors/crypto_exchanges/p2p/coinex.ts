@@ -174,11 +174,7 @@ export async function getP2POrders(
     base: asset,
     quote: fiat,
     amount: 0,
-    pay_channel_ids: [
-      '664573de2a4f532fcbb15846',
-      '664573dc2a4f532fcbb15834',
-      '6641bfb19a770eab925c5d28',
-    ],
+    pay_channel_ids: [], // Empty array means all payment methods
     sort_by: 'PRICE',
     sort_type: 'ASC',
     user_preferences: [],
