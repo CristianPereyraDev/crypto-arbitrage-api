@@ -1,7 +1,7 @@
 import * as binance from './binance.js';
 import * as binancep2p from './p2p/binance.js';
-import * as bitmonedero from './bitmonedero.js';
 import * as cryptomarket from './cryptomarket.js';
+import * as coinExP2P from './p2p/coinex.js';
 import * as ripiotrade from './ripiotrade.js';
 import * as saldo from './saldo.js';
 import * as trubit from './trubit.js';
@@ -64,6 +64,7 @@ const p2pOrderCollectors = new Map<string, P2PCollectorFunctionType>();
 
 p2pOrderCollectors.set('binancep2p', binancep2p.getP2POrders);
 p2pOrderCollectors.set('bitgetp2p', bitgetP2P.getP2POrders);
+p2pOrderCollectors.set('coinex', coinExP2P.getP2POrders);
 
 export {
   exchangePriceCollectors,
