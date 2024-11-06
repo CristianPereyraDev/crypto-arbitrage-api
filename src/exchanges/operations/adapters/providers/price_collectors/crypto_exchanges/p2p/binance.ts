@@ -175,12 +175,20 @@ export async function getP2POrders(
 
     const allBuyPages = await Promise.all(
       [...Array(numBuyPages).keys()].map((page) =>
-        fetchP2POrders({ ...fetchConfig, page: page + 1 })
+        fetchP2POrders({
+          ...fetchConfig,
+          tradeType: P2POrderType.SELL,
+          page: page + 1,
+        })
       )
     );
     const allSellPages = await Promise.all(
       [...Array(numSellPages).keys()].map((page) =>
-        fetchP2POrders({ ...fetchConfig, page: page + 1 })
+        fetchP2POrders({
+          ...fetchConfig,
+          tradeType: P2POrderType.BUY,
+          page: page + 1,
+        })
       )
     );
 
