@@ -178,7 +178,6 @@ async function makeP2PMessage(
   arbitrageCalculator: ArbitrageCalculator
 ): Promise<P2POutgoingMessage> {
   const orders = await exchangeService.getP2POrders(exchangeSlug, pair);
-  console.log(orders.buyOrders[0], orders.sellOrders[0]);
 
   const computedArbitrage: P2PArbitrageResult =
     arbitrageCalculator.calculateP2PArbitrage({
@@ -206,9 +205,6 @@ async function makeP2PMessage(
       arbitrage: computedArbitrage.arbitrage,
     },
   };
-
-  console.log(orders.buyOrders[0], orders.sellOrders[0]);
-  console.log(message.p2p.buyOrders[0], message.p2p.sellOrders[0]);
 
   return message;
 }
