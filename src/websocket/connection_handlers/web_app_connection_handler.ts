@@ -1,5 +1,5 @@
 import { ExchangesFeesType } from '../../exchanges/services/exchanges.service.js';
-import { CryptoPairWebSocketConfig } from '../types.js';
+import { CrossArbitrageWebSocketConfig } from '../types.js';
 import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
   calculateTotalAsk,
@@ -23,7 +23,7 @@ import { IExchangeBase } from '../../data/model/exchange_base.model.js';
 const currencyService = new CurrencyService();
 
 export async function wsWebConnectionHandler(websocket: WebSocket) {
-  const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
+  const cryptoPairConfig = new Map<string, CrossArbitrageWebSocketConfig>();
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
   let exchangePricesTimeout: ReturnType<typeof setInterval>;
   let fees: ExchangesFeesType | null = null;

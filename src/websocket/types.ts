@@ -1,12 +1,12 @@
 import { IP2POrder, P2PUserType } from '../data/model/exchange_p2p.model.js';
 import { P2PArbitrage } from '../arbitrages/p2p_strategies/types.js';
 
-export type CryptoPairWebSocketConfig = {
+export type CrossArbitrageWebSocketConfig = {
   volume: number;
   includeFees?: boolean;
 };
 
-export type CryptoP2PWebSocketConfig = {
+export type P2PArbitrageWebSocketConfig = {
   minProfit: number;
   volume: number;
   sellLimits: [number, number];
@@ -17,9 +17,16 @@ export type CryptoP2PWebSocketConfig = {
   maxSellOrderPosition: number;
 };
 
+export type P2PArbitrageWebSocketIncomingMessage =
+  P2PArbitrageWebSocketConfig & {
+    exchangeSlug: string;
+    asset: string;
+    fiat: string;
+  };
+
 export type P2POutgoingMessage = {
   p2p: {
-    exchange: string;
+    exchangeSlug: string;
     crypto: string;
     fiat: string;
     buyOrders: IP2POrder[];

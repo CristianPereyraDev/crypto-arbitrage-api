@@ -35,5 +35,10 @@ export interface IExchangePricingDTO {
   time: number;
 }
 
+export interface IExchangePricingTotalDTO extends IExchangePricingDTO {
+  totalAsk: number;
+  totalBid: number;
+}
+
 export type ExchangePricingCompletedDTO = IExchangeBaseDTO &
   IExchangePricingDTO;

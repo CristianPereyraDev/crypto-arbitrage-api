@@ -32,10 +32,10 @@ export class ExchangeService {
   ) {}
 
   async getP2POrders(
-    exchangeName: string,
+    exchangeSlug: string,
     pair: IPair
-  ): Promise<IP2PPairOrders | null> {
-    return await this.exchangeP2PRepository.getP2POrders(exchangeName, pair);
+  ): Promise<IP2PPairOrders> {
+    return await this.exchangeP2PRepository.getP2POrders(exchangeSlug, pair);
   }
 
   async updateP2POrders(

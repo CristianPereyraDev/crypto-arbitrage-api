@@ -11,14 +11,14 @@ import { calculateOrderBookAvgPrice } from '../../../exchanges/operations/exchan
 
 export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
   async getP2POrders(
-    exchangeName: string,
+    exchangeSlug: string,
     pair: IPair
-  ): Promise<IP2PPairOrders | null> {
+  ): Promise<IP2PPairOrders> {
     try {
       const result = await P2PExchange.aggregate([
         {
           $match: {
-            name: exchangeName,
+            name: exchangeSlug,
             available: true,
             exchangeType: 'P2PExchange',
           },
@@ -52,12 +52,12 @@ export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
       return result[0].ordersByPair[0];
     } catch (error) {
       console.error(error);
-      return null;
+      return { ...pair, buyOrders: [], sellOrders: [] };
     }
   }
 
   async updateP2POrders(
-    exchangeSlugName: string,
+    exchangeSlug: string,
     baseAsset: string,
     fiat: string,
     sellOrders: IP2POrder[],
@@ -68,7 +68,7 @@ export class ExchangeP2PRepositoryMongoDB implements IExchangeP2PRepository {
       const sellTarget = 'ordersByPair.$[i].sellOrders';
 
       await P2PExchange.findOneAndUpdate(
-        { slug: exchangeSlugName },
+        { slug: exchangeSlug },
         { $set: { [buyTarget]: buyOrders, [sellTarget]: sellOrders } },
         {
           arrayFilters: [

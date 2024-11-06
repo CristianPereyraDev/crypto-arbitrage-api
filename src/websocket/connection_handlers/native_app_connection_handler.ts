@@ -1,8 +1,9 @@
 import { type ExchangesFeesType } from '../../exchanges/services/exchanges.service.js';
 import {
-  CryptoP2PWebSocketConfig,
-  CryptoPairWebSocketConfig,
+  P2PArbitrageWebSocketConfig,
+  CrossArbitrageWebSocketConfig,
   P2POutgoingMessage,
+  P2PArbitrageWebSocketIncomingMessage,
 } from '../types.js';
 import CurrencyService from '../../exchanges/services/currency.service.js';
 import {
@@ -10,7 +11,10 @@ import {
   calculateTotalAsk,
   calculateTotalBid,
 } from '../../arbitrages/arbitrage-calculator.js';
-import { IExchangePricingDTO } from '../../data/dto/index.js';
+import {
+  IExchangePricingDTO,
+  IExchangePricingTotalDTO,
+} from '../../data/dto/index.js';
 
 import { WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
@@ -30,8 +34,8 @@ export async function wsNativeConnectionHandler(
   let currencyRatesTimeout: ReturnType<typeof setInterval>;
   let exchangePricesTimeout: ReturnType<typeof setInterval>;
 
-  const cryptoPairConfig = new Map<string, CryptoPairWebSocketConfig>();
-  const cryptoPairP2PConfig = new Map<string, CryptoP2PWebSocketConfig>();
+  const crossArbitrageConfig = new Map<string, CrossArbitrageWebSocketConfig>();
+  const p2pArbitrageConfig = new Map<string, P2PArbitrageWebSocketConfig>();
 
   let fees: ExchangesFeesType | null = null;
 
@@ -51,7 +55,7 @@ export async function wsNativeConnectionHandler(
     });
 
   const sendAllConfiguredMessages = () => {
-    cryptoPairConfig.forEach((value, key) => {
+    crossArbitrageConfig.forEach((value, key) => {
       sendCryptoMessage(
         key.split('-')[0],
         key.split('-')[1],
@@ -73,43 +77,16 @@ export async function wsNativeConnectionHandler(
   };
 
   const p2pOrdersTimeout = setInterval(() => {
-    cryptoPairP2PConfig.forEach((msgConfig, p2pConfigKey) => {
-      const exchangeName = p2pConfigKey.split('/')[0];
+    p2pArbitrageConfig.forEach((msgConfig, p2pConfigKey) => {
+      const exchangeSlug = p2pConfigKey.split('/')[0];
       const pair: IPair = {
         crypto: p2pConfigKey.split('/')[1].split('-')[0],
         fiat: p2pConfigKey.split('/')[1].split('-')[1],
       };
-      exchangeService.getP2POrders(exchangeName, pair).then((orders) => {
-        if (orders) {
-          const computedArbitrage: P2PArbitrageResult =
-            arbitrageCalculator.calculateP2PArbitrage({
-              buyOrders: orders.buyOrders,
-              sellOrders: orders.sellOrders,
-              volume: msgConfig.volume,
-              minProfit: msgConfig.minProfit,
-              userType: msgConfig.userType,
-              sellLimits: msgConfig.sellLimits,
-              buyLimits: msgConfig.buyLimits,
-              nickName: msgConfig.nickName,
-              maxBuyOrderPosition: msgConfig.maxBuyOrderPosition,
-              maxSellOrderPosition: msgConfig.maxSellOrderPosition,
-            });
-          const message: P2POutgoingMessage = {
-            p2p: {
-              arbitrage: computedArbitrage.arbitrage,
-              exchange: exchangeName,
-              crypto: pair.crypto,
-              fiat: pair.fiat,
-              totalBuyOrders: orders.buyOrders.length,
-              totalSellOrders: orders.sellOrders.length,
-              buyOrders: computedArbitrage.buyOrders,
-              sellOrders: computedArbitrage.sellOrders,
-            },
-          };
 
-          websocket.send(JSON.stringify(message));
-        }
-      });
+      makeP2PMessage(exchangeSlug, pair, msgConfig, arbitrageCalculator).then(
+        (msg) => websocket.send(JSON.stringify(msg))
+      );
     });
   }, 1000 * 6);
 
@@ -138,7 +115,7 @@ export async function wsNativeConnectionHandler(
         return;
       }
 
-      cryptoPairConfig.set(`${asset}-${fiat}`, { volume, includeFees });
+      crossArbitrageConfig.set(`${asset}-${fiat}`, { volume, includeFees });
 
       if (includeFees && fees === null) {
         return;
@@ -150,23 +127,24 @@ export async function wsNativeConnectionHandler(
     }
 
     if (Object.hasOwn(parsedMessage, 'p2p')) {
-      cryptoPairP2PConfig.set(
-        `${parsedMessage.p2p.exchange}/${parsedMessage.p2p.asset}-${parsedMessage.p2p.fiat}`,
+      const p2pMsg = parsedMessage.p2p as P2PArbitrageWebSocketIncomingMessage;
+      p2pArbitrageConfig.set(
+        `${p2pMsg.exchangeSlug}/${p2pMsg.asset}-${p2pMsg.fiat}`,
         {
-          minProfit: parsedMessage.p2p.minProfit ?? 1,
-          volume: parsedMessage.p2p.volume ?? 1,
-          userType: Object.hasOwn(parsedMessage.p2p, 'userType')
-            ? parsedMessage.p2p.userType
+          minProfit: p2pMsg.minProfit ?? 1,
+          volume: p2pMsg.volume ?? 1,
+          userType: Object.hasOwn(p2pMsg, 'userType')
+            ? p2pMsg.userType
             : P2PUserType.merchant,
-          sellLimits: Object.hasOwn(parsedMessage.p2p, 'sellLimits')
-            ? parsedMessage.p2p.sellLimits
+          sellLimits: Object.hasOwn(p2pMsg, 'sellLimits')
+            ? p2pMsg.sellLimits
             : [100000, 100000],
-          buyLimits: Object.hasOwn(parsedMessage.p2p, 'buyLimits')
-            ? parsedMessage.p2p.buyLimits
+          buyLimits: Object.hasOwn(p2pMsg, 'buyLimits')
+            ? p2pMsg.buyLimits
             : [100, 100000],
-          nickName: parsedMessage.p2p.nickName,
-          maxBuyOrderPosition: parsedMessage.p2p.maxBuyOrderPosition ?? 500,
-          maxSellOrderPosition: parsedMessage.p2p.maxSellOrderPosition ?? 500,
+          nickName: p2pMsg.nickName,
+          maxBuyOrderPosition: p2pMsg.maxBuyOrderPosition ?? 500,
+          maxSellOrderPosition: p2pMsg.maxSellOrderPosition ?? 500,
         }
       );
 
@@ -193,43 +171,81 @@ export async function wsNativeConnectionHandler(
   });
 }
 
-export async function makeJSONCryptoMessage(
+async function makeP2PMessage(
+  exchangeSlug: string,
+  pair: IPair,
+  config: P2PArbitrageWebSocketConfig,
+  arbitrageCalculator: ArbitrageCalculator
+): Promise<P2POutgoingMessage> {
+  const orders = await exchangeService.getP2POrders(exchangeSlug, pair);
+
+  const computedArbitrage: P2PArbitrageResult =
+    arbitrageCalculator.calculateP2PArbitrage({
+      buyOrders: orders.buyOrders,
+      sellOrders: orders.sellOrders,
+      volume: config.volume,
+      minProfit: config.minProfit,
+      userType: config.userType,
+      sellLimits: config.sellLimits,
+      buyLimits: config.buyLimits,
+      nickName: config.nickName,
+      maxBuyOrderPosition: config.maxBuyOrderPosition,
+      maxSellOrderPosition: config.maxSellOrderPosition,
+    });
+
+  const message: P2POutgoingMessage = {
+    p2p: {
+      exchangeSlug: exchangeSlug,
+      crypto: pair.crypto,
+      fiat: pair.fiat,
+      totalBuyOrders: orders.buyOrders.length,
+      totalSellOrders: orders.sellOrders.length,
+      buyOrders: computedArbitrage.buyOrders,
+      sellOrders: computedArbitrage.sellOrders,
+      arbitrage: computedArbitrage.arbitrage,
+    },
+  };
+
+  return message;
+}
+
+async function makeJSONCryptoMessage(
   asset: string,
   fiat: string,
   volume: number,
   fees?: ExchangesFeesType | null
 ) {
-  let prices: IExchangePricingDTO[] =
+  const rawPrices: IExchangePricingDTO[] =
     await exchangeService.getAllExchangesPricesBySymbol(asset, fiat, volume);
 
-  if (fees) {
-    prices = prices.map((price) => {
-      const exchangeFees =
-        fees[price.exchangeSlug.replaceAll(' ', '').toLocaleLowerCase()];
+  const totalPrices: IExchangePricingTotalDTO[] = rawPrices.map((price) => {
+    const exchangeFees = fees
+      ? fees[price.exchangeSlug.replaceAll(' ', '').toLocaleLowerCase()]
+      : undefined;
 
-      if (exchangeFees !== undefined) {
-        return {
-          ...price,
-          totalAsk: calculateTotalAsk({
-            baseAsk: price.ask,
-            fees: exchangeFees,
-            includeDepositFiatFee: false,
-          }),
-          totalBid: calculateTotalBid({
-            baseBid: price.bid,
-            fees: exchangeFees,
-            includeWithdrawalFiatFee: false,
-          }),
-        };
-      }
-      return price;
-    });
-  }
+    if (exchangeFees !== undefined) {
+      return {
+        ...price,
+        totalAsk: calculateTotalAsk({
+          baseAsk: price.ask,
+          fees: exchangeFees,
+          includeDepositFiatFee: false,
+        }),
+        totalBid: calculateTotalBid({
+          baseBid: price.bid,
+          fees: exchangeFees,
+          includeWithdrawalFiatFee: false,
+        }),
+      };
+    }
+
+    return { ...price, totalAsk: price.ask, totalBid: price.bid };
+  });
 
   return JSON.stringify({
     asset: asset,
     fiat: fiat,
-    prices: prices,
+    prices: totalPrices,
   });
 }
 

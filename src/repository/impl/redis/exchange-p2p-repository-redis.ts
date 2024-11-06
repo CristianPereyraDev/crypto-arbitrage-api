@@ -14,7 +14,7 @@ import { calculateOrderBookAvgPrice } from '../../../exchanges/operations/exchan
 import { RedisType } from '../../../databases/redis/redis-client.js';
 
 const exchangeP2PSchema = new Schema('exchangeP2P', {
-  exchange: { type: 'string' },
+  exchangeSlug: { type: 'string' },
   exchangeType: { type: 'string' },
   pair: { type: 'string' },
   sellOrders: { type: 'string[]' },
@@ -33,11 +33,11 @@ export class ExchangeP2PRepositoryRedis implements IExchangeP2PRepository {
   }
 
   async getP2POrders(
-    exchangeName: string,
+    exchangeSlug: string,
     pair: IPair
-  ): Promise<IP2PPairOrders | null> {
+  ): Promise<IP2PPairOrders> {
     const p2pExchange = await this.repository.fetch(
-      `${exchangeName}${pair.crypto}${pair.fiat}`
+      `${exchangeSlug}${pair.crypto}${pair.fiat}`
     );
 
     if (
@@ -46,23 +46,27 @@ export class ExchangeP2PRepositoryRedis implements IExchangeP2PRepository {
     ) {
       return {
         ...pair,
-        buyOrders: JSON.parse(p2pExchange.buyOrders),
-        sellOrders: JSON.parse(p2pExchange.sellOrders),
+        buyOrders: (p2pExchange.buyOrders as string[]).map((strOrder) =>
+          JSON.parse(strOrder)
+        ),
+        sellOrders: (p2pExchange.sellOrders as string[]).map((strOrder) =>
+          JSON.parse(strOrder)
+        ),
       };
     }
 
-    return null;
+    return { ...pair, buyOrders: [], sellOrders: [] };
   }
 
   async updateP2POrders(
-    exchangeSlugName: string,
+    exchangeSlug: string,
     baseAsset: string,
     fiat: string,
     sellOrders: IP2POrder[],
     buyOrders: IP2POrder[]
   ): Promise<void> {
-    await this.repository.save(`${exchangeSlugName}${baseAsset}${fiat}`, {
-      exchange: exchangeSlugName,
+    await this.repository.save(`${exchangeSlug}${baseAsset}${fiat}`, {
+      exchangeSlug: exchangeSlug,
       exchangeType: ExchangeType.P2PExchange,
       pair: `${baseAsset}-${fiat}`,
       sellOrders: sellOrders.map((order) => JSON.stringify(order)),
@@ -101,7 +105,7 @@ export class ExchangeP2PRepositoryRedis implements IExchangeP2PRepository {
         );
 
         prices.push({
-          exchangeSlug: entity.exchange,
+          exchangeSlug: entity.exchangeSlug,
           pair,
           exchangeType: ExchangeType.P2PExchange,
           ask: avgAsk,
