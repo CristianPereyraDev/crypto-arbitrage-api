@@ -19,6 +19,9 @@ import { PushSubscriptionProviderMongoDB } from '../operations/adapters/provider
 import { ExchangeP2PRepositoryRedis } from '../repository/impl/redis/exchange-p2p-repository-redis.js';
 import BrokerageRepositoryRedis from '../repository/impl/redis/brokerage-repository-redis.js';
 import ExchangeRepositoryRedis from '../repository/impl/redis/exchange-repository-redis.js';
+import ExchangeRepositoryNodeCache from '../repository/impl/node-cache/exchange-repository-node-cache.js';
+import BrokerageRepositoryNodeCache from '../repository/impl/node-cache/brokerage-repository-node-cache.js';
+import { ExchangeP2PRepositoryNodeCache } from '../repository/impl/node-cache/exchange-p2p-repository-node-cache.js';
 
 export let exchangeService: ExchangeService;
 
@@ -32,9 +35,9 @@ appSetup(app)
   .then((setup) => {
     exchangeService = new ExchangeService(
       new ExchangeBaseRepositoryMongoBD(),
-      new ExchangeRepositoryRedis(setup.redis),
-      new BrokerageRepositoryRedis(setup.redis),
-      new ExchangeP2PRepositoryRedis(setup.redis)
+      new ExchangeRepositoryNodeCache(setup.nodeCache),
+      new BrokerageRepositoryNodeCache(setup.nodeCache),
+      new ExchangeP2PRepositoryNodeCache(setup.nodeCache)
     );
 
     securitySetup(app, express);
@@ -48,7 +51,7 @@ appSetup(app)
         console.log(reason)
       );
       collectP2POrdersToDB().catch((reason) => console.log(reason));
-    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 1000 * 6));
+    }, Number(process.env.PRICING_COLLECTOR_INTERVAL ?? 30000));
 
     // Push notifications interval
     setInterval(async () => {
@@ -72,7 +75,7 @@ appSetup(app)
       } catch (error) {
         console.log(error);
       }
-    }, 1000 * 60);
+    }, Number(process.env.PUSH_NOTIFICATIONS_INTERVAL ?? 60000));
 
     // Currency rates collector
     const currencyJob = new CronJob(

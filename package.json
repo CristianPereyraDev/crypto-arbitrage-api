@@ -69,6 +69,7 @@
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.2",
     "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
     "pug": "^3.0.2",
     "puppeteer": "^23.6.0",
     "query-string": "^8.1.0",

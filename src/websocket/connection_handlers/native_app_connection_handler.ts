@@ -47,7 +47,7 @@ export async function wsNativeConnectionHandler(
       sendAllConfiguredMessages();
       exchangePricesTimeout = setInterval(() => {
         sendAllConfiguredMessages();
-      }, 1000 * 6);
+      }, 10000);
     })
     .catch((reason) => {
       console.log('error:', reason);
@@ -78,20 +78,22 @@ export async function wsNativeConnectionHandler(
 
   const p2pOrdersTimeout = setInterval(() => {
     p2pArbitrageConfig.forEach((msgConfig, p2pConfigKey) => {
-      const exchangeSlug = p2pConfigKey.split('/')[0];
+      const exchangeSlug = p2pConfigKey.split('_')[0];
+      const symbolSplitted = p2pConfigKey.split('_')[1].split('-');
+
       const pair: IPair = {
-        crypto: p2pConfigKey.split('/')[1].split('-')[0],
-        fiat: p2pConfigKey.split('/')[1].split('-')[1],
+        crypto: symbolSplitted[0],
+        fiat: symbolSplitted[1],
       };
 
       makeP2PMessage(exchangeSlug, pair, msgConfig, arbitrageCalculator).then(
         (msg) => websocket.send(JSON.stringify(msg))
       );
     });
-  }, 1000 * 6);
+  }, 11000);
 
   websocket.on('error', (error) => {
-    console.log('An error has ocurred in the websocket: %s', error);
+    console.log('An error has occurred in the websocket: %s', error);
     clearInterval(exchangePricesTimeout);
     clearInterval(currencyRatesTimeout);
     clearInterval(p2pOrdersTimeout);
@@ -127,24 +129,26 @@ export async function wsNativeConnectionHandler(
     }
 
     if (Object.hasOwn(parsedMessage, 'p2p')) {
-      const p2pMsg = parsedMessage.p2p as P2PArbitrageWebSocketIncomingMessage;
+      const p2pMessage =
+        parsedMessage.p2p as P2PArbitrageWebSocketIncomingMessage;
+
       p2pArbitrageConfig.set(
-        `${p2pMsg.exchangeSlug}/${p2pMsg.asset}-${p2pMsg.fiat}`,
+        `${p2pMessage.exchangeSlug}_${p2pMessage.asset}-${p2pMessage.fiat}`,
         {
-          minProfit: p2pMsg.minProfit ?? 1,
-          volume: p2pMsg.volume ?? 1,
-          userType: Object.hasOwn(p2pMsg, 'userType')
-            ? p2pMsg.userType
+          minProfit: p2pMessage.minProfit ?? 1,
+          volume: p2pMessage.volume ?? 1,
+          userType: Object.hasOwn(p2pMessage, 'userType')
+            ? p2pMessage.userType
             : P2PUserType.merchant,
-          sellLimits: Object.hasOwn(p2pMsg, 'sellLimits')
-            ? p2pMsg.sellLimits
+          sellLimits: Object.hasOwn(p2pMessage, 'sellLimits')
+            ? p2pMessage.sellLimits
             : [100000, 100000],
-          buyLimits: Object.hasOwn(p2pMsg, 'buyLimits')
-            ? p2pMsg.buyLimits
+          buyLimits: Object.hasOwn(p2pMessage, 'buyLimits')
+            ? p2pMessage.buyLimits
             : [100, 100000],
-          nickName: p2pMsg.nickName,
-          maxBuyOrderPosition: p2pMsg.maxBuyOrderPosition ?? 500,
-          maxSellOrderPosition: p2pMsg.maxSellOrderPosition ?? 500,
+          nickName: p2pMessage.nickName,
+          maxBuyOrderPosition: p2pMessage.maxBuyOrderPosition ?? 500,
+          maxSellOrderPosition: p2pMessage.maxSellOrderPosition ?? 500,
         }
       );
 
