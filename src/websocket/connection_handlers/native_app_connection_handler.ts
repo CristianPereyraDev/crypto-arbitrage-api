@@ -78,6 +78,7 @@ export async function wsNativeConnectionHandler(
 
   const p2pOrdersTimeout = setInterval(() => {
     p2pArbitrageConfig.forEach((msgConfig, p2pConfigKey) => {
+      console.log(p2pConfigKey);
       const exchangeSlug = p2pConfigKey.split('_')[0];
       const symbolSplitted = p2pConfigKey.split('_')[1].split('-');
 
@@ -86,9 +87,12 @@ export async function wsNativeConnectionHandler(
         fiat: symbolSplitted[1],
       };
 
-      makeP2PMessage(exchangeSlug, pair, msgConfig, arbitrageCalculator).then(
-        (msg) => websocket.send(JSON.stringify(msg))
-      );
+      makeJSONP2PMessage(
+        exchangeSlug,
+        pair,
+        msgConfig,
+        arbitrageCalculator
+      ).then((msg) => websocket.send(msg));
     });
   }, 11000);
 
@@ -175,12 +179,12 @@ export async function wsNativeConnectionHandler(
   });
 }
 
-async function makeP2PMessage(
+async function makeJSONP2PMessage(
   exchangeSlug: string,
   pair: IPair,
   config: P2PArbitrageWebSocketConfig,
   arbitrageCalculator: ArbitrageCalculator
-): Promise<P2POutgoingMessage> {
+): Promise<string> {
   const orders = await exchangeService.getP2POrders(exchangeSlug, pair);
 
   const computedArbitrage: P2PArbitrageResult =
@@ -210,7 +214,9 @@ async function makeP2PMessage(
     },
   };
 
-  return message;
+  console.log(message.p2p.exchangeSlug, message.p2p.arbitrage?.profit);
+
+  return JSON.stringify(message);
 }
 
 async function makeJSONCryptoMessage(
