@@ -7,7 +7,7 @@ import {
 import { currencyPriceCollectors } from './operations/adapters/providers/price_collectors/currency_exchanges/index.js';
 import CurrencyService from './services/currency.service.js';
 import { IExchangePairPrices } from '../data/model/exchange.model.js';
-import { P2POrderType, P2PUserType } from '../data/model/exchange_p2p.model.js';
+import { P2PUserType } from '../data/model/exchange_p2p.model.js';
 import { IBrokeragePairPrices } from '../data/model/brokerage.model.js';
 import { reduceAvailablePairs } from './operations/exchange-utils.js';
 import { IExchangeBase } from '../data/model/exchange_base.model.js';

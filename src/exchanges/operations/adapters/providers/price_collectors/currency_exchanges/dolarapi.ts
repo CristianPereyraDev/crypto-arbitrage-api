@@ -42,17 +42,17 @@ export async function getDollarRates(): Promise<
   }
 }
 
-export async function getEuroRates(): Promise<
-  CurrencyCollectorFunctionReturnType | undefined
-> {
+export async function getRates(
+  coin: 'eur' | 'brl' | 'clp' | 'uyu'
+): Promise<CurrencyCollectorFunctionReturnType | undefined> {
   try {
     const response = await fetchWithTimeout(
-      'https://dolarapi.com/v1/cotizaciones/eur'
+      `https://dolarapi.com/v1/cotizaciones/${coin}`
     );
 
     if (!response.ok) {
       throw new APIError(
-        'https://dolarapi.com/v1/cotizaciones/eur',
+        `https://dolarapi.com/v1/cotizaciones/${coin}`,
         'DolarAPI',
         response.statusText
       );
